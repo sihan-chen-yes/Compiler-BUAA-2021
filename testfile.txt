@@ -1,0 +1,4 @@
+int main() {
+    A[0][2-a] = c;
+    return 0;
+}
