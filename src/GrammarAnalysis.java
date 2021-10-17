@@ -7,21 +7,28 @@ import java.util.Iterator;
 
 public class GrammarAnalysis {
     private ArrayList<HashMap<String, String>> wordAndGrammar = new ArrayList<>();
-    private HashMap<String, String> symbol = null;
     private Word word = null;
-    private Word peekWord = null;
+    private Word lastWord = null;
     private ArrayList<Word> wordList;
     private HashMap<String, String> nonTermimal = new HashMap<>();
     private int pos = 0;
     private FileWriter writer;
+    private Node curNode = null;
+    private ErrorAnalysis errorAnalysis;
+    private ArrayList<Node> loopStmts = new ArrayList<>();
 
-    public GrammarAnalysis(ArrayList<Word> wordList, File outputFile) {
+    public GrammarAnalysis(ArrayList<Word> wordList, File outputFile,ErrorAnalysis errorAnalysis) {
         this.wordList = wordList;
         try {
             this.writer = new FileWriter(outputFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        this.errorAnalysis = errorAnalysis;
+    }
+
+    public Node getCurNode() {
+        return curNode;
     }
 
     public void saveGrammarAnalysis() {
@@ -43,18 +50,37 @@ public class GrammarAnalysis {
         }
     }
 
+    public void addNonLeaf(GrammarType type) {
+        Node node = new Node(type,pos - 1);
+        curNode.link(node);
+        curNode = node;
+    }
+
+    public void addLeaf() {
+        Node node = new Node(word,pos - 1);
+        curNode.link(node);
+    }
+
+    public void backWard() {
+        //非终结符需要backWard 终结符不需要backWard
+        curNode = curNode.getFather();
+    }
+
     public void recursionDown(){
-        getSymbol();
-        //进来之前symbol里面已经get到了新的symbol 出去的时候必须要getSymbol
+        getWord();
+        //进来之前symbol里面已经get到了新的word 出去的时候必须要getWord
         CompUnit();
     }
 
-    public void getSymbol() {
-        if (word != null) {
-            symbol = new HashMap<>();
+    public void getWord() {
+        //刚开始的时候 symbol为null
+        if (word != null && !word.getClassName().equals("EOF")) {
+            HashMap symbol = new HashMap<>();
             symbol.put("class",word.getClassName());
             symbol.put("word",word.getWord());
             wordAndGrammar.add(symbol);
+            addLeaf();
+            lastWord = word;
         }
         if (pos < wordList.size()) {
             word = wordList.get(pos++);
@@ -62,7 +88,6 @@ public class GrammarAnalysis {
         else {
             word = new Word("EOF","",wordList.get(wordList.size() - 1).getLine());
         }
-        //刚开始的时候 symbol为null
     }
 
     public String getWordClass() {
@@ -160,6 +185,7 @@ public class GrammarAnalysis {
     }
 
     public void CompUnit() {
+        curNode = new Node(GrammarType.CompUnit,pos);
         while (isDeclPrefix()) {
             Decl();
         }
@@ -168,462 +194,526 @@ public class GrammarAnalysis {
         }
         MainFuncDef();
         addNonTermimal("<CompUnit>");
+        errorAnalysis.deliverInfo(loopStmts,curNode);
     }
 
     public void Decl() {
+        addNonLeaf(GrammarType.Decl);
         if (getWordClass().equals("CONSTTK")) {
             ConstDecl();
         } else if (getWordClass().equals("INTTK")) {
             VarDecl();
-        } else {
-            //不是常数声明也不是变量声明
         }
+        backWard();
     }
 
     public void BType() {
+        addNonLeaf(GrammarType.BType);
         if (getWordClass().equals("INTTK")) {
-            getSymbol();
-        } else {
-            //不是int
+            getWord();
         }
+        backWard();
     }
 
     public void ConstDef() {
+        addNonLeaf(GrammarType.ConstDef);
         if (getWordClass().equals("IDENFR")) {
-            getSymbol();
+            getWord();
             while (getWordClass().equals("LBRACK")) {
-                getSymbol();
+                getWord();
                 ConstExp();
                 if (getWordClass().equals("RBRACK")) {
-                    getSymbol();
+                    getWord();
                 } else {
+                    errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRBRACK);
                     //不以 ] 结尾
                 }
             }
             if (getWordClass().equals("ASSIGN")) {
-                getSymbol();
+                getWord();
                 ConstInitVal();
                 addNonTermimal("<ConstDef>");
-            } else {
-                //不是 =
             }
-        } else {
-            //不是标识符 出错
         }
+        backWard();
     }
 
     public void ConstDecl() {
-        getSymbol();
+        addNonLeaf(GrammarType.ConstDecl);
+        getWord();//一定是const
         BType();
         ConstDef();
         while (getWordClass().equals("COMMA")) {
-            getSymbol();
+            getWord();
             ConstDef();
         }
         if (getWordClass().equals("SEMICN")) {
-            getSymbol();
+            getWord();
             addNonTermimal("<ConstDecl>");
         } else {
+            errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
             //不以分号结尾
         }
+        backWard();
     }
 
     public void ConstInitVal() {
+        addNonLeaf(GrammarType.ConstInitVal);
         if (getWordClass().equals("LBRACE")) {
-            getSymbol();
+            getWord();
             if (getWordClass().equals("RBRACE")) {
-                getSymbol();
+                getWord();
                 addNonTermimal("<ConstInitVal>");
             } else {
                 ConstInitVal();
                 while (getWordClass().equals("COMMA")) {
-                    getSymbol();
+                    getWord();
                     ConstInitVal();
                 }
                 if (getWordClass().equals("RBRACE")) {
-                    getSymbol();
+                    getWord();
                     addNonTermimal("<ConstInitVal>");
-                } else {
-                    //不是 }
                 }
             }
         } else {
             ConstExp();
             addNonTermimal("<ConstInitVal>");
         }
+        backWard();
     }
 
     public void VarDecl() {
+        addNonLeaf(GrammarType.VarDecl);
         BType();
         VarDef();
         while (getWordClass().equals("COMMA")) {
-            getSymbol();
+            getWord();
             VarDef();
         }
         if (getWordClass().equals("SEMICN")) {
-            getSymbol();
+            getWord();
             addNonTermimal("<VarDecl>");
         } else {
+            errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
             //不是;
         }
+        backWard();
     }
 
     public void VarDef() {
+        addNonLeaf(GrammarType.VarDef);
         if (getWordClass().equals("IDENFR")) {
-            getSymbol();
+            getWord();
             while (getWordClass().equals("LBRACK")) {
-                getSymbol();
+                getWord();
                 ConstExp();
                 if (getWordClass().equals("RBRACK")) {
-                    getSymbol();
+                    getWord();
                 } else {
+                    errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRBRACK);
                     //不是]
                 }
             }
             if (getWordClass().equals("ASSIGN")) {
-                getSymbol();
+                getWord();
                 InitVal();
             }
             addNonTermimal("<VarDef>");
-        } else {
-            //不是 ident
         }
+        backWard();
     }
 
     public void InitVal() {
+        addNonLeaf(GrammarType.InitVal);
         if (getWordClass().equals("LBRACE")) {
-            getSymbol();
+            getWord();
             if (getWordClass().equals("RBRACE")) {
-                getSymbol();
+                getWord();
                 addNonTermimal("<InitVal>");
             } else {
                 InitVal();
                 while (getWordClass().equals("COMMA")) {
-                    getSymbol();
+                    getWord();
                     InitVal();
                 }
                 if (getWordClass().equals("RBRACE")) {
-                    getSymbol();
+                    getWord();
                     addNonTermimal("<InitVal>");
-                } else {
-                    //不是}
                 }
             }
         } else if (isExpPrefix()) {
             Exp();
             addNonTermimal("<InitVal>");
-        } else {
-            //分支不对
         }
+        backWard();
     }
 
     public void FuncDef() {
+        addNonLeaf(GrammarType.FuncDef);
         FuncType();
         if (getWordClass().equals("IDENFR")) {
-            getSymbol();
+            getWord();
             if (getWordClass().equals("LPARENT")) {
-                getSymbol();
+                getWord();
                 if (getWordClass().equals("RPARENT")) {
-                    getSymbol();
+                    getWord();
                     Block();
                     addNonTermimal("<FuncDef>");
                 } else {
                     FuncFParams();
                     if (getWordClass().equals("RPARENT")) {
-                        getSymbol();
+                        getWord();
                         Block();
                         addNonTermimal("<FuncDef>");
                     } else {
+                        errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
                         //不是 )
                     }
                 }
             } else {
+                errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
                 //不是 (
             }
-        } else {
-            //不是ident
         }
+        backWard();
     }
 
     public void FuncType() {
+        addNonLeaf(GrammarType.FuncType);
         if (isFuncTypePrefix()) {
-            getSymbol();
+            getWord();
             addNonTermimal("<FuncType>");
-        } else {
-            //不是void int
         }
+        backWard();
     }
 
     public void FuncFParams() {
+        addNonLeaf(GrammarType.FuncFParams);
         FuncFParam();
         while (getWordClass().equals("COMMA")) {
-            getSymbol();
+            getWord();
             FuncFParam();
         }
         addNonTermimal("<FuncFParams>");
+        backWard();
     }
 
     public void FuncFParam() {
+        addNonLeaf(GrammarType.FuncFParam);
         BType();
         if (getWordClass().equals("IDENFR")) {
-            getSymbol();
+            getWord();
             if (getWordClass().equals("LBRACK")) {
-                getSymbol();
+                getWord();
                 if (getWordClass().equals("RBRACK")) {
-                    getSymbol();
+                    getWord();
                     while (getWordClass().equals("LBRACK")) {
-                        getSymbol();
+                        getWord();
                         ConstExp();
                         if (getWordClass().equals("RBRACK")) {
-                            getSymbol();
+                            getWord();
                         } else {
+                            errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRBRACK);
                             //不是 ]
                         }
                     }
                 } else {
+                    errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRBRACK);
                     //不是 ]
                 }
             }
             addNonTermimal("<FuncFParam>");
-        } else {
-            //不是ident
         }
+        backWard();
     }
 
     public void Block() {
+        addNonLeaf(GrammarType.Block);
         if (getWordClass().equals("LBRACE")) {
-            getSymbol();
+            getWord();
             while (isBlockItemPrefix()) {
                 BlockItem();
             }
             if (getWordClass().equals("RBRACE")) {
-                getSymbol();
+                getWord();
                 addNonTermimal("<Block>");
-            } else {
-                //不是}
             }
-        } else {
-            //不是 {
         }
+        backWard();
     }
 
     public void MainFuncDef() {
+        addNonLeaf(GrammarType.MainFuncDef);
         if (getWordClass().equals("INTTK")) {
-            getSymbol();
+            getWord();
             if (getWordClass().equals("MAINTK")) {
-                getSymbol();
+                getWord();
                 if (getWordClass().equals("LPARENT")) {
-                    getSymbol();
+                    getWord();
                     if (getWordClass().equals("RPARENT")) {
-                        getSymbol();
+                        getWord();
                         Block();
                         addNonTermimal("<MainFuncDef>");
                     } else {
+                        errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
                         //不是 )
                     }
-                } else {
-                    //不是(
                 }
-            } else {
-                //不是main
             }
-        } else {
-            //不是int
         }
+        backWard();
     }
 
     public void BlockItem() {
+        addNonLeaf(GrammarType.BlockItem);
         if (isDeclPrefix()) {
             Decl();
         } else {
             Stmt();
         }
+        backWard();
     }
-
-    public void Stmt() {
-        //一定不存在异常情况
-        if (getWordClass().equals("IDENFR") && hasASSIGN()) {
-            //LVal两种
-            LVal();
-            if (getWordClass().equals("ASSIGN")) {
-                getSymbol();
-                if (getWordClass().equals("GETINTTK")) {
-                    getSymbol();
-                    if (getWordClass().equals("LPARENT")) {
-                        getSymbol();
-                        if (getWordClass().equals("RPARENT")) {
-                            getSymbol();
-                            if (getWordClass().equals("SEMICN")) {
-                                getSymbol();
-                            } else {
-                                //不是;
-                            }
-                        } else {
-                            //不是)
-                        }
-                    } else {
-                        //不是(
-                    }
-                } else if (isExpPrefix()) {
-                    Exp();
-                    if (getWordClass().equals("SEMICN")) {
-                        getSymbol();
-                    } else {
-                        //不是;
-                    }
-                } else {
-                    //不是getint Exp
-                }
-            } else {
-                //不是=
-            }
-        } else if (isExpPrefix()) {
-            //有Exp
-            Exp();
-            if (getWordClass().equals("SEMICN")) {
-                getSymbol();
-            } else {
-                //不是;
-            }
-        } else if (getWordClass().equals("SEMICN")) {
-            //只有;没有Exp
-            getSymbol();
-        } else if (getWordClass().equals("LBRACE")) {
-            Block();
-        } else if (getWordClass().equals("IFTK")) {
-            getSymbol();
-            if (getWordClass().equals("LPARENT")) {
-                getSymbol();
-                Cond();
-                if (getWordClass().equals("RPARENT")) {
-                    getSymbol();
-                    Stmt();
-                    if (getWordClass().equals("ELSETK")) {
-                        getSymbol();
-                        Stmt();
-                    }
-                } else {
-                    //不是)
-                }
-            } else {
-                //不是(
-            }
-        } else if (getWordClass().equals("WHILETK")) {
-            getSymbol();
-            if (getWordClass().equals("LPARENT")) {
-                getSymbol();
-                Cond();
-                if (getWordClass().equals("RPARENT")) {
-                    getSymbol();
-                    Stmt();
-                } else {
-                    //不是)
-                }
-            } else {
-                //不是(
-            }
-        } else if (getWordClass().equals("BREAKTK")) {
-            getSymbol();
-            if (getWordClass().equals("SEMICN")) {
-                getSymbol();
-            } else {
-                //不是 ;
-            }
-        } else if (getWordClass().equals("CONTINUETK")) {
-            getSymbol();
-            if (getWordClass().equals("SEMICN")) {
-                getSymbol();
-            } else {
-                //不是 ;
-            }
-        } else if (getWordClass().equals("RETURNTK")) {
-            getSymbol();
-            if (isExpPrefix()) {
-                Exp();
-            }
-            if (getWordClass().equals("SEMICN")) {
-                getSymbol();
-            } else {
-                //不是;
-            }
-        } else if (getWordClass().equals("PRINTFTK")) {
-            getSymbol();
-            if (getWordClass().equals("LPARENT")) {
-                getSymbol();
-                if (getWordClass().equals("STRCON")) {
-                    getSymbol();
-                    while (getWordClass().equals("COMMA")) {
-                        getSymbol();
-                        Exp();
-                    }
+    public void AssignStmt() {
+        LVal();
+        if (getWordClass().equals("ASSIGN")) {
+            getWord();
+            if (getWordClass().equals("GETINTTK")) {
+                getWord();
+                if (getWordClass().equals("LPARENT")) {
+                    getWord();
                     if (getWordClass().equals("RPARENT")) {
-                        getSymbol();
+                        getWord();
                         if (getWordClass().equals("SEMICN")) {
-                            getSymbol();
+                            getWord();
                         } else {
+                            errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
                             //不是;
                         }
                     } else {
+                        errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
                         //不是)
                     }
+                }
+            } else if (isExpPrefix()) {
+                Exp();
+                if (getWordClass().equals("SEMICN")) {
+                    getWord();
                 } else {
-                    //不是字符串
+                    errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
+                    //不是;
+                }
+            }
+        }
+    }
+
+    public void ExpStmt() {
+        Exp();
+        if (getWordClass().equals("SEMICN")) {
+            getWord();
+        } else {
+            errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
+            //不是;
+        }
+    }
+
+    public void EmptyStmt() {
+        getWord();
+    }
+
+    public void BlockStmt() {
+        Block();
+    }
+
+    public void IfStmt() {
+        getWord();
+        if (getWordClass().equals("LPARENT")) {
+            getWord();
+            Cond();
+            if (getWordClass().equals("RPARENT")) {
+                getWord();
+                Stmt();
+                if (getWordClass().equals("ELSETK")) {
+                    getWord();
+                    Stmt();
                 }
             } else {
-                //不是(
+                errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
+                //不是)
             }
+        }
+    }
+
+    public void WhileStmt() {
+        getWord();
+        if (getWordClass().equals("LPARENT")) {
+            getWord();
+            Cond();
+            if (getWordClass().equals("RPARENT")) {
+                getWord();
+                Stmt();
+            } else {
+                errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
+                //不是)
+            }
+        }
+    }
+
+    public void BreakStmt() {
+        getWord();
+        if (getWordClass().equals("SEMICN")) {
+            getWord();
         } else {
-            //不是分支!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
+            //不是 ;
+        }
+    }
+
+    public void ContinueStmt() {
+        getWord();
+        if (getWordClass().equals("SEMICN")) {
+            getWord();
+        } else {
+            errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
+            //不是 ;
+        }
+    }
+
+    public void ReturnStmt() {
+        getWord();
+        if (isExpPrefix()) {
+            Exp();
+        }
+        if (getWordClass().equals("SEMICN")) {
+            getWord();
+        } else {
+            errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
+            //不是;
+        }
+    }
+
+    public void PrintStmt() {
+        getWord();
+        if (getWordClass().equals("LPARENT")) {
+            getWord();
+            if (getWordClass().equals("STRCON")) {
+                getWord();
+                while (getWordClass().equals("COMMA")) {
+                    getWord();
+                    Exp();
+                }
+                if (getWordClass().equals("RPARENT")) {
+                    getWord();
+                    if (getWordClass().equals("SEMICN")) {
+                        getWord();
+                    } else {
+                        errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
+                        //不是;
+                    }
+                } else {
+                    errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
+                    //不是)
+                }
+            }
+        }
+    }
+
+    public void Stmt() {
+        //一定不存在异常情况 子stmt只是逻辑判断的提取 不需要管curNode和输出
+        if (getWordClass().equals("IDENFR") && hasASSIGN()) {
+            //LVal两种
+            addNonLeaf(GrammarType.AssignStmt);
+            AssignStmt();
+        } else if (isExpPrefix()) {
+            //有Exp
+            addNonLeaf(GrammarType.ExpStmt);
+            ExpStmt();
+        } else if (getWordClass().equals("SEMICN")) {
+            //只有;没有Exp
+            addNonLeaf(GrammarType.EmptyStmt);
+            EmptyStmt();
+        } else if (getWordClass().equals("LBRACE")) {
+            addNonLeaf(GrammarType.BlockStmt);
+            BlockStmt();
+        } else if (getWordClass().equals("IFTK")) {
+            addNonLeaf(GrammarType.IfStmt);
+            IfStmt();
+        } else if (getWordClass().equals("WHILETK")) {
+            addNonLeaf(GrammarType.WhileStmt);
+            WhileStmt();
+        } else if (getWordClass().equals("BREAKTK")) {
+            addNonLeaf(GrammarType.BreakStmt);
+            loopStmts.add(curNode);
+            BreakStmt();
+        } else if (getWordClass().equals("CONTINUETK")) {
+            addNonLeaf(GrammarType.ContinueStmt);
+            loopStmts.add(curNode);
+            ContinueStmt();
+        } else if (getWordClass().equals("RETURNTK")) {
+            addNonLeaf(GrammarType.ReturnStmt);
+            ReturnStmt();
+        } else if (getWordClass().equals("PRINTFTK")) {
+            addNonLeaf(GrammarType.PrintStmt);
+            PrintStmt();
         }
         addNonTermimal("<Stmt>");
+        backWard();
     }
 
     public void LVal() {
+        addNonLeaf(GrammarType.LVal);
         if (getWordClass().equals("IDENFR")) {
-            getSymbol();
+            getWord();
             while (getWordClass().equals("LBRACK")) {
-                getSymbol();
+                getWord();
                 Exp();
                 if (getWordClass().equals("RBRACK")) {
-                    getSymbol();
+                    getWord();
                 } else {
+                    errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRBRACK);
                     //不是]
                 }
             }
             addNonTermimal("<LVal>");
-        } else {
-            //不是Ident
         }
+        backWard();
     }
 
     public void Cond() {
+        addNonLeaf(GrammarType.Cond);
         LOrExp();
         addNonTermimal("<Cond>");
+        backWard();
     }
 
     public void Exp() {
+        addNonLeaf(GrammarType.Exp);
         AddExp();
         addNonTermimal("<Exp>");
+        backWard();
     }
 
     public void AddExp() {
+        addNonLeaf(GrammarType.AddExp);
         MulExp();
         addNonTermimal("<AddExp>");
         while (isAddOp()) {
-            getSymbol();
+            getWord();
             MulExp();
             addNonTermimal("<AddExp>");
         }
+        backWard();
     }
 
     public void PrimaryExp() {
+        addNonLeaf(GrammarType.PrimaryExp);
         if (getWordClass().equals("LPARENT")) {
-            getSymbol();
+            getWord();
             Exp();
             if (getWordClass().equals("RPARENT")) {
-                getSymbol();
+                getWord();
                 addNonTermimal("<PrimaryExp>");
             } else {
+                errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
                 //不是)
             }
         } else if (getWordClass().equals("IDENFR")) {
@@ -632,30 +722,31 @@ public class GrammarAnalysis {
         } else if (getWordClass().equals("INTCON")) {
             Number();
             addNonTermimal("<PrimaryExp>");
-        } else {
-            //分支不对
         }
+        backWard();
     }
 
     public void Number() {
+        addNonLeaf(GrammarType.Number);
         if (getWordClass().equals("INTCON")) {
-            getSymbol();
+            getWord();
             addNonTermimal("<Number>");
-        } else {
-            //不是数字
         }
+        backWard();
     }
 
     public void UnaryExp() {
+        addNonLeaf(GrammarType.UnaryExp);
         if (isFuncCallPrefix()) {
-            getSymbol();
-            getSymbol();
+            getWord();
+            getWord();
             if (isExpPrefix()) {
                 FuncRParams();
             }
             if (getWordClass().equals("RPARENT")) {
-                getSymbol();
+                getWord();
             } else {
+                errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
                 //不是)
             }
             addNonTermimal("<UnaryExp>");
@@ -666,82 +757,95 @@ public class GrammarAnalysis {
             UnaryOp();
             UnaryExp();
             addNonTermimal("<UnaryExp>");
-        } else {
-            //不是分支
         }
+        backWard();
     }
 
     public void UnaryOp() {
+        addNonLeaf(GrammarType.UnaryOp);
         if (isUnaryOp()) {
-            getSymbol();
-        } else {
-            //不是 + - !
+            getWord();
         }
         addNonTermimal("<UnaryOp>");
+        backWard();
     }
 
     public void FuncRParams() {
+        addNonLeaf(GrammarType.FuncRParams);
         Exp();
         while (getWordClass().equals("COMMA")) {
-            getSymbol();
+            getWord();
             Exp();
         }
         addNonTermimal("<FuncRParams>");
+        backWard();
     }
 
     public void MulExp() {
+        addNonLeaf(GrammarType.MulExp);
         UnaryExp();
         addNonTermimal("<MulExp>");
         while (isMulOp()) {
-            getSymbol();
+            getWord();
             UnaryExp();
             addNonTermimal("<MulExp>");
         }
+        backWard();
     }
 
     public void RelExp() {
+        addNonLeaf(GrammarType.RelExp);
         AddExp();
         addNonTermimal("<RelExp>");
         while (isRelOp()) {
-            getSymbol();
+            getWord();
             AddExp();
             addNonTermimal("<RelExp>");
         }
+        backWard();
     }
 
     public void EqExp() {
+        addNonLeaf(GrammarType.EqExp);
         RelExp();
         addNonTermimal("<EqExp>");
         while (isEqOp()) {
-            getSymbol();
+            getWord();
             RelExp();
             addNonTermimal("<EqExp>");
         }
+        backWard();
     }
 
     public void LAndExp() {
+        addNonLeaf(GrammarType.LAndExp);
         EqExp();
         addNonTermimal("<LAndExp>");
         while (getWordClass().equals("AND")) {
-            getSymbol();
+            getWord();
             EqExp();
             addNonTermimal("<LAndExp>");
         }
+        backWard();
     }
 
     public void LOrExp() {
+        addNonLeaf(GrammarType.LOrExp);
         LAndExp();
         addNonTermimal("<LOrExp>");
         while (getWordClass().equals("OR")) {
-            getSymbol();
+            getWord();
             LAndExp();
             addNonTermimal("<LOrExp>");
         }
+        backWard();
     }
 
     public void ConstExp() {
+        addNonLeaf(GrammarType.ConstExp);
         AddExp();
         addNonTermimal("<ConstExp>");
+        backWard();
     }
 }
 

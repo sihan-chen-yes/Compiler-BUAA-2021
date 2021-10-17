@@ -1,3 +1,3 @@
-public class ReadEOFException extends Exception{
+public class ReadEOFException extends Exception {
 
 }

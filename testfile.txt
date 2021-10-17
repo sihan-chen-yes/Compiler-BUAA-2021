@@ -1,6 +1,5 @@
 int main(){
     int c;
-    c= getint();
-    printf("%d",c);
+    c= 6 + 7 + 6;
     return c;
 }
