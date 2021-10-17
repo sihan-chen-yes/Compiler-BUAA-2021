@@ -1,43 +1,83 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class GrammarAnalysis {
     private ArrayList<HashMap<String, String>> wordAndGrammar = new ArrayList<>();
     private HashMap<String, String> symbol = null;
-    private HashMap<String, String> peekSymbol = new HashMap<>();
-    private WordAnalysis wordAnalysis;
+    private Word word = null;
+    private Word peekWord = null;
+    private ArrayList<Word> wordList;
     private HashMap<String, String> nonTermimal = new HashMap<>();
+    private int pos = 0;
+    private FileWriter writer;
 
-    public GrammarAnalysis(WordAnalysis wordAnalysis) {
-        this.wordAnalysis = wordAnalysis;
+    public GrammarAnalysis(ArrayList<Word> wordList, File outputFile) {
+        this.wordList = wordList;
+        try {
+            this.writer = new FileWriter(outputFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public ArrayList<HashMap<String, String>> recursionDown(){
+    public void saveGrammarAnalysis() {
+        try {
+            Iterator iterator = wordAndGrammar.iterator();
+            HashMap<String, String> symbol;
+            while (iterator.hasNext()) {
+                symbol = (HashMap<String, String>) iterator.next();
+                if (symbol.get("class").equals("NONTER")) {
+                    writer.write(String.format("%s\n",symbol.get("word")));
+                } else {
+                    writer.write(String.format("%s %s\n",symbol.get("class"),symbol.get("word")));
+                }
+            }
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void recursionDown(){
         getSymbol();
         //进来之前symbol里面已经get到了新的symbol 出去的时候必须要getSymbol
         CompUnit();
-        return wordAndGrammar;
     }
 
     public void getSymbol() {
-        if (symbol != null) {
+        if (word != null) {
+            symbol = new HashMap<>();
+            symbol.put("class",word.getClassName());
+            symbol.put("word",word.getWord());
             wordAndGrammar.add(symbol);
         }
+        if (pos < wordList.size()) {
+            word = wordList.get(pos++);
+        }
+        else {
+            word = new Word("EOF","",wordList.get(wordList.size() - 1).getLine());
+        }
         //刚开始的时候 symbol为null
-        do {
-            symbol = wordAnalysis.getSymbol(false);
-        } while (symbol.get("class").equals("ANNO"));
-        //过滤注释
     }
 
-    public String getSymbolClass() {
-        return symbol.get("class");
+    public String getWordClass() {
+        return word.getClassName();
     }
 
     public String getPeekSymbolClass(int i) {
-        //peek 并不改变指针 只有get才会改变指针 注意 peek指针指在当前指针的下一个
-        peekSymbol = wordAnalysis.peekSymbol(i);
-        return peekSymbol.get("class");
+        //peek 并不改变pos 只有get才会改变pos 注意 peek指针指在pos的下一个
+        int peek = pos;
+        peek += i;
+        if (peek < wordList.size()) {
+            return wordList.get(peek).getClassName();
+        } else {
+            return "EOF";
+        }
     }
 
     public void addNonTermimal(String nonTermValue) {
@@ -49,26 +89,26 @@ public class GrammarAnalysis {
 
     public Boolean isExpPrefix() {
         //ExpPrefix不含! 只有+ -
-        return getSymbolClass().equals("IDENFR") || getSymbolClass().equals("PLUS") || getSymbolClass().equals("MINU")
-                || getSymbolClass().equals("LPARENT") || getSymbolClass().equals("INTCON");
+        return getWordClass().equals("IDENFR") || getWordClass().equals("PLUS") || getWordClass().equals("MINU")
+                || getWordClass().equals("LPARENT") || getWordClass().equals("INTCON");
     }
 
     public Boolean isPrimaryExpPrefix() {
-        return getSymbolClass().equals("IDENFR") || getSymbolClass().equals("LPARENT") || getSymbolClass().equals("INTCON");
+        return getWordClass().equals("IDENFR") || getWordClass().equals("LPARENT") || getWordClass().equals("INTCON");
     }
 
     public Boolean isFuncCallPrefix() {
-        return getSymbolClass().equals("IDENFR") && getPeekSymbolClass(0).equals("LPARENT");
+        return getWordClass().equals("IDENFR") && getPeekSymbolClass(0).equals("LPARENT");
     }
     public boolean isDeclPrefix() {
-        return (getSymbolClass().equals("CONSTTK") ||
-                (getSymbolClass().equals("INTTK") && !getPeekSymbolClass(1).equals("LPARENT")));
+        return (getWordClass().equals("CONSTTK") ||
+                (getWordClass().equals("INTTK") && !getPeekSymbolClass(1).equals("LPARENT")));
     }
 
     public boolean isStmtPrefix() {
-        return (getSymbolClass().equals("SEMICN") || getSymbolClass().equals("LBRACE") || getSymbolClass().equals("IFTK")
-                || getSymbolClass().equals("WHILETK") || getSymbolClass().equals("BREAKTK") || getSymbolClass().equals("CONTINUETK")
-                || getSymbolClass().equals("RETURNTK") || getSymbolClass().equals("PRINTFTK"))
+        return (getWordClass().equals("SEMICN") || getWordClass().equals("LBRACE") || getWordClass().equals("IFTK")
+                || getWordClass().equals("WHILETK") || getWordClass().equals("BREAKTK") || getWordClass().equals("CONTINUETK")
+                || getWordClass().equals("RETURNTK") || getWordClass().equals("PRINTFTK"))
                 || isExpPrefix();
     }
 
@@ -77,39 +117,39 @@ public class GrammarAnalysis {
     }
 
     public boolean isFuncDefPrefix() {
-        return (getSymbolClass().equals("VOIDTK") ||
-                (getSymbolClass().equals("INTTK") && !getPeekSymbolClass(0).equals("MAINTK")));
+        return (getWordClass().equals("VOIDTK") ||
+                (getWordClass().equals("INTTK") && !getPeekSymbolClass(0).equals("MAINTK")));
     }
 
     public boolean isFuncTypePrefix() {
-        return getSymbolClass().equals("VOIDTK") || getSymbolClass().equals("INTTK");
+        return getWordClass().equals("VOIDTK") || getWordClass().equals("INTTK");
     }
 
     public Boolean isUnaryOp() {
         //UnaryOp + - !
-        return getSymbolClass().equals("PLUS") || getSymbolClass().equals("MINU") || getSymbolClass().equals("NOT");
+        return getWordClass().equals("PLUS") || getWordClass().equals("MINU") || getWordClass().equals("NOT");
     }
 
     public Boolean isMulOp() {
-        return getSymbolClass().equals("MULT") || getSymbolClass().equals("DIV") || getSymbolClass().equals("MOD");
+        return getWordClass().equals("MULT") || getWordClass().equals("DIV") || getWordClass().equals("MOD");
     }
 
     public Boolean isAddOp() {
-        return getSymbolClass().equals("PLUS") || getSymbolClass().equals("MINU");
+        return getWordClass().equals("PLUS") || getWordClass().equals("MINU");
     }
 
     public Boolean isRelOp() {
-        return getSymbolClass().equals("LSS") || getSymbolClass().equals("LEQ")
-                || getSymbolClass().equals("GRE") || getSymbolClass().equals("GEQ");
+        return getWordClass().equals("LSS") || getWordClass().equals("LEQ")
+                || getWordClass().equals("GRE") || getWordClass().equals("GEQ");
     }
 
     public Boolean isEqOp() {
-        return getSymbolClass().equals("EQL") || getSymbolClass().equals("NEQ");
+        return getWordClass().equals("EQL") || getWordClass().equals("NEQ");
     }
 
     public Boolean hasASSIGN() {
         int i = 0;
-        while (!getPeekSymbolClass(i).equals("SEMICN")) {
+        while (!getPeekSymbolClass(i).equals("SEMICN") && !getPeekSymbolClass(i).equals("EOF")) {
             //一直往后看直到遇到;
             if (getPeekSymbolClass(i).equals("ASSIGN")) {
                 return true;
@@ -131,9 +171,9 @@ public class GrammarAnalysis {
     }
 
     public void Decl() {
-        if (getSymbolClass().equals("CONSTTK")) {
+        if (getWordClass().equals("CONSTTK")) {
             ConstDecl();
-        } else if (getSymbolClass().equals("INTTK")) {
+        } else if (getWordClass().equals("INTTK")) {
             VarDecl();
         } else {
             //不是常数声明也不是变量声明
@@ -141,7 +181,7 @@ public class GrammarAnalysis {
     }
 
     public void BType() {
-        if (getSymbolClass().equals("INTTK")) {
+        if (getWordClass().equals("INTTK")) {
             getSymbol();
         } else {
             //不是int
@@ -149,18 +189,18 @@ public class GrammarAnalysis {
     }
 
     public void ConstDef() {
-        if (getSymbolClass().equals("IDENFR")) {
+        if (getWordClass().equals("IDENFR")) {
             getSymbol();
-            while (getSymbolClass().equals("LBRACK")) {
+            while (getWordClass().equals("LBRACK")) {
                 getSymbol();
                 ConstExp();
-                if (getSymbolClass().equals("RBRACK")) {
+                if (getWordClass().equals("RBRACK")) {
                     getSymbol();
                 } else {
                     //不以 ] 结尾
                 }
             }
-            if (getSymbolClass().equals("ASSIGN")) {
+            if (getWordClass().equals("ASSIGN")) {
                 getSymbol();
                 ConstInitVal();
                 addNonTermimal("<ConstDef>");
@@ -176,11 +216,11 @@ public class GrammarAnalysis {
         getSymbol();
         BType();
         ConstDef();
-        while (getSymbolClass().equals("COMMA")) {
+        while (getWordClass().equals("COMMA")) {
             getSymbol();
             ConstDef();
         }
-        if (getSymbolClass().equals("SEMICN")) {
+        if (getWordClass().equals("SEMICN")) {
             getSymbol();
             addNonTermimal("<ConstDecl>");
         } else {
@@ -189,18 +229,18 @@ public class GrammarAnalysis {
     }
 
     public void ConstInitVal() {
-        if (getSymbolClass().equals("LBRACE")) {
+        if (getWordClass().equals("LBRACE")) {
             getSymbol();
-            if (getSymbolClass().equals("RBRACE")) {
+            if (getWordClass().equals("RBRACE")) {
                 getSymbol();
                 addNonTermimal("<ConstInitVal>");
             } else {
                 ConstInitVal();
-                while (getSymbolClass().equals("COMMA")) {
+                while (getWordClass().equals("COMMA")) {
                     getSymbol();
                     ConstInitVal();
                 }
-                if (getSymbolClass().equals("RBRACE")) {
+                if (getWordClass().equals("RBRACE")) {
                     getSymbol();
                     addNonTermimal("<ConstInitVal>");
                 } else {
@@ -216,11 +256,11 @@ public class GrammarAnalysis {
     public void VarDecl() {
         BType();
         VarDef();
-        while (getSymbolClass().equals("COMMA")) {
+        while (getWordClass().equals("COMMA")) {
             getSymbol();
             VarDef();
         }
-        if (getSymbolClass().equals("SEMICN")) {
+        if (getWordClass().equals("SEMICN")) {
             getSymbol();
             addNonTermimal("<VarDecl>");
         } else {
@@ -229,18 +269,18 @@ public class GrammarAnalysis {
     }
 
     public void VarDef() {
-        if (getSymbolClass().equals("IDENFR")) {
+        if (getWordClass().equals("IDENFR")) {
             getSymbol();
-            while (getSymbolClass().equals("LBRACK")) {
+            while (getWordClass().equals("LBRACK")) {
                 getSymbol();
                 ConstExp();
-                if (getSymbolClass().equals("RBRACK")) {
+                if (getWordClass().equals("RBRACK")) {
                     getSymbol();
                 } else {
                     //不是]
                 }
             }
-            if (getSymbolClass().equals("ASSIGN")) {
+            if (getWordClass().equals("ASSIGN")) {
                 getSymbol();
                 InitVal();
             }
@@ -251,18 +291,18 @@ public class GrammarAnalysis {
     }
 
     public void InitVal() {
-        if (getSymbolClass().equals("LBRACE")) {
+        if (getWordClass().equals("LBRACE")) {
             getSymbol();
-            if (getSymbolClass().equals("RBRACE")) {
+            if (getWordClass().equals("RBRACE")) {
                 getSymbol();
                 addNonTermimal("<InitVal>");
             } else {
                 InitVal();
-                while (getSymbolClass().equals("COMMA")) {
+                while (getWordClass().equals("COMMA")) {
                     getSymbol();
                     InitVal();
                 }
-                if (getSymbolClass().equals("RBRACE")) {
+                if (getWordClass().equals("RBRACE")) {
                     getSymbol();
                     addNonTermimal("<InitVal>");
                 } else {
@@ -279,17 +319,17 @@ public class GrammarAnalysis {
 
     public void FuncDef() {
         FuncType();
-        if (getSymbolClass().equals("IDENFR")) {
+        if (getWordClass().equals("IDENFR")) {
             getSymbol();
-            if (getSymbolClass().equals("LPARENT")) {
+            if (getWordClass().equals("LPARENT")) {
                 getSymbol();
-                if (getSymbolClass().equals("RPARENT")) {
+                if (getWordClass().equals("RPARENT")) {
                     getSymbol();
                     Block();
                     addNonTermimal("<FuncDef>");
                 } else {
                     FuncFParams();
-                    if (getSymbolClass().equals("RPARENT")) {
+                    if (getWordClass().equals("RPARENT")) {
                         getSymbol();
                         Block();
                         addNonTermimal("<FuncDef>");
@@ -316,7 +356,7 @@ public class GrammarAnalysis {
 
     public void FuncFParams() {
         FuncFParam();
-        while (getSymbolClass().equals("COMMA")) {
+        while (getWordClass().equals("COMMA")) {
             getSymbol();
             FuncFParam();
         }
@@ -325,16 +365,16 @@ public class GrammarAnalysis {
 
     public void FuncFParam() {
         BType();
-        if (getSymbolClass().equals("IDENFR")) {
+        if (getWordClass().equals("IDENFR")) {
             getSymbol();
-            if (getSymbolClass().equals("LBRACK")) {
+            if (getWordClass().equals("LBRACK")) {
                 getSymbol();
-                if (getSymbolClass().equals("RBRACK")) {
+                if (getWordClass().equals("RBRACK")) {
                     getSymbol();
-                    while (getSymbolClass().equals("LBRACK")) {
+                    while (getWordClass().equals("LBRACK")) {
                         getSymbol();
                         ConstExp();
-                        if (getSymbolClass().equals("RBRACK")) {
+                        if (getWordClass().equals("RBRACK")) {
                             getSymbol();
                         } else {
                             //不是 ]
@@ -351,12 +391,12 @@ public class GrammarAnalysis {
     }
 
     public void Block() {
-        if (getSymbolClass().equals("LBRACE")) {
+        if (getWordClass().equals("LBRACE")) {
             getSymbol();
             while (isBlockItemPrefix()) {
                 BlockItem();
             }
-            if (getSymbolClass().equals("RBRACE")) {
+            if (getWordClass().equals("RBRACE")) {
                 getSymbol();
                 addNonTermimal("<Block>");
             } else {
@@ -368,13 +408,13 @@ public class GrammarAnalysis {
     }
 
     public void MainFuncDef() {
-        if (getSymbolClass().equals("INTTK")) {
+        if (getWordClass().equals("INTTK")) {
             getSymbol();
-            if (getSymbolClass().equals("MAINTK")) {
+            if (getWordClass().equals("MAINTK")) {
                 getSymbol();
-                if (getSymbolClass().equals("LPARENT")) {
+                if (getWordClass().equals("LPARENT")) {
                     getSymbol();
-                    if (getSymbolClass().equals("RPARENT")) {
+                    if (getWordClass().equals("RPARENT")) {
                         getSymbol();
                         Block();
                         addNonTermimal("<MainFuncDef>");
@@ -402,18 +442,18 @@ public class GrammarAnalysis {
 
     public void Stmt() {
         //一定不存在异常情况
-        if (getSymbolClass().equals("IDENFR") && hasASSIGN()) {
+        if (getWordClass().equals("IDENFR") && hasASSIGN()) {
             //LVal两种
             LVal();
-            if (getSymbolClass().equals("ASSIGN")) {
+            if (getWordClass().equals("ASSIGN")) {
                 getSymbol();
-                if (getSymbolClass().equals("GETINTTK")) {
+                if (getWordClass().equals("GETINTTK")) {
                     getSymbol();
-                    if (getSymbolClass().equals("LPARENT")) {
+                    if (getWordClass().equals("LPARENT")) {
                         getSymbol();
-                        if (getSymbolClass().equals("RPARENT")) {
+                        if (getWordClass().equals("RPARENT")) {
                             getSymbol();
-                            if (getSymbolClass().equals("SEMICN")) {
+                            if (getWordClass().equals("SEMICN")) {
                                 getSymbol();
                             } else {
                                 //不是;
@@ -426,7 +466,7 @@ public class GrammarAnalysis {
                     }
                 } else if (isExpPrefix()) {
                     Exp();
-                    if (getSymbolClass().equals("SEMICN")) {
+                    if (getWordClass().equals("SEMICN")) {
                         getSymbol();
                     } else {
                         //不是;
@@ -440,25 +480,25 @@ public class GrammarAnalysis {
         } else if (isExpPrefix()) {
             //有Exp
             Exp();
-            if (getSymbolClass().equals("SEMICN")) {
+            if (getWordClass().equals("SEMICN")) {
                 getSymbol();
             } else {
                 //不是;
             }
-        } else if (getSymbolClass().equals("SEMICN")) {
+        } else if (getWordClass().equals("SEMICN")) {
             //只有;没有Exp
             getSymbol();
-        } else if (getSymbolClass().equals("LBRACE")) {
+        } else if (getWordClass().equals("LBRACE")) {
             Block();
-        } else if (getSymbolClass().equals("IFTK")) {
+        } else if (getWordClass().equals("IFTK")) {
             getSymbol();
-            if (getSymbolClass().equals("LPARENT")) {
+            if (getWordClass().equals("LPARENT")) {
                 getSymbol();
                 Cond();
-                if (getSymbolClass().equals("RPARENT")) {
+                if (getWordClass().equals("RPARENT")) {
                     getSymbol();
                     Stmt();
-                    if (getSymbolClass().equals("ELSETK")) {
+                    if (getWordClass().equals("ELSETK")) {
                         getSymbol();
                         Stmt();
                     }
@@ -468,12 +508,12 @@ public class GrammarAnalysis {
             } else {
                 //不是(
             }
-        } else if (getSymbolClass().equals("WHILETK")) {
+        } else if (getWordClass().equals("WHILETK")) {
             getSymbol();
-            if (getSymbolClass().equals("LPARENT")) {
+            if (getWordClass().equals("LPARENT")) {
                 getSymbol();
                 Cond();
-                if (getSymbolClass().equals("RPARENT")) {
+                if (getWordClass().equals("RPARENT")) {
                     getSymbol();
                     Stmt();
                 } else {
@@ -482,43 +522,43 @@ public class GrammarAnalysis {
             } else {
                 //不是(
             }
-        } else if (getSymbolClass().equals("BREAKTK")) {
+        } else if (getWordClass().equals("BREAKTK")) {
             getSymbol();
-            if (getSymbolClass().equals("SEMICN")) {
+            if (getWordClass().equals("SEMICN")) {
                 getSymbol();
             } else {
                 //不是 ;
             }
-        } else if (getSymbolClass().equals("CONTINUETK")) {
+        } else if (getWordClass().equals("CONTINUETK")) {
             getSymbol();
-            if (getSymbolClass().equals("SEMICN")) {
+            if (getWordClass().equals("SEMICN")) {
                 getSymbol();
             } else {
                 //不是 ;
             }
-        } else if (getSymbolClass().equals("RETURNTK")) {
+        } else if (getWordClass().equals("RETURNTK")) {
             getSymbol();
             if (isExpPrefix()) {
                 Exp();
             }
-            if (getSymbolClass().equals("SEMICN")) {
+            if (getWordClass().equals("SEMICN")) {
                 getSymbol();
             } else {
                 //不是;
             }
-        } else if (getSymbolClass().equals("PRINTFTK")) {
+        } else if (getWordClass().equals("PRINTFTK")) {
             getSymbol();
-            if (getSymbolClass().equals("LPARENT")) {
+            if (getWordClass().equals("LPARENT")) {
                 getSymbol();
-                if (getSymbolClass().equals("STRCON")) {
+                if (getWordClass().equals("STRCON")) {
                     getSymbol();
-                    while (getSymbolClass().equals("COMMA")) {
+                    while (getWordClass().equals("COMMA")) {
                         getSymbol();
                         Exp();
                     }
-                    if (getSymbolClass().equals("RPARENT")) {
+                    if (getWordClass().equals("RPARENT")) {
                         getSymbol();
-                        if (getSymbolClass().equals("SEMICN")) {
+                        if (getWordClass().equals("SEMICN")) {
                             getSymbol();
                         } else {
                             //不是;
@@ -539,12 +579,12 @@ public class GrammarAnalysis {
     }
 
     public void LVal() {
-        if (getSymbolClass().equals("IDENFR")) {
+        if (getWordClass().equals("IDENFR")) {
             getSymbol();
-            while (getSymbolClass().equals("LBRACK")) {
+            while (getWordClass().equals("LBRACK")) {
                 getSymbol();
                 Exp();
-                if (getSymbolClass().equals("RBRACK")) {
+                if (getWordClass().equals("RBRACK")) {
                     getSymbol();
                 } else {
                     //不是]
@@ -577,19 +617,19 @@ public class GrammarAnalysis {
     }
 
     public void PrimaryExp() {
-        if (getSymbolClass().equals("LPARENT")) {
+        if (getWordClass().equals("LPARENT")) {
             getSymbol();
             Exp();
-            if (getSymbolClass().equals("RPARENT")) {
+            if (getWordClass().equals("RPARENT")) {
                 getSymbol();
                 addNonTermimal("<PrimaryExp>");
             } else {
                 //不是)
             }
-        } else if (getSymbolClass().equals("IDENFR")) {
+        } else if (getWordClass().equals("IDENFR")) {
             LVal();
             addNonTermimal("<PrimaryExp>");
-        } else if (getSymbolClass().equals("INTCON")) {
+        } else if (getWordClass().equals("INTCON")) {
             Number();
             addNonTermimal("<PrimaryExp>");
         } else {
@@ -598,7 +638,7 @@ public class GrammarAnalysis {
     }
 
     public void Number() {
-        if (getSymbolClass().equals("INTCON")) {
+        if (getWordClass().equals("INTCON")) {
             getSymbol();
             addNonTermimal("<Number>");
         } else {
@@ -613,7 +653,7 @@ public class GrammarAnalysis {
             if (isExpPrefix()) {
                 FuncRParams();
             }
-            if (getSymbolClass().equals("RPARENT")) {
+            if (getWordClass().equals("RPARENT")) {
                 getSymbol();
             } else {
                 //不是)
@@ -642,7 +682,7 @@ public class GrammarAnalysis {
 
     public void FuncRParams() {
         Exp();
-        while (getSymbolClass().equals("COMMA")) {
+        while (getWordClass().equals("COMMA")) {
             getSymbol();
             Exp();
         }
@@ -682,7 +722,7 @@ public class GrammarAnalysis {
     public void LAndExp() {
         EqExp();
         addNonTermimal("<LAndExp>");
-        while (getSymbolClass().equals("AND")) {
+        while (getWordClass().equals("AND")) {
             getSymbol();
             EqExp();
             addNonTermimal("<LAndExp>");
@@ -692,7 +732,7 @@ public class GrammarAnalysis {
     public void LOrExp() {
         LAndExp();
         addNonTermimal("<LOrExp>");
-        while (getSymbolClass().equals("OR")) {
+        while (getWordClass().equals("OR")) {
             getSymbol();
             LAndExp();
             addNonTermimal("<LOrExp>");

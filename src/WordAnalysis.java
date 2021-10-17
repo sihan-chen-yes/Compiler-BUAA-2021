@@ -1,20 +1,25 @@
+import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class WordAnalysis {
-    private final RandomAccessFile raf;
+    private RandomAccessFile raf = null;
     private int sym;
     private char c;
     private String token = "";
     private final int EOF = -1;
     private final HashMap<String, String> reservedWords = new HashMap<>();
     private int line = 1;
-    private ArrayList<HashMap<String, String>> bufferWords = new ArrayList<>();
+    private ArrayList<Word> wordList = new ArrayList<>();
 
-    public WordAnalysis (RandomAccessFile raf){
-        this.raf = raf;
+    public WordAnalysis (File readFile){
+        try {
+            this.raf = new RandomAccessFile(readFile, "r");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         reservedWords.put("main","MAINTK");
         reservedWords.put("const","CONSTTK");
         reservedWords.put("int","INTTK");
@@ -29,31 +34,24 @@ public class WordAnalysis {
         reservedWords.put("void","VOIDTK");
     }
 
-    public HashMap<String, String> peekSymbol(int i) {
-        while (i >= bufferWords.size()) {
-            HashMap<String, String> word = getSymbol(true);
-            while (word.get("class").equals("ANNO")) {
-                word = getSymbol(true);
+    public ArrayList<Word> getWordList() {
+        Word word;
+        do {
+            word = getSymbol();
+            if (!word.getClassName().equals("EOF") && !word.getClassName().equals("ANNO")) {
+                wordList.add(word);
             }
-            //过滤注释
-            bufferWords.add(word);
-        }
-        return bufferWords.get(i);
+        } while (!word.getClassName().equals("EOF"));
+        return wordList;
     }
 
-    public HashMap<String, String> getSymbol(boolean peeking){
-        if (!bufferWords.isEmpty() && !peeking) {
-            HashMap<String, String> word = bufferWords.get(0);
-            bufferWords.remove(0);
-            return word;
-        }
+    public Word getSymbol(){
         token = "";
-        HashMap<String, String> word = new HashMap<>();
+        Word word = null;
         try {
             jumpBlank();//每次进来先检查一下上次的暂停字符 读一个字符并且跳过空白符 再检查一下是不是EOF
         } catch (ReadEOFException e) {
-            word.put("class","EOF");
-            word.put("word",token);
+            word = new Word("EOF",token,line);
             return word;
         }
         if (Character.isLetter(c) || c == '_') {
@@ -66,11 +64,9 @@ public class WordAnalysis {
                 retract();
             }
             if (reservedWords.containsKey(token)) {
-                word.put("class",reservedWords.get(token));
-                word.put("word",token);
+                word = new Word(reservedWords.get(token),token,line);
             } else {
-                word.put("class","IDENFR");
-                word.put("word",token);
+                word = new Word("IDENFR",token,line);
             }
         } else if (Character.isDigit(c)) {
             //0或者非零的数（不能以0开头）
@@ -81,122 +77,102 @@ public class WordAnalysis {
             if (sym != EOF) {
                 retract();
             }
-            word.put("class","INTCON");
-            word.put("word",token);
+            word = new Word("INTCON",token,line);
         } else if (c == '"') {
             do {
                 token += c;
                 getChar();
             } while (c != '"');
             token += c;
-            word.put("class","STRCON");
-            word.put("word",token);
+            word = new Word("STRCON",token,line);
         } else if (c == '+') {
             token += c;
-            word.put("class","PLUS");
-            word.put("word",token);
+            word = new Word("PLUS",token,line);
         } else if (c == '-') {
             token += c;
-            word.put("class","MINU");
-            word.put("word",token);
+            word = new Word("MINU",token,line);
         } else if (c == '*') {
             token += c;
-            word.put("class","MULT");
-            word.put("word",token);
+            word = new Word("MULT",token,line);
         } else if (c == '%') {
             token += c;
-            word.put("class","MOD");
-            word.put("word",token);
+            word = new Word("MOD",token,line);
         } else if (c == ';') {
             token += c;
-            word.put("class","SEMICN");
-            word.put("word",token);
+            word = new Word("SEMICN",token,line);
         } else if (c == ',') {
             token += c;
-            word.put("class","COMMA");
-            word.put("word",token);
+            word = new Word("COMMA",token,line);
         } else if (c == '(') {
             token += c;
-            word.put("class","LPARENT");
-            word.put("word",token);
+            word = new Word("LPARENT",token,line);
         } else if (c == ')') {
             token += c;
-            word.put("class","RPARENT");
-            word.put("word",token);
+            word = new Word("RPARENT",token,line);
         } else if (c == '[') {
             token += c;
-            word.put("class","LBRACK");
-            word.put("word",token);
+            word = new Word("LBRACK",token,line);
         } else if (c == ']') {
             token += c;
-            word.put("class","RBRACK");
-            word.put("word",token);
+            word = new Word("RBRACK",token,line);
         } else if (c == '{') {
             token += c;
-            word.put("class","LBRACE");
-            word.put("word",token);
+            word = new Word("LBRACE",token,line);
         } else if (c == '}') {
             token += c;
-            word.put("class","RBRACE");
-            word.put("word",token);
+            word = new Word("RBRACE",token,line);
         } else if (c == '&') {
             token += c;
             getChar();
             assert c == '&';
             token += c;
-            word.put("class","AND");
-            word.put("word",token);
+            word = new Word("AND",token,line);
         } else if (c == '|') {
             token += c;
             getChar();
             assert c == '|';
             token += c;
-            word.put("class","OR");
-            word.put("word",token);
+            word = new Word("OR",token,line);
         } else if (c == '!') {
             token += c;
             getChar();
             if (c == '=') {
                 token += c;
-                word.put("class","NEQ");
+                word = new Word("NEQ",token,line);
             } else {
                 retract();
-                word.put("class","NOT");
+                word = new Word("NOT",token,line);
             }
-            word.put("word",token);
         } else if (c == '<') {
             token += c;
             getChar();
             if (c == '=') {
                 token += c;
-                word.put("class","LEQ");
+                word = new Word("LEQ",token,line);
             } else {
                 retract();
-                word.put("class","LSS");
+                word = new Word("LSS",token,line);
             }
-            word.put("word",token);
         } else if (c == '>') {
             token += c;
             getChar();
             if (c == '=') {
                 token += c;
-                word.put("class","GEQ");
+                word = new Word("GEQ",token,line);
             } else {
                 retract();
-                word.put("class","GRE");
+                word = new Word("GRE",token,line);
             }
-            word.put("word",token);
         } else if (c == '=') {
             token += c;
             getChar();
             if (c == '=') {
                 token += c;
-                word.put("class","EQL");
+                word = new Word("EQL",token,line);
             } else {
                 retract();
-                word.put("class","ASSIGN");
+                word = new Word("ASSIGN",token,line);
             }
-            word.put("word",token);
         } else if (c == '/') {
             token += c;
             getChar();
@@ -211,8 +187,7 @@ public class WordAnalysis {
                     if (c == '/') {
                         token += pre;
                         token += c;
-                        word.put("class","ANNO");
-                        word.put("word",token);
+                        word = new Word("ANNO",token,line);
                         break;
                     } else {
                         retract();
@@ -224,12 +199,10 @@ public class WordAnalysis {
                     token += c;
                     getChar();
                 } while (c != '\n' && sym != EOF);
-                word.put("class","ANNO");
-                word.put("word",token);
+                word = new Word("ANNO",token,line);
             } else {
                 retract();
-                word.put("class","DIV");
-                word.put("word",token);
+                word = new Word("DIV",token,line);
             }
         }
         return word;
@@ -266,6 +239,14 @@ public class WordAnalysis {
             raf.seek(raf.getFilePointer() - 1);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void print() {
+        //debug
+        for (Word word:
+                wordList) {
+            System.out.println(word.getWord());
         }
     }
 }

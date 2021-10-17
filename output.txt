@@ -8,6 +8,14 @@ IDENFR c
 <VarDef>
 SEMICN ;
 <VarDecl>
+IDENFR c
+<LVal>
+ASSIGN =
+GETINTTK getint
+LPARENT (
+RPARENT )
+SEMICN ;
+<Stmt>
 PRINTFTK printf
 LPARENT (
 STRCON "%d"
