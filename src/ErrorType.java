@@ -1,5 +1,15 @@
 public enum ErrorType {
+    illegalChar,
+    reDef,
+    nonDef,
+    paramsNumError,
+    paramsTypeError,
+    redundantReturn,
+    nonReturn,
+    constChange,
     nonSEMICN,
     nonRPARENT,
     nonRBRACK,
+    printNumError,
+    loopError,
 }

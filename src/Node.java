@@ -1,4 +1,3 @@
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 public class Node {
@@ -33,4 +32,17 @@ public class Node {
     public Node getFather() {
         return father;
     }
+
+    public GrammarType getType() {
+        return type;
+    }
+
+    public ArrayList<Node> getChildList() {
+        return childList;
+    }
+
+    public int getLine() {
+        return word.getLine();
+    }
+
 }
