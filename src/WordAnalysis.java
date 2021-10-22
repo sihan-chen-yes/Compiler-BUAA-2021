@@ -211,10 +211,10 @@ public class WordAnalysis {
     public void jumpBlank() throws ReadEOFException {
         judgeEnd();
         do {
+            getChar();
             if (c == '\n') {
                 line++;
             }
-            getChar();
         } while (c == '\n' || c == '\r' || c == '\t' || c == ' ');
         judgeEnd();
     }

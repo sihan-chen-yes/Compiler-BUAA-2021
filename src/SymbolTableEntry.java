@@ -3,29 +3,47 @@ import java.util.ArrayList;
 public class SymbolTableEntry {
     private String name;
     private DeclType declType;
-    private int dim1 = 0;
-    private int dim2 = 0;
+    private DataType dataType;
+    private Word Ident;
 
-    private RetType retType;
-    private ArrayList<String> params = new ArrayList<>();
+    private ArrayList<Integer> paramsDim = new ArrayList<>();
 
-    private int layer = 0;
+    private int layer = -1;
 
-    public SymbolTableEntry(String name, DeclType declType, int dim1, int dim2) {
-        this.name = name;
+    public SymbolTableEntry(Word Ident,DeclType declType,int brackNum) {
+        //声明
+        this.name = Ident.getWord();
+        this.Ident = Ident;
         this.declType = declType;
-        this.dim1 = dim1;
-        this.dim2 = dim2;
+        if (brackNum == 0) {
+            this.dataType = DataType.INT;
+        } else if (brackNum == 1) {
+            dataType = DataType.ARRAY_1D;
+        } else if (brackNum == 2) {
+            dataType = DataType.ARRAY_2D;
+        }
     }
 
-    public SymbolTableEntry(String name, RetType retType, ArrayList<String> params) {
-        this.name = name;
-        this.retType = retType;
-        this.params = params;
+    public SymbolTableEntry(Word Ident,DeclType declType,DataType dataType) {
+        //函数声明
+        this.name = Ident.getWord();
+        this.Ident = Ident;
+        this.declType = declType;
+        this.dataType = dataType;
     }
 
-    public SymbolTableEntry(String name, int layer) {
-        this.name = name;
+    public SymbolTableEntry(Word Ident, DeclType declType,int brackNum, int layer) {
+        //局部变量和常量
+        this.name = Ident.getWord();
+        this.Ident = Ident;
+        this.declType = declType;
+        if (brackNum == 0) {
+            this.dataType = DataType.INT;
+        } else if (brackNum == 1) {
+            dataType = DataType.ARRAY_1D;
+        } else if (brackNum == 2) {
+            dataType = DataType.ARRAY_2D;
+        }
         this.layer = layer;
     }
 
@@ -37,23 +55,19 @@ public class SymbolTableEntry {
         return declType;
     }
 
-    public int getDim1() {
-        return dim1;
-    }
-
-    public int getDim2() {
-        return dim2;
-    }
-
-    public RetType getRetType() {
-        return retType;
-    }
-
-    public ArrayList<String> getParams() {
-        return params;
+    public DataType getDataType() {
+        return dataType;
     }
 
     public int getLayer() {
         return layer;
+    }
+
+    public int getLine() {
+        return Ident.getLine();
+    }
+
+    public void setDataType(DataType dataType) {
+        this.dataType = dataType;
     }
 }

@@ -4,7 +4,7 @@ public class Error implements Comparable {
     private ErrorType error;
     private char errorCode;
 
-    public Error(int line,ErrorType error) {
+    public Error(int line, ErrorType error) {
         this.line = line;
         this.error = error;
         if (error == ErrorType.nonSEMICN) {
@@ -16,6 +16,36 @@ public class Error implements Comparable {
         } else if (error == ErrorType.nonRBRACK) {
             msg = "no ]";
             errorCode = 'k';
+        } else if (error == ErrorType.illegalString) {
+            msg = "illegalChar";
+            errorCode = 'a';
+        } else if (error == ErrorType.reDef) {
+            msg = "redefine Ident";
+            errorCode = 'b';
+        } else if (error == ErrorType.unDef) {
+            msg = "undefine Ident";
+            errorCode = 'c';
+        } else if (error == ErrorType.paramsNumError) {
+            msg = "params number is not right";
+            errorCode = 'd';
+        } else if (error == ErrorType.paramsTypeError) {
+            msg = "params type is not right";
+            errorCode = 'e';
+        } else if (error == ErrorType.redundantReturn) {
+            msg = "redundant return stmt";
+            errorCode = 'f';
+        } else if (error == ErrorType.unReturn) {
+            msg = "no return stmt";
+            errorCode = 'g';
+        } else if (error == ErrorType.constAssign) {
+            msg = "const can't be changed";
+            errorCode = 'h';
+        } else if (error == ErrorType.printNumError) {
+            msg = "print number is not right";
+            errorCode = 'l';
+        } else if (error == ErrorType.loopError) {
+            msg = "break or continue not in loop";
+            errorCode = 'm';
         }
     }
 

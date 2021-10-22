@@ -1,4 +1,6 @@
 public enum DeclType {
     VAR,
-    CONST
+    CONST,
+    PARAM,
+    FUNC,
 }
