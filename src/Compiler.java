@@ -1,3 +1,7 @@
+import ASTNode.*;
+import GrammarAnalysis.*;
+import WordAnalysis.*;
+
 import java.io.*;
 import java.util.*;
 
@@ -13,7 +17,9 @@ public class Compiler {
         GrammarAnalysis grammarAnalysis = new GrammarAnalysis(wordList,outputFile,errorAnalysis);
         grammarAnalysis.recursionDown();
         grammarAnalysis.saveGrammarAnalysis();
-        Node root = grammarAnalysis.getCurNode();
+        Node root = grammarAnalysis.getASTroot();
+        errorAnalysis.deliverAST(root);
+        errorAnalysis.checkError();
         errorAnalysis.saveErrorAnalysis();
     }
 }

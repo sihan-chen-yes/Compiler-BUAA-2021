@@ -1,3 +1,5 @@
+package Enum;
+
 public enum ErrorType {
     illegalString,
     reDef,

@@ -1,3 +1,10 @@
+package GrammarAnalysis;
+
+import ASTNode.*;
+import ASTNode.Number;
+import WordAnalysis.*;
+import Enum.*;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,9 +20,10 @@ public class GrammarAnalysis {
     private HashMap<String, String> nonTermimal = new HashMap<>();
     private int pos = 0;
     private FileWriter writer;
-    private Node curNode = null;
+
+    private Node ASTroot = null;
+
     private ErrorAnalysis errorAnalysis;
-    private ArrayList<Node> loopStmts = new ArrayList<>();
 
     public GrammarAnalysis(ArrayList<Word> wordList, File outputFile,ErrorAnalysis errorAnalysis) {
         this.wordList = wordList;
@@ -27,8 +35,8 @@ public class GrammarAnalysis {
         this.errorAnalysis = errorAnalysis;
     }
 
-    public Node getCurNode() {
-        return curNode;
+    public Node getASTroot() {
+        return ASTroot;
     }
 
     public void saveGrammarAnalysis() {
@@ -50,22 +58,6 @@ public class GrammarAnalysis {
         }
     }
 
-    public void addNonLeaf(GrammarType type) {
-        Node node = new Node(type,pos - 1);
-        curNode.link(node);
-        curNode = node;
-    }
-
-    public void addLeaf() {
-        Node node = new Node(word,pos - 1);
-        curNode.link(node);
-    }
-
-    public void backWard() {
-        //非终结符需要backWard 终结符不需要backWard
-        curNode = curNode.getFather();
-    }
-
     public void recursionDown(){
         getWord();
         //进来之前symbol里面已经get到了新的word 出去的时候必须要getWord
@@ -79,7 +71,6 @@ public class GrammarAnalysis {
             symbol.put("class",word.getClassName());
             symbol.put("word",word.getWord());
             wordAndGrammar.add(symbol);
-            addLeaf();
             lastWord = word;
         }
         if (pos < wordList.size()) {
@@ -146,8 +137,8 @@ public class GrammarAnalysis {
                 (getWordClass().equals("INTTK") && !getPeekSymbolClass(0).equals("MAINTK")));
     }
 
-    public boolean isFuncTypePrefix() {
-        return getWordClass().equals("VOIDTK") || getWordClass().equals("INTTK");
+    public boolean isFuncFParamsPrefix () {
+        return getWordClass().equals("INTTK");
     }
 
     public Boolean isUnaryOp() {
@@ -184,86 +175,97 @@ public class GrammarAnalysis {
         return false;
     }
 
+    public Boolean hasGETINTTK() {
+        int i = 0;
+        while (!getPeekSymbolClass(i).equals("SEMICN") && !getPeekSymbolClass(i).equals("EOF")) {
+            //一直往后看直到遇到;
+            if (getPeekSymbolClass(i).equals("GETINTTK")) {
+                return true;
+            }
+            i++;
+        }
+        return false;
+    }
+
     public void CompUnit() {
-        curNode = new Node(GrammarType.CompUnit,pos);
+        ASTroot = new CompUnit(pos - 1);
         while (isDeclPrefix()) {
-            Decl();
+            ASTroot.link(Decl());
         }
         while (isFuncDefPrefix()) {
-            FuncDef();
+            ASTroot.link(FuncDef());
         }
-        MainFuncDef();
+        ASTroot.link(MainFuncDef());
         addNonTermimal("<CompUnit>");
-        errorAnalysis.deliverInfo(loopStmts,curNode);
     }
 
-    public void Decl() {
-        addNonLeaf(GrammarType.Decl);
+    public Node Decl() {
         if (getWordClass().equals("CONSTTK")) {
-            ConstDecl();
-        } else if (getWordClass().equals("INTTK")) {
-            VarDecl();
+            return ConstDecl();
+        } else {
+            return VarDecl();
         }
-        backWard();
     }
 
-    public void BType() {
-        addNonLeaf(GrammarType.BType);
+    public Node BType() {
+        BType node = null;
         if (getWordClass().equals("INTTK")) {
             getWord();
+            node = new BType(pos - 1,DataType.INT);
         }
-        backWard();
+        return node;
     }
 
-    public void ConstDef() {
-        addNonLeaf(GrammarType.ConstDef);
+    public Node ConstDef() {
+        ConstDef node = new ConstDef(word,pos - 1);
+        int dim = 0;
         if (getWordClass().equals("IDENFR")) {
             getWord();
             while (getWordClass().equals("LBRACK")) {
+                dim++;
                 getWord();
                 ConstExp();
                 if (getWordClass().equals("RBRACK")) {
                     getWord();
                 } else {
-                    errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRBRACK);
+                    errorAnalysis.addError(lastWord.getLine(), ErrorType.nonRBRACK);
                     //不以 ] 结尾
                 }
             }
             if (getWordClass().equals("ASSIGN")) {
                 getWord();
                 ConstInitVal();
-                addNonTermimal("<ConstDef>");
             }
         }
-        backWard();
+        node.setDimType(dim);
+        addNonTermimal("<ConstDef>");
+        return node;
     }
 
-    public void ConstDecl() {
-        addNonLeaf(GrammarType.ConstDecl);
+    public Node ConstDecl() {
+        ConstDecl node = new ConstDecl(pos - 1);
         getWord();//一定是const
-        BType();
-        ConstDef();
+        node.link(BType());
+        node.link(ConstDef());
         while (getWordClass().equals("COMMA")) {
             getWord();
-            ConstDef();
+            node.link(ConstDef());
         }
         if (getWordClass().equals("SEMICN")) {
             getWord();
-            addNonTermimal("<ConstDecl>");
         } else {
-            errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
+            errorAnalysis.addError(lastWord.getLine(), ErrorType.nonSEMICN);
             //不以分号结尾
         }
-        backWard();
+        addNonTermimal("<ConstDecl>");
+        return node;
     }
 
     public void ConstInitVal() {
-        addNonLeaf(GrammarType.ConstInitVal);
         if (getWordClass().equals("LBRACE")) {
             getWord();
             if (getWordClass().equals("RBRACE")) {
                 getWord();
-                addNonTermimal("<ConstInitVal>");
             } else {
                 ConstInitVal();
                 while (getWordClass().equals("COMMA")) {
@@ -272,45 +274,45 @@ public class GrammarAnalysis {
                 }
                 if (getWordClass().equals("RBRACE")) {
                     getWord();
-                    addNonTermimal("<ConstInitVal>");
                 }
             }
         } else {
             ConstExp();
-            addNonTermimal("<ConstInitVal>");
         }
-        backWard();
+        addNonTermimal("<ConstInitVal>");
     }
 
-    public void VarDecl() {
-        addNonLeaf(GrammarType.VarDecl);
-        BType();
-        VarDef();
+    public Node VarDecl() {
+        VarDecl node = new VarDecl(pos - 1);
+        node.link(BType());
+        node.link(VarDef());
         while (getWordClass().equals("COMMA")) {
             getWord();
-            VarDef();
+            node.link(VarDef());
         }
         if (getWordClass().equals("SEMICN")) {
             getWord();
-            addNonTermimal("<VarDecl>");
         } else {
-            errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
+            errorAnalysis.addError(lastWord.getLine(), ErrorType.nonSEMICN);
             //不是;
         }
-        backWard();
+        addNonTermimal("<VarDecl>");
+        return node;
     }
 
-    public void VarDef() {
-        addNonLeaf(GrammarType.VarDef);
+    public Node VarDef() {
+        VarDef node = new VarDef(word,pos - 1);
+        int dim = 0;
         if (getWordClass().equals("IDENFR")) {
             getWord();
             while (getWordClass().equals("LBRACK")) {
+                dim++;
                 getWord();
                 ConstExp();
                 if (getWordClass().equals("RBRACK")) {
                     getWord();
                 } else {
-                    errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRBRACK);
+                    errorAnalysis.addError(lastWord.getLine(), ErrorType.nonRBRACK);
                     //不是]
                 }
             }
@@ -318,18 +320,17 @@ public class GrammarAnalysis {
                 getWord();
                 InitVal();
             }
-            addNonTermimal("<VarDef>");
         }
-        backWard();
+        node.setDimType(dim);
+        addNonTermimal("<VarDef>");
+        return node;
     }
 
     public void InitVal() {
-        addNonLeaf(GrammarType.InitVal);
         if (getWordClass().equals("LBRACE")) {
             getWord();
             if (getWordClass().equals("RBRACE")) {
                 getWord();
-                addNonTermimal("<InitVal>");
             } else {
                 InitVal();
                 while (getWordClass().equals("COMMA")) {
@@ -338,143 +339,163 @@ public class GrammarAnalysis {
                 }
                 if (getWordClass().equals("RBRACE")) {
                     getWord();
-                    addNonTermimal("<InitVal>");
                 }
             }
         } else if (isExpPrefix()) {
             Exp();
-            addNonTermimal("<InitVal>");
         }
-        backWard();
+        addNonTermimal("<InitVal>");
     }
 
-    public void FuncDef() {
-        addNonLeaf(GrammarType.FuncDef);
-        FuncType();
+    public Node FuncDef() {
+        Node bType = FuncType();
+        FuncDef node = new FuncDef(word,pos - 1);
+        node.link(bType);
         if (getWordClass().equals("IDENFR")) {
             getWord();
             if (getWordClass().equals("LPARENT")) {
                 getWord();
+                if (isFuncFParamsPrefix()) {
+                    node.link(FuncFParams());
+                }
                 if (getWordClass().equals("RPARENT")) {
                     getWord();
-                    Block();
-                    addNonTermimal("<FuncDef>");
                 } else {
-                    FuncFParams();
-                    if (getWordClass().equals("RPARENT")) {
-                        getWord();
-                        Block();
-                        addNonTermimal("<FuncDef>");
-                    } else {
-                        errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
-                        //不是 )
-                    }
+                    errorAnalysis.addError(lastWord.getLine(), ErrorType.nonRPARENT);
+                    //不是 )
                 }
-            } else {
-                errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
-                //不是 (
+                node.link(Block());
+                }
             }
-        }
-        backWard();
+        addNonTermimal("<FuncDef>");
+        return node;
     }
 
-    public void FuncType() {
-        addNonLeaf(GrammarType.FuncType);
-        if (isFuncTypePrefix()) {
+
+    public Node FuncType() {
+        FuncType node = null;
+        if (getWordClass().equals("VOIDTK")) {
             getWord();
-            addNonTermimal("<FuncType>");
+            node = new FuncType(pos - 1,DataType.VOID);
+        } else {
+            getWord();
+            node = new FuncType(pos - 1,DataType.INT);
         }
-        backWard();
+        addNonTermimal("<FuncType>");
+        return node;
     }
 
-    public void FuncFParams() {
-        addNonLeaf(GrammarType.FuncFParams);
-        FuncFParam();
+    public Node FuncFParams() {
+        FuncFParams node = new FuncFParams(pos - 1);
+        node.link(FuncFParam());
         while (getWordClass().equals("COMMA")) {
             getWord();
-            FuncFParam();
+            node.link(FuncFParam());
         }
         addNonTermimal("<FuncFParams>");
-        backWard();
+        return node;
     }
 
-    public void FuncFParam() {
-        addNonLeaf(GrammarType.FuncFParam);
-        BType();
+    public Node FuncFParam() {
+        Node btype = BType();
+        FuncFParam node = new FuncFParam(word,pos - 1);
+        node.link(btype);
+        int dim = 0;
         if (getWordClass().equals("IDENFR")) {
             getWord();
             if (getWordClass().equals("LBRACK")) {
+                dim++;
                 getWord();
                 if (getWordClass().equals("RBRACK")) {
                     getWord();
-                    while (getWordClass().equals("LBRACK")) {
-                        getWord();
-                        ConstExp();
-                        if (getWordClass().equals("RBRACK")) {
-                            getWord();
-                        } else {
-                            errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRBRACK);
-                            //不是 ]
-                        }
-                    }
                 } else {
-                    errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRBRACK);
+                    errorAnalysis.addError(lastWord.getLine(), ErrorType.nonRBRACK);
                     //不是 ]
                 }
+                while (getWordClass().equals("LBRACK")) {
+                    dim++;
+                    getWord();
+                    ConstExp();
+                    if (getWordClass().equals("RBRACK")) {
+                        getWord();
+                    } else {
+                        errorAnalysis.addError(lastWord.getLine(), ErrorType.nonRBRACK);
+                        //不是 ]
+                    }
+                }
             }
-            addNonTermimal("<FuncFParam>");
         }
-        backWard();
+        node.setDimType(dim);
+        addNonTermimal("<FuncFParam>");
+        return node;
     }
 
-    public void Block() {
-        addNonLeaf(GrammarType.Block);
+    public Node Block() {
+        Block node = new Block(pos - 1);
         if (getWordClass().equals("LBRACE")) {
             getWord();
             while (isBlockItemPrefix()) {
-                BlockItem();
+                node.link(BlockItem());
             }
             if (getWordClass().equals("RBRACE")) {
                 getWord();
-                addNonTermimal("<Block>");
             }
         }
-        backWard();
+        addNonTermimal("<Block>");
+        return node;
     }
 
-    public void MainFuncDef() {
-        addNonLeaf(GrammarType.MainFuncDef);
+    public Node MainFuncDef() {
+        MainFuncDef node = null;
         if (getWordClass().equals("INTTK")) {
             getWord();
             if (getWordClass().equals("MAINTK")) {
+                node = new MainFuncDef(word,pos - 1);
                 getWord();
                 if (getWordClass().equals("LPARENT")) {
                     getWord();
                     if (getWordClass().equals("RPARENT")) {
                         getWord();
-                        Block();
-                        addNonTermimal("<MainFuncDef>");
                     } else {
-                        errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
+                        errorAnalysis.addError(lastWord.getLine(), ErrorType.nonRPARENT);
                         //不是 )
                     }
+                    node.link(Block());
                 }
             }
         }
-        backWard();
+        addNonTermimal("<MainFuncDef>");
+        return node;
     }
 
-    public void BlockItem() {
-        addNonLeaf(GrammarType.BlockItem);
+    public Node BlockItem() {
         if (isDeclPrefix()) {
-            Decl();
+            return Decl();
         } else {
-            Stmt();
+            return Stmt();
         }
-        backWard();
     }
-    public void AssignStmt() {
-        LVal();
+    public Node AssignStmt() {
+        AssignStmt node = new AssignStmt(pos - 1);
+        node.link(LVal());
+        if (getWordClass().equals("ASSIGN")) {
+            getWord();
+            if (isExpPrefix()) {
+                node.link(Exp());
+            }
+            if (getWordClass().equals("SEMICN")) {
+                getWord();
+            } else {
+                errorAnalysis.addError(lastWord.getLine(), ErrorType.nonSEMICN);
+                //不是;
+            }
+        }
+        return node;
+    }
+
+    public Node GetIntStmt() {
+        GetIntStmt node = new GetIntStmt(pos - 1);
+        node.link(LVal());
         if (getWordClass().equals("ASSIGN")) {
             getWord();
             if (getWordClass().equals("GETINTTK")) {
@@ -483,318 +504,321 @@ public class GrammarAnalysis {
                     getWord();
                     if (getWordClass().equals("RPARENT")) {
                         getWord();
-                        if (getWordClass().equals("SEMICN")) {
-                            getWord();
-                        } else {
-                            errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
-                            //不是;
-                        }
                     } else {
-                        errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
+                        errorAnalysis.addError(lastWord.getLine(), ErrorType.nonRPARENT);
                         //不是)
                     }
                 }
-            } else if (isExpPrefix()) {
-                Exp();
-                if (getWordClass().equals("SEMICN")) {
-                    getWord();
-                } else {
-                    errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
-                    //不是;
-                }
+            }
+            if (getWordClass().equals("SEMICN")) {
+                getWord();
+            } else {
+                errorAnalysis.addError(lastWord.getLine(), ErrorType.nonSEMICN);
+                //不是;
             }
         }
+        return node;
     }
 
-    public void ExpStmt() {
-        Exp();
+    public Node ExpStmt() {
+        ExpStmt node = new ExpStmt(pos - 1);
+        node.link(Exp());
         if (getWordClass().equals("SEMICN")) {
             getWord();
         } else {
-            errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
+            errorAnalysis.addError(lastWord.getLine(), ErrorType.nonSEMICN);
             //不是;
         }
+        return node;
     }
 
-    public void EmptyStmt() {
+    public Node EmptyStmt() {
         getWord();
+        return new EmptyStmt(pos - 1);
     }
 
-    public void BlockStmt() {
-        Block();
+    public Node BlockStmt() {
+        return Block();
     }
 
-    public void IfStmt() {
-        getWord();
-        if (getWordClass().equals("LPARENT")) {
-            getWord();
-            Cond();
-            if (getWordClass().equals("RPARENT")) {
-                getWord();
-                Stmt();
-                if (getWordClass().equals("ELSETK")) {
-                    getWord();
-                    Stmt();
-                }
-            } else {
-                errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
-                //不是)
-            }
-        }
-    }
-
-    public void WhileStmt() {
+    public Node IfStmt() {
+        IfStmt node = new IfStmt(pos - 1);
         getWord();
         if (getWordClass().equals("LPARENT")) {
             getWord();
             Cond();
             if (getWordClass().equals("RPARENT")) {
                 getWord();
-                Stmt();
             } else {
-                errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
+                errorAnalysis.addError(lastWord.getLine(), ErrorType.nonRPARENT);
                 //不是)
             }
+            node.link(Stmt());
+            if (getWordClass().equals("ELSETK")) {
+                getWord();
+                node.link(Stmt());
+            }
         }
+        return node;
     }
 
-    public void BreakStmt() {
+    public Node WhileStmt() {
+        WhileStmt node = new WhileStmt(pos - 1);
+        getWord();
+        if (getWordClass().equals("LPARENT")) {
+            getWord();
+            Cond();
+            if (getWordClass().equals("RPARENT")) {
+                getWord();
+            } else {
+                errorAnalysis.addError(lastWord.getLine(), ErrorType.nonRPARENT);
+                //不是)
+            }
+            node.link(Stmt());
+        }
+        return node;
+    }
+
+    public Node BreakStmt() {
+        BreakStmt node = new BreakStmt(word,pos - 1);
         getWord();
         if (getWordClass().equals("SEMICN")) {
             getWord();
         } else {
-            errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
+            errorAnalysis.addError(lastWord.getLine(), ErrorType.nonSEMICN);
             //不是 ;
         }
+        return node;
     }
 
-    public void ContinueStmt() {
+    public Node ContinueStmt() {
+        ContinueStmt node = new ContinueStmt(word,pos - 1);
         getWord();
         if (getWordClass().equals("SEMICN")) {
             getWord();
         } else {
-            errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
+            errorAnalysis.addError(lastWord.getLine(), ErrorType.nonSEMICN);
             //不是 ;
         }
+        return node;
     }
 
-    public void ReturnStmt() {
+    public Node ReturnStmt() {
+        ReturnStmt node = new ReturnStmt(word,pos - 1);
         getWord();
         if (isExpPrefix()) {
-            Exp();
+            node.link(Exp());
         }
         if (getWordClass().equals("SEMICN")) {
             getWord();
         } else {
-            errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
+            errorAnalysis.addError(lastWord.getLine(), ErrorType.nonSEMICN);
             //不是;
         }
+        return node;
     }
 
-    public void PrintStmt() {
+    public Node PrintStmt() {
+        PrintStmt node = new PrintStmt(word,pos - 1);
         getWord();
         if (getWordClass().equals("LPARENT")) {
             getWord();
             if (getWordClass().equals("STRCON")) {
+                node.addFormatString(word);
                 getWord();
                 while (getWordClass().equals("COMMA")) {
                     getWord();
-                    Exp();
+                    node.link(Exp());
                 }
                 if (getWordClass().equals("RPARENT")) {
                     getWord();
-                    if (getWordClass().equals("SEMICN")) {
-                        getWord();
-                    } else {
-                        errorAnalysis.addError(lastWord.getLine(),ErrorType.nonSEMICN);
-                        //不是;
-                    }
                 } else {
-                    errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
+                    errorAnalysis.addError(lastWord.getLine(), ErrorType.nonRPARENT);
                     //不是)
+                }
+                if (getWordClass().equals("SEMICN")) {
+                    getWord();
+                } else {
+                    errorAnalysis.addError(lastWord.getLine(), ErrorType.nonSEMICN);
+                    //不是;
                 }
             }
         }
+        return node;
     }
 
-    public void Stmt() {
+    public Node Stmt() {
         //一定不存在异常情况 子stmt只是逻辑判断的提取 不需要管curNode和输出
+        Node node = null;
         if (getWordClass().equals("IDENFR") && hasASSIGN()) {
             //LVal两种
-            addNonLeaf(GrammarType.AssignStmt);
-            AssignStmt();
+            if (hasGETINTTK()) {
+                node = GetIntStmt();
+            } else {
+                node = AssignStmt();
+            }
         } else if (isExpPrefix()) {
             //有Exp
-            addNonLeaf(GrammarType.ExpStmt);
-            ExpStmt();
+            node = ExpStmt();
         } else if (getWordClass().equals("SEMICN")) {
             //只有;没有Exp
-            addNonLeaf(GrammarType.EmptyStmt);
-            EmptyStmt();
+            node = EmptyStmt();
         } else if (getWordClass().equals("LBRACE")) {
-            addNonLeaf(GrammarType.BlockStmt);
-            BlockStmt();
+            node = BlockStmt();
         } else if (getWordClass().equals("IFTK")) {
-            addNonLeaf(GrammarType.IfStmt);
-            IfStmt();
+            node = IfStmt();
         } else if (getWordClass().equals("WHILETK")) {
-            addNonLeaf(GrammarType.WhileStmt);
-            WhileStmt();
+            node = WhileStmt();
         } else if (getWordClass().equals("BREAKTK")) {
-            addNonLeaf(GrammarType.BreakStmt);
-            loopStmts.add(curNode);
-            BreakStmt();
+            node = BreakStmt();
         } else if (getWordClass().equals("CONTINUETK")) {
-            addNonLeaf(GrammarType.ContinueStmt);
-            loopStmts.add(curNode);
-            ContinueStmt();
+            node = ContinueStmt();
         } else if (getWordClass().equals("RETURNTK")) {
-            addNonLeaf(GrammarType.ReturnStmt);
-            ReturnStmt();
+            node = ReturnStmt();
         } else if (getWordClass().equals("PRINTFTK")) {
-            addNonLeaf(GrammarType.PrintStmt);
-            PrintStmt();
+            node = PrintStmt();
         }
         addNonTermimal("<Stmt>");
-        backWard();
+        return node;
     }
 
-    public void LVal() {
-        addNonLeaf(GrammarType.LVal);
+    public Node LVal() {
+        LVal node = new LVal(word,pos - 1);
         if (getWordClass().equals("IDENFR")) {
             getWord();
             while (getWordClass().equals("LBRACK")) {
                 getWord();
-                Exp();
+                node.link(Exp());
                 if (getWordClass().equals("RBRACK")) {
                     getWord();
                 } else {
-                    errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRBRACK);
+                    errorAnalysis.addError(lastWord.getLine(), ErrorType.nonRBRACK);
                     //不是]
                 }
             }
-            addNonTermimal("<LVal>");
         }
-        backWard();
+        addNonTermimal("<LVal>");
+        return node;
     }
 
     public void Cond() {
-        addNonLeaf(GrammarType.Cond);
         LOrExp();
         addNonTermimal("<Cond>");
-        backWard();
     }
 
-    public void Exp() {
-        addNonLeaf(GrammarType.Exp);
-        AddExp();
+    public Node Exp() {
+        Exp node = new Exp(pos - 1);
+        node.link(AddExp());
         addNonTermimal("<Exp>");
-        backWard();
+        return node;
     }
 
-    public void AddExp() {
-        addNonLeaf(GrammarType.AddExp);
-        MulExp();
+    public Node AddExp() {
+        AddExp node = new AddExp(pos - 1);
+        node.link(MulExp());
         addNonTermimal("<AddExp>");
         while (isAddOp()) {
             getWord();
-            MulExp();
+            node.link(MulExp());
             addNonTermimal("<AddExp>");
         }
-        backWard();
+        return node;
     }
 
-    public void PrimaryExp() {
-        addNonLeaf(GrammarType.PrimaryExp);
+    public Node PrimaryExp() {
+        Node node = null;
         if (getWordClass().equals("LPARENT")) {
             getWord();
-            Exp();
+            node = Exp();
             if (getWordClass().equals("RPARENT")) {
                 getWord();
-                addNonTermimal("<PrimaryExp>");
             } else {
-                errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
+                errorAnalysis.addError(lastWord.getLine(), ErrorType.nonRPARENT);
                 //不是)
             }
         } else if (getWordClass().equals("IDENFR")) {
-            LVal();
-            addNonTermimal("<PrimaryExp>");
+            node = LVal();
         } else if (getWordClass().equals("INTCON")) {
-            Number();
-            addNonTermimal("<PrimaryExp>");
+            node = Number();
         }
-        backWard();
+        addNonTermimal("<PrimaryExp>");
+        return node;
     }
 
-    public void Number() {
-        addNonLeaf(GrammarType.Number);
+    public Node Number() {
+        Number node = new Number(word,pos - 1);
         if (getWordClass().equals("INTCON")) {
             getWord();
             addNonTermimal("<Number>");
         }
-        backWard();
+        return node;
     }
 
-    public void UnaryExp() {
-        addNonLeaf(GrammarType.UnaryExp);
+    public Node FuncCall() {
+        Node node = new FuncCall(word,pos - 1);
+        getWord();//函数名
+        getWord();
+        if (isExpPrefix()) {
+            node.link(FuncRParams());
+        }
+        if (getWordClass().equals("RPARENT")) {
+            getWord();
+        } else {
+            errorAnalysis.addError(lastWord.getLine(), ErrorType.nonRPARENT);
+            //不是)
+        }
+        return node;
+    }
+
+    public Node UnaryExp() {
+        Node node = new UnaryExp(pos - 1);
         if (isFuncCallPrefix()) {
-            getWord();
-            getWord();
-            if (isExpPrefix()) {
-                FuncRParams();
-            }
-            if (getWordClass().equals("RPARENT")) {
-                getWord();
-            } else {
-                errorAnalysis.addError(lastWord.getLine(),ErrorType.nonRPARENT);
-                //不是)
-            }
-            addNonTermimal("<UnaryExp>");
+            node.link(FuncCall());
         } else if (isPrimaryExpPrefix()) {
-            PrimaryExp();
-            addNonTermimal("<UnaryExp>");
+            node.link(PrimaryExp());
         } else if (isUnaryOp()) {
             UnaryOp();
-            UnaryExp();
-            addNonTermimal("<UnaryExp>");
+            node = UnaryExp();
         }
-        backWard();
+        addNonTermimal("<UnaryExp>");
+        return node;
     }
 
     public void UnaryOp() {
-        addNonLeaf(GrammarType.UnaryOp);
         if (isUnaryOp()) {
             getWord();
         }
         addNonTermimal("<UnaryOp>");
-        backWard();
     }
 
-    public void FuncRParams() {
-        addNonLeaf(GrammarType.FuncRParams);
-        Exp();
+    public Node FuncRParams() {
+        Node node = new FuncRParams(pos - 1);
+        Node funcRParam = new FuncRParam(pos - 1);
+        funcRParam.link(Exp());
+        node.link(funcRParam);
         while (getWordClass().equals("COMMA")) {
             getWord();
-            Exp();
+            funcRParam = new FuncRParam(pos - 1);
+            funcRParam.link(Exp());
+            node.link(funcRParam);
         }
         addNonTermimal("<FuncRParams>");
-        backWard();
+        return node;
     }
 
-    public void MulExp() {
-        addNonLeaf(GrammarType.MulExp);
-        UnaryExp();
+    public Node MulExp() {
+        MulExp node = new MulExp(pos - 1);
+        node.link(UnaryExp());
         addNonTermimal("<MulExp>");
         while (isMulOp()) {
             getWord();
-            UnaryExp();
+            node.link(UnaryExp());
             addNonTermimal("<MulExp>");
         }
-        backWard();
+        return node;
     }
 
     public void RelExp() {
-        addNonLeaf(GrammarType.RelExp);
         AddExp();
         addNonTermimal("<RelExp>");
         while (isRelOp()) {
@@ -802,11 +826,9 @@ public class GrammarAnalysis {
             AddExp();
             addNonTermimal("<RelExp>");
         }
-        backWard();
     }
 
     public void EqExp() {
-        addNonLeaf(GrammarType.EqExp);
         RelExp();
         addNonTermimal("<EqExp>");
         while (isEqOp()) {
@@ -814,11 +836,9 @@ public class GrammarAnalysis {
             RelExp();
             addNonTermimal("<EqExp>");
         }
-        backWard();
     }
 
     public void LAndExp() {
-        addNonLeaf(GrammarType.LAndExp);
         EqExp();
         addNonTermimal("<LAndExp>");
         while (getWordClass().equals("AND")) {
@@ -826,11 +846,9 @@ public class GrammarAnalysis {
             EqExp();
             addNonTermimal("<LAndExp>");
         }
-        backWard();
     }
 
     public void LOrExp() {
-        addNonLeaf(GrammarType.LOrExp);
         LAndExp();
         addNonTermimal("<LOrExp>");
         while (getWordClass().equals("OR")) {
@@ -838,14 +856,11 @@ public class GrammarAnalysis {
             LAndExp();
             addNonTermimal("<LOrExp>");
         }
-        backWard();
     }
 
     public void ConstExp() {
-        addNonLeaf(GrammarType.ConstExp);
         AddExp();
         addNonTermimal("<ConstExp>");
-        backWard();
     }
 }
 

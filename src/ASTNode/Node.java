@@ -1,27 +1,25 @@
+package ASTNode;
+import WordAnalysis.*;
+import Enum.*;
+
 import java.util.ArrayList;
 
-public class Node {
+public abstract class Node {
     private Word word = null;
     //非终结符没有word
-    private GrammarType type;
     private Node father = null;
-    private ArrayList<Node> childList = new ArrayList<>();
     int pos;
 
     public Node(Word word,int pos) {
-        //如果是非终结符
         this.word = word;
-        type = GrammarType.Terminal;
         this.pos = pos;
     }
 
-    public Node(GrammarType type,int pos) {
-        this.type = type;
+    public Node(int pos) {
         this.pos = pos;
     }
 
     public void link(Node node) {
-        childList.add(node);
         node.setFather(this);
     }
 
@@ -31,14 +29,6 @@ public class Node {
 
     public Node getFather() {
         return father;
-    }
-
-    public GrammarType getType() {
-        return type;
-    }
-
-    public ArrayList<Node> getChildList() {
-        return childList;
     }
 
     public int getLine() {

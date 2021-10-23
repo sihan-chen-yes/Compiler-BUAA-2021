@@ -1,3 +1,5 @@
+package GrammarAnalysis;
+import Enum.*;
 public class Error implements Comparable {
     private String msg;
     private int line;

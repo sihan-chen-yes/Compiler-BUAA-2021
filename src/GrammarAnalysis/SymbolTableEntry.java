@@ -1,49 +1,49 @@
+package GrammarAnalysis;
+
+import Enum.DataType;
+import Enum.DeclType;
+import Enum.DimType;
+import WordAnalysis.Word;
+
 import java.util.ArrayList;
 
 public class SymbolTableEntry {
     private String name;
     private DeclType declType;
     private DataType dataType;
+    private DimType dimType;
     private Word Ident;
+    private ArrayList<FParam> FParams;
 
     private ArrayList<Integer> paramsDim = new ArrayList<>();
 
-    private int layer = -1;
+    private int layer = 0;
 
-    public SymbolTableEntry(Word Ident,DeclType declType,int brackNum) {
+    public SymbolTableEntry(Word Ident, DeclType declType, DataType dataType,DimType dimType) {
         //声明
         this.name = Ident.getWord();
-        this.Ident = Ident;
         this.declType = declType;
-        if (brackNum == 0) {
-            this.dataType = DataType.INT;
-        } else if (brackNum == 1) {
-            dataType = DataType.ARRAY_1D;
-        } else if (brackNum == 2) {
-            dataType = DataType.ARRAY_2D;
-        }
+        this.dataType = dataType;
+        this.dimType = dimType;
+        this.Ident = Ident;
     }
 
-    public SymbolTableEntry(Word Ident,DeclType declType,DataType dataType) {
+    public SymbolTableEntry(Word Ident, DeclType declType, DataType retType,ArrayList<FParam> FParams) {
         //函数声明
         this.name = Ident.getWord();
         this.Ident = Ident;
         this.declType = declType;
-        this.dataType = dataType;
+        this.dataType = retType;
+        this.FParams = FParams;
     }
 
-    public SymbolTableEntry(Word Ident, DeclType declType,int brackNum, int layer) {
-        //局部变量和常量
+    public SymbolTableEntry(Word Ident, DeclType declType, DataType dataType,DimType dimType, int layer) {
+        //局部变量和常量声明
         this.name = Ident.getWord();
         this.Ident = Ident;
         this.declType = declType;
-        if (brackNum == 0) {
-            this.dataType = DataType.INT;
-        } else if (brackNum == 1) {
-            dataType = DataType.ARRAY_1D;
-        } else if (brackNum == 2) {
-            dataType = DataType.ARRAY_2D;
-        }
+        this.dataType = dataType;
+        this.dimType = dimType;
         this.layer = layer;
     }
 
@@ -67,7 +67,11 @@ public class SymbolTableEntry {
         return Ident.getLine();
     }
 
-    public void setDataType(DataType dataType) {
-        this.dataType = dataType;
+    public int getFParamNum() {
+        return FParams.size();
+    }
+
+    public ArrayList<FParam> getFParams() {
+        return FParams;
     }
 }

@@ -1,3 +1,5 @@
+package WordAnalysis;
+
 public class Word {
     private String className;
     private String word;
