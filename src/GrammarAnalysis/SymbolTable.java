@@ -1,17 +1,18 @@
 package GrammarAnalysis;
 
+import ASTNode.FuncFParam;
+import Enum.DataType;
 import Enum.DeclType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-
 public class SymbolTable {
     private ArrayList<SymbolTableEntry> global = new ArrayList<>();
     private HashMap<String,ArrayList<SymbolTableEntry>> funcToDecl = new HashMap<>();
 
     public boolean insertGlobal(SymbolTableEntry symbolTableEntry) {
-        if (queryGlobalDefined(symbolTableEntry.getName())) {
+        if (queryGlobalDefined(symbolTableEntry)) {
             return false;
         } else {
             global.add(symbolTableEntry);
@@ -43,9 +44,10 @@ public class SymbolTable {
         }
     }
 
-    public boolean queryGlobalDefined(String name) {
-        for (SymbolTableEntry symbolTableEntry:global) {
-            if (symbolTableEntry.getName().equals(name)) {
+    public boolean queryGlobalDefined(SymbolTableEntry symbolTableEntry) {
+        //变量或者函数是否重复声明
+        for (SymbolTableEntry entry:global) {
+            if (symbolTableEntry.getName().equals(entry.getName()) && isSameDecl(entry,symbolTableEntry)) {
                 return true;
                 //存在
             }
@@ -53,17 +55,40 @@ public class SymbolTable {
         return false;
     }
 
-    public boolean queryFuncDefined(String name) {
+    public boolean isSameDecl(SymbolTableEntry entry1,SymbolTableEntry entry2) {
+        //种类相同
+        return isFunc(entry1) == isFunc(entry2);
+    }
+
+    public boolean isData(SymbolTableEntry symbolTableEntry) {
+        return !isFunc(symbolTableEntry);
+    }
+
+    public boolean isFunc(SymbolTableEntry symbolTableEntry) {
+        return symbolTableEntry.getDeclType() == DeclType.FUNC;
+    }
+
+    public DataType queryFuncReturn(String name) {
         for (SymbolTableEntry symbolTableEntry:global) {
-            if (symbolTableEntry.getName().equals(name) && symbolTableEntry.getDeclType() == DeclType.FUNC) {
-                return true;
+            if (symbolTableEntry.getName().equals(name) && isFunc(symbolTableEntry)) {
+                return symbolTableEntry.getDataType();
                 //存在
             }
         }
-        return false;
+        return DataType.UNDEFINED;
     }
 
     public boolean queryLocalReDefined(String name,String funcName,int layer) {
+        //局部变量是否重复声明
+        //和参数重名
+        if (layer == 1) {
+            ArrayList<FuncFParam> funcFParams = queryFuncFParam(funcName);
+            for (FuncFParam funcFParam:funcFParams) {
+                if (name.equals(funcFParam.getName())) {
+                    return true;
+                }
+            }
+        }
         for (SymbolTableEntry symbolTableEntry:funcToDecl.get(funcName)) {
             if (symbolTableEntry.getName().equals(name) && layer == symbolTableEntry.getLayer()) {
                 return true;
@@ -73,6 +98,7 @@ public class SymbolTable {
     }
 
     public boolean queryLocalDefined(String name, String funcName) {
+        //局部变量是否声明
         assert funcToDecl.containsKey(funcName);
         for (SymbolTableEntry symbolTableEntry:funcToDecl.get(funcName)) {
             if (symbolTableEntry.getName().equals(name)) {
@@ -80,7 +106,7 @@ public class SymbolTable {
             }
         }
         for (SymbolTableEntry symbolTableEntry:global) {
-            if (symbolTableEntry.getName().equals(name) && symbolTableEntry.getDeclType() != DeclType.FUNC) {
+            if (symbolTableEntry.getName().equals(name) && !isFunc(symbolTableEntry)) {
                 return true;
             }
         }
@@ -98,8 +124,35 @@ public class SymbolTable {
         return num;
     }
 
-    public ArrayList<FParam> queryFuncParam(String funcName) {
-        ArrayList<FParam> fParams = null;
+    public boolean queryFunc(String funcName) {
+        for (SymbolTableEntry symbolTableEntry:global) {
+            if (symbolTableEntry.getName().equals(funcName) && symbolTableEntry.getDeclType() == DeclType.FUNC) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public DataType queryGlobalDataType(String name) {
+        for (SymbolTableEntry symbolTableEntry:global) {
+            if (symbolTableEntry.getName().equals(name)) {
+                return symbolTableEntry.getDataType();
+            }
+        }
+        return DataType.UNDEFINED;
+    }
+
+    public DataType queryLocalDataType(String name,String funcName) {
+        for (int i = funcToDecl.get(funcName).size() - 1;i >= 0;i--) {
+            if (funcToDecl.get(funcName).get(i).getName().equals(name)) {
+                return funcToDecl.get(funcName).get(i).getDataType();
+            }
+        }
+        return queryGlobalDataType(name);
+    }
+
+    public ArrayList<FuncFParam> queryFuncFParam(String funcName) {
+        ArrayList<FuncFParam> fParams = null;
         for (SymbolTableEntry symbolTableEntry:global) {
             if (symbolTableEntry.getName().equals(funcName)) {
                 fParams = symbolTableEntry.getFParams();

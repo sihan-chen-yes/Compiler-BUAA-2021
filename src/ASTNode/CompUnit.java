@@ -16,6 +16,8 @@ public class CompUnit extends Node {
         super.link(node);
         if (node instanceof ConstDecl || node instanceof VarDecl) {
             Decls.add(node);
+        } else if (node instanceof FuncDef) {
+            FuncDefs.add(node);
         } else {
             assert node instanceof MainFuncDef;
             MainFuncDef = node;
@@ -32,5 +34,15 @@ public class CompUnit extends Node {
 
     public Node getMainFuncDef() {
         return MainFuncDef;
+    }
+
+    public void checkError() {
+        for (Node decl:Decls) {
+            decl.checkError();
+        }
+        for (Node funcDef:FuncDefs) {
+            funcDef.checkError();
+        }
+        MainFuncDef.checkError();
     }
 }

@@ -14,4 +14,10 @@ public class EqExp extends Node {
         super.link(node);
         RelExps.add(node);
     }
+
+    public void checkError() {
+        for (Node node:RelExps) {
+            node.checkError();
+        }
+    }
 }

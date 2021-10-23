@@ -20,4 +20,14 @@ public class IfStmt extends Node {
             ElseStmt = node;
         }
     }
+
+    public void checkError() {
+        Cond.checkError();
+        if (IfStmt != null) {
+            IfStmt.checkError();
+        }
+        if (ElseStmt != null) {
+            ElseStmt.checkError();
+        }
+    }
 }

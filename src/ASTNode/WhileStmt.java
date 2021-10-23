@@ -2,7 +2,7 @@ package ASTNode;
 
 public class WhileStmt extends Node {
     private Node Cond;
-    private Node Stmt;
+    private Node body;
 
     public WhileStmt(int pos) {
         super(pos);
@@ -14,7 +14,16 @@ public class WhileStmt extends Node {
         if (node instanceof Cond) {
             Cond = node;
         } else {
-            Stmt = node;
+            body = node;
+        }
+    }
+
+    public void checkError() {
+        if (Cond != null) {
+            Cond.checkError();
+        }
+        if (body != null) {
+            body.checkError();
         }
     }
 }

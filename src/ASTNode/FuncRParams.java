@@ -14,4 +14,18 @@ public class FuncRParams extends Node {
         super.link(node);
         funcRParams.add((FuncRParam) node);
     }
+
+    public void checkError() {
+        for (FuncRParam funcRParam:funcRParams) {
+            funcRParam.checkError();
+        }
+    }
+
+    public int getFuncRParmaNum() {
+        return funcRParams.size();
+    }
+
+    public ArrayList<FuncRParam> getFuncRParams() {
+        return funcRParams;
+    }
 }

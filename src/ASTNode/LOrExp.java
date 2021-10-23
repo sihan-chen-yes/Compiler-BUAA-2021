@@ -3,7 +3,7 @@ package ASTNode;
 import java.util.ArrayList;
 
 public class LOrExp extends Node {
-    private ArrayList<Node> LAndExps;
+    private ArrayList<Node> LAndExps = new ArrayList<>();
 
     public LOrExp(int pos) {
         super(pos);
@@ -13,5 +13,11 @@ public class LOrExp extends Node {
     public void link(Node node) {
         super.link(node);
         LAndExps.add(node);
+    }
+
+    public void checkError() {
+        for (Node landexp:LAndExps) {
+            landexp.checkError();
+        }
     }
 }

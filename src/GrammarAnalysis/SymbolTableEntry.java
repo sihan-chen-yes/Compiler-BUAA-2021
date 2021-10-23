@@ -1,54 +1,47 @@
 package GrammarAnalysis;
 
+import ASTNode.FuncFParam;
 import Enum.DataType;
 import Enum.DeclType;
-import Enum.DimType;
 import WordAnalysis.Word;
 
 import java.util.ArrayList;
 
 public class SymbolTableEntry {
-    private String name;
     private DeclType declType;
     private DataType dataType;
-    private DimType dimType;
     private Word Ident;
-    private ArrayList<FParam> FParams;
+    private ArrayList<FuncFParam> FParams;
 
     private ArrayList<Integer> paramsDim = new ArrayList<>();
 
     private int layer = 0;
 
-    public SymbolTableEntry(Word Ident, DeclType declType, DataType dataType,DimType dimType) {
+    public SymbolTableEntry(Word Ident, DeclType declType, DataType dataType) {
         //声明
-        this.name = Ident.getWord();
         this.declType = declType;
         this.dataType = dataType;
-        this.dimType = dimType;
         this.Ident = Ident;
     }
 
-    public SymbolTableEntry(Word Ident, DeclType declType, DataType retType,ArrayList<FParam> FParams) {
+    public SymbolTableEntry(Word Ident, DeclType declType, DataType retType,ArrayList<FuncFParam> FParams) {
         //函数声明
-        this.name = Ident.getWord();
         this.Ident = Ident;
         this.declType = declType;
         this.dataType = retType;
         this.FParams = FParams;
     }
 
-    public SymbolTableEntry(Word Ident, DeclType declType, DataType dataType,DimType dimType, int layer) {
+    public SymbolTableEntry(Word Ident, DeclType declType, DataType dataType, int layer) {
         //局部变量和常量声明
-        this.name = Ident.getWord();
         this.Ident = Ident;
         this.declType = declType;
         this.dataType = dataType;
-        this.dimType = dimType;
         this.layer = layer;
     }
 
     public String getName() {
-        return name;
+        return Ident.getWord();
     }
 
     public DeclType getDeclType() {
@@ -71,7 +64,7 @@ public class SymbolTableEntry {
         return FParams.size();
     }
 
-    public ArrayList<FParam> getFParams() {
+    public ArrayList<FuncFParam> getFParams() {
         return FParams;
     }
 }

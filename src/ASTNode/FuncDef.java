@@ -1,5 +1,8 @@
 package ASTNode;
 import Enum.*;
+import GrammarAnalysis.ErrorAnalysis;
+import GrammarAnalysis.SymbolTable;
+import GrammarAnalysis.SymbolTableEntry;
 import WordAnalysis.Word;
 
 import java.util.ArrayList;
@@ -38,5 +41,37 @@ public class FuncDef extends Node {
 
     public Node getBlock() {
         return block;
+    }
+
+    public DataType getFuncType() {
+        return funcType.getDataType();
+    }
+
+    public void checkError() {
+        ErrorAnalysis.startFuncDef(getName());
+        if (funcFParams != null) {
+            funcFParams.checkError();
+        }
+        ArrayList<FuncFParam> FParams;
+        if (funcFParams == null) {
+            FParams = new ArrayList<>();
+        } else {
+            FParams = funcFParams.getFuncFParams();
+        }
+        SymbolTable symbolTable = ErrorAnalysis.getSymbolTable();
+        SymbolTableEntry symbolTableEntry = new SymbolTableEntry(getWord(),DeclType.FUNC,getDataType(),FParams);
+        if (!symbolTable.insertGlobal(symbolTableEntry)) {
+            ErrorAnalysis.addError(getLine(),ErrorType.reDef);
+        }
+        block.checkError();
+        if (getFuncType() == DataType.INT) {
+            if (!block.lastReturned()) {
+                ErrorAnalysis.addError(getLine(),ErrorType.unReturn);
+            }
+        } else if (getFuncType() == DataType.VOID){
+            if (ErrorAnalysis.hasReturned()) {
+                ErrorAnalysis.addError(ErrorAnalysis.getReturned().getLine(),ErrorType.redundantReturn);
+            }
+        }
     }
 }

@@ -1,4 +1,5 @@
 package ASTNode;
+
 import Enum.DataType;
 import Enum.DeclType;
 
@@ -8,7 +9,6 @@ public class ConstDecl extends Node {
     private DeclType declType = DeclType.CONST;
     private BType BType = null;
     private ArrayList<ConstDef> ConstDefs = new ArrayList<>();
-
     public ConstDecl(int pos) {
         super(pos);
     }
@@ -20,6 +20,7 @@ public class ConstDecl extends Node {
             BType = (BType) node;
         } else {
             ConstDefs.add((ConstDef) node);
+            ((ConstDef) node).setDataType(getDataType());
         }
     }
 
@@ -31,7 +32,9 @@ public class ConstDecl extends Node {
         return BType.getDataType();
     }
 
-    public ArrayList<ConstDef> getConstDefs() {
-        return ConstDefs;
+    public void checkError() {
+        for (Node constDef:ConstDefs) {
+            constDef.checkError();
+        }
     }
 }

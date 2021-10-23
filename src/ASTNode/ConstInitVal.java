@@ -1,34 +1,33 @@
 package ASTNode;
-import Enum.*;
-import WordAnalysis.Word;
+import Enum.DataType;
 
 import java.util.ArrayList;
 
 public class ConstInitVal extends Node {
-    private DimType dimType;
-    private Node val = null;
-    private ArrayList<Node> val_1D = null;
-    private ArrayList<ArrayList<Node>> val_2D = null;
+    private DataType dataType;
+    private ConstExp constExp = null;
+    private ArrayList<ConstInitVal> constInitVals = new ArrayList<>();
 
-    public ConstInitVal(int pos,DimType dimType) {
+    public ConstInitVal(int pos) {
         super(pos);
-        this.dimType = dimType;
-        if (dimType == DimType.ARRAY_1D) {
-            val_1D = new ArrayList<>();
-        } else if (dimType == DimType.ARRAY_2D) {
-            val_2D = new ArrayList<>();
-        }
     }
 
     @Override
     public void link(Node node) {
         super.link(node);
-        if (dimType == DimType.NOTARRAY) {
-            val = node;
-        } else if (dimType == DimType.ARRAY_1D) {
-            val_1D.add(node);
-        } else {
+        if (node instanceof ConstExp) {
+            constExp = (ConstExp) node;
+        } else if (node instanceof ConstInitVal) {
+            constInitVals.add((ConstInitVal) node);
+        }
+    }
 
+    public void checkError() {
+        if (constExp != null) {
+            constExp.checkError();
+        }
+        for (ConstInitVal constInitVal:constInitVals) {
+            constInitVal.checkError();
         }
     }
 }

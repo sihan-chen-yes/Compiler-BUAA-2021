@@ -3,30 +3,30 @@ import Enum.*;
 import java.util.ArrayList;
 
 public class InitVal extends Node {
-    private DimType dimType;
-    private Node val = null;
-    private ArrayList<Node> val_1D = null;
-    private ArrayList<ArrayList<Node>> val_2D = null;
+    private DataType dataType;
+    private Exp exp = null;
+    private ArrayList<InitVal> initVals = new ArrayList<>();
 
-    public InitVal(int pos, DimType dimType) {
+    public InitVal(int pos) {
         super(pos);
-        this.dimType = dimType;
-        if (dimType == DimType.ARRAY_1D) {
-            val_1D = new ArrayList<>();
-        } else if (dimType == DimType.ARRAY_2D) {
-            val_2D = new ArrayList<>();
-        }
     }
 
     @Override
     public void link(Node node) {
         super.link(node);
-        if (dimType == DimType.NOTARRAY) {
-            val = node;
-        } else if (dimType == DimType.ARRAY_1D) {
-            val_1D.add(node);
+        if (node instanceof Exp) {
+            exp = (Exp) node;
         } else {
+            initVals.add((InitVal) node);
+        }
+    }
 
+    public void checkError() {
+        if (exp != null) {
+            exp.checkError();
+        }
+        for (InitVal initVal:initVals) {
+            initVal.checkError();
         }
     }
 }

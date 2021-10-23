@@ -1,5 +1,5 @@
 package ASTNode;
-
+import Enum.*;
 public class Exp extends Node {
     private Node AddExp;
 
@@ -15,5 +15,14 @@ public class Exp extends Node {
 
     public Node getAddExp() {
         return AddExp;
+    }
+
+    public void checkError() {
+        AddExp.checkError();
+    }
+
+    public DataType getDataType() {
+        assert AddExp instanceof AddExp;
+        return ((AddExp) AddExp).getDataType();
     }
 }

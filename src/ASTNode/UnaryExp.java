@@ -2,7 +2,6 @@ package ASTNode;
 
 import Enum.*;
 public class UnaryExp extends Node {
-    private UnaryType unaryType;
     private Node unary;
 
     public UnaryExp(int pos) {
@@ -13,18 +12,22 @@ public class UnaryExp extends Node {
     public void link(Node node) {
         super.link(node);
         unary = node;
-        if (unary instanceof FuncCall) {
-            unaryType = UnaryType.FUNCCALL;
-        } else if (unary instanceof Exp) {
-            unaryType = UnaryType.EXP;
-        } else if (unary instanceof LVal) {
-            unaryType = UnaryType.LVAL;
-        } else {
-            unaryType = UnaryType.NUMBER;
-        }
     }
 
-    public UnaryType getUnaryType() {
-        return unaryType;
+    public void checkError() {
+        unary.checkError();
+    }
+
+    public DataType getDataType() {
+        if (unary instanceof Exp) {
+            return ((Exp) unary).getDataType();
+        } else if (unary instanceof LVal) {
+            return ((LVal) unary).getDataType();
+        } else if (unary instanceof Number) {
+            return DataType.INT;
+        } else {
+            assert unary instanceof FuncCall;
+            return ((FuncCall) unary).getDataType();
+        }
     }
 }

@@ -1,4 +1,5 @@
 package ASTNode;
+
 import Enum.DataType;
 import Enum.DeclType;
 
@@ -8,6 +9,7 @@ public class VarDecl extends Node {
     private DeclType declType = DeclType.VAR;
     private BType BType = null;
     private ArrayList<VarDef> VarDefs = new ArrayList<>();
+
     public VarDecl(int pos) {
         super(pos);
     }
@@ -19,6 +21,7 @@ public class VarDecl extends Node {
             BType = (BType) node;
         } else if (node instanceof VarDef) {
             VarDefs.add((VarDef) node);
+            ((VarDef) node).setDataType(getDataType());
         }
     }
 
@@ -30,7 +33,9 @@ public class VarDecl extends Node {
         return BType.getDataType();
     }
 
-    public ArrayList<VarDef> getVarDefs() {
-        return VarDefs;
+    public void checkError() {
+        for (VarDef varDef:VarDefs) {
+            varDef.checkError();
+        }
     }
 }

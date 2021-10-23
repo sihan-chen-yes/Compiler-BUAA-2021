@@ -16,4 +16,8 @@ public class BlockStmt extends Node {
     public Node getBlock() {
         return block;
     }
+
+    public void checkError() {
+        block.checkError();
+    }
 }

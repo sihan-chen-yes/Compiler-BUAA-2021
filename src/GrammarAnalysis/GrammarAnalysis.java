@@ -224,7 +224,7 @@ public class GrammarAnalysis {
             while (getWordClass().equals("LBRACK")) {
                 dim++;
                 getWord();
-                ConstExp();
+                node.link(ConstExp());
                 if (getWordClass().equals("RBRACK")) {
                     getWord();
                 } else {
@@ -234,7 +234,7 @@ public class GrammarAnalysis {
             }
             if (getWordClass().equals("ASSIGN")) {
                 getWord();
-                ConstInitVal();
+                node.link(ConstInitVal());
             }
         }
         node.setDimType(dim);
@@ -261,25 +261,27 @@ public class GrammarAnalysis {
         return node;
     }
 
-    public void ConstInitVal() {
+    public Node ConstInitVal() {
+        ConstInitVal node = new ConstInitVal(pos - 1);
         if (getWordClass().equals("LBRACE")) {
             getWord();
             if (getWordClass().equals("RBRACE")) {
                 getWord();
             } else {
-                ConstInitVal();
+                node.link(ConstInitVal());
                 while (getWordClass().equals("COMMA")) {
                     getWord();
-                    ConstInitVal();
+                    node.link(ConstInitVal());
                 }
                 if (getWordClass().equals("RBRACE")) {
                     getWord();
                 }
             }
         } else {
-            ConstExp();
+            node.link(ConstExp());
         }
         addNonTermimal("<ConstInitVal>");
+        return node;
     }
 
     public Node VarDecl() {
@@ -308,7 +310,7 @@ public class GrammarAnalysis {
             while (getWordClass().equals("LBRACK")) {
                 dim++;
                 getWord();
-                ConstExp();
+                node.link(ConstExp());
                 if (getWordClass().equals("RBRACK")) {
                     getWord();
                 } else {
@@ -318,7 +320,7 @@ public class GrammarAnalysis {
             }
             if (getWordClass().equals("ASSIGN")) {
                 getWord();
-                InitVal();
+                node.link(InitVal());
             }
         }
         node.setDimType(dim);
@@ -326,25 +328,27 @@ public class GrammarAnalysis {
         return node;
     }
 
-    public void InitVal() {
+    public Node InitVal() {
+        Node node = new InitVal(pos - 1);
         if (getWordClass().equals("LBRACE")) {
             getWord();
             if (getWordClass().equals("RBRACE")) {
                 getWord();
             } else {
-                InitVal();
+                node.link(InitVal());
                 while (getWordClass().equals("COMMA")) {
                     getWord();
-                    InitVal();
+                    node.link(InitVal());
                 }
                 if (getWordClass().equals("RBRACE")) {
                     getWord();
                 }
             }
         } else if (isExpPrefix()) {
-            Exp();
+            node.link(Exp());
         }
         addNonTermimal("<InitVal>");
+        return node;
     }
 
     public Node FuncDef() {
@@ -370,7 +374,6 @@ public class GrammarAnalysis {
         addNonTermimal("<FuncDef>");
         return node;
     }
-
 
     public Node FuncType() {
         FuncType node = null;
@@ -415,7 +418,7 @@ public class GrammarAnalysis {
                 while (getWordClass().equals("LBRACK")) {
                     dim++;
                     getWord();
-                    ConstExp();
+                    node.link(ConstExp());
                     if (getWordClass().equals("RBRACK")) {
                         getWord();
                     } else {
@@ -438,6 +441,7 @@ public class GrammarAnalysis {
                 node.link(BlockItem());
             }
             if (getWordClass().equals("RBRACE")) {
+                node.setLastRBRACE(word);
                 getWord();
             }
         }
@@ -546,7 +550,7 @@ public class GrammarAnalysis {
         getWord();
         if (getWordClass().equals("LPARENT")) {
             getWord();
-            Cond();
+            node.link(Cond());
             if (getWordClass().equals("RPARENT")) {
                 getWord();
             } else {
@@ -567,7 +571,7 @@ public class GrammarAnalysis {
         getWord();
         if (getWordClass().equals("LPARENT")) {
             getWord();
-            Cond();
+            node.link(Cond());
             if (getWordClass().equals("RPARENT")) {
                 getWord();
             } else {
@@ -701,9 +705,11 @@ public class GrammarAnalysis {
         return node;
     }
 
-    public void Cond() {
-        LOrExp();
+    public Node Cond() {
+        Node node = new Cond(pos - 1);
+        node.link(LOrExp());
         addNonTermimal("<Cond>");
+        return node;
     }
 
     public Node Exp() {
@@ -749,8 +755,8 @@ public class GrammarAnalysis {
         Number node = new Number(word,pos - 1);
         if (getWordClass().equals("INTCON")) {
             getWord();
-            addNonTermimal("<Number>");
         }
+        addNonTermimal("<Number>");
         return node;
     }
 
@@ -818,49 +824,59 @@ public class GrammarAnalysis {
         return node;
     }
 
-    public void RelExp() {
-        AddExp();
+    public Node RelExp() {
+        Node node = new RelExp(pos - 1);
+        node.link(AddExp());
         addNonTermimal("<RelExp>");
         while (isRelOp()) {
             getWord();
-            AddExp();
+            node.link(AddExp());
             addNonTermimal("<RelExp>");
         }
+        return node;
     }
 
-    public void EqExp() {
-        RelExp();
+    public Node EqExp() {
+        Node node = new EqExp(pos - 1);
+        node.link(RelExp());
         addNonTermimal("<EqExp>");
         while (isEqOp()) {
             getWord();
-            RelExp();
+            node.link(RelExp());
             addNonTermimal("<EqExp>");
         }
+        return node;
     }
 
-    public void LAndExp() {
-        EqExp();
+    public Node LAndExp() {
+        Node node = new LAndExp(pos - 1);
+        node.link(EqExp());
         addNonTermimal("<LAndExp>");
         while (getWordClass().equals("AND")) {
             getWord();
-            EqExp();
+            node.link(EqExp());
             addNonTermimal("<LAndExp>");
         }
+        return node;
     }
 
-    public void LOrExp() {
-        LAndExp();
+    public Node LOrExp() {
+        Node node = new LOrExp(pos - 1);
+        node.link(LAndExp());
         addNonTermimal("<LOrExp>");
         while (getWordClass().equals("OR")) {
             getWord();
-            LAndExp();
+            node.link(LAndExp());
             addNonTermimal("<LOrExp>");
         }
+        return node;
     }
 
-    public void ConstExp() {
-        AddExp();
+    public Node ConstExp() {
+        ConstExp node = new ConstExp(pos - 1);
+        node.link(AddExp());
         addNonTermimal("<ConstExp>");
+        return node;
     }
 }
 

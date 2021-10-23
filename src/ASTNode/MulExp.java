@@ -1,5 +1,6 @@
 package ASTNode;
 
+import Enum.*;
 import java.util.ArrayList;
 
 public class MulExp extends Node {
@@ -17,5 +18,20 @@ public class MulExp extends Node {
 
     public ArrayList<Node> getUnaryExps() {
         return UnaryExps;
+    }
+
+    public void checkError() {
+        for (Node node:UnaryExps) {
+            node.checkError();
+        }
+    }
+
+    public DataType getDataType() {
+        if (UnaryExps.size() == 1) {
+            assert UnaryExps.get(0) instanceof UnaryExp;
+            return ((UnaryExp) UnaryExps.get(0)).getDataType();
+        } else {
+            return DataType.INT;
+        }
     }
 }

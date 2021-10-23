@@ -14,4 +14,10 @@ public class LAndExp extends Node {
         super.link(node);
         EqExps.add(node);
     }
+
+    public void checkError() {
+        for (Node eqexp:EqExps) {
+            eqexp.checkError();
+        }
+    }
 }

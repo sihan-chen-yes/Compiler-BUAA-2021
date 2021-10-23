@@ -1,10 +1,7 @@
 package ASTNode;
 import Enum.DataType;
-import Enum.DimType;
 
 public class FuncRParam extends Node {
-    private DataType dataType = DataType.INT;
-    private DimType dimType;
     private Exp exp;
 
     public FuncRParam(int pos) {
@@ -19,14 +16,10 @@ public class FuncRParam extends Node {
     }
 
     public DataType getDataType() {
-        return dataType;
+        return exp.getDataType();
     }
 
-    public DimType getDimType() {
-        return dimType;
-    }
-
-    public void setDimType(DimType dimType) {
-        this.dimType = dimType;
+    public void checkError() {
+        exp.checkError();
     }
 }

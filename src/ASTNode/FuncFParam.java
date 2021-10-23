@@ -1,12 +1,14 @@
 package ASTNode;
 
 import Enum.DataType;
-import Enum.DimType;
 import WordAnalysis.Word;
+
+import java.util.ArrayList;
 
 public class FuncFParam extends Node {
     private BType bType;
-    private DimType dimType;
+    private ArrayList<ConstExp> constExps = new ArrayList<>();
+    private DataType dataType;
 
     public FuncFParam(Word word,int pos) {
         super(word,pos);
@@ -15,24 +17,25 @@ public class FuncFParam extends Node {
     @Override
     public void link(Node node) {
         super.link(node);
-        bType = (BType) node;
+        if (node instanceof BType) {
+            bType = (BType) node;
+        } else {
+            constExps.add((ConstExp) node);
+        }
     }
 
     public DataType getDataType() {
-        return bType.getDataType();
+        return dataType;
     }
 
-    public DimType getDimType() {
-        return dimType;
-    }
 
     public void setDimType(int dim) {
         if (dim == 0) {
-            dimType = DimType.NOTARRAY;
+            dataType = DataType.INT;
         } else if (dim == 1) {
-            dimType = DimType.ARRAY_1D;
+            dataType = DataType.INT_ARRAY_1D;
         } else {
-            dimType = DimType.ARRAY_2D;
+            dataType = DataType.INT_ARRAY_2D;
         }
     }
 }

@@ -1,10 +1,11 @@
 package ASTNode;
 
-import WordAnalysis.Word;
-
+import GrammarAnalysis.ErrorAnalysis;
+import GrammarAnalysis.SymbolTable;
+import Enum.*;
 public class AssignStmt extends Node {
-    private Node LVal;
-    private Node Exp;
+    private LVal lval;
+    private Exp exp;
 
     public AssignStmt(int pos) {
         super(pos);
@@ -14,17 +15,28 @@ public class AssignStmt extends Node {
     public void link(Node node) {
         super.link(node);
         if (node instanceof LVal) {
-            LVal = node;
+            lval = (LVal) node;
         } else {
-            Exp = node;
+            exp = (Exp) node;
         }
     }
 
-    public Node getLVal() {
-        return LVal;
+    public LVal getLVal() {
+        return lval;
     }
 
-    public Node getExp() {
-        return Exp;
+    public Exp getExp() {
+        return exp;
+    }
+
+    @Override
+    public void checkError() {
+        lval.checkError();
+        exp.checkError();
+        SymbolTable symbolTable = ErrorAnalysis.getSymbolTable();
+        if (symbolTable.queryLocalDefined(getLVal().getName(),ErrorAnalysis.getFuncName())
+                && symbolTable.isConst(ErrorAnalysis.getFuncName(), lval.getName())) {
+            ErrorAnalysis.addError(lval.getLine(),ErrorType.constAssign);
+        }
     }
 }

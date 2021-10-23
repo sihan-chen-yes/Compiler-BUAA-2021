@@ -14,4 +14,10 @@ public class RelExp extends Node {
         super.link(node);
         AddExps.add(node);
     }
+
+    public void checkError() {
+        for (Node addexp:AddExps) {
+            addexp.checkError();
+        }
+    }
 }

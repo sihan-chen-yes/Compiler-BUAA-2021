@@ -1,8 +1,5 @@
 package ASTNode;
-import WordAnalysis.*;
-import Enum.*;
-
-import java.util.ArrayList;
+import WordAnalysis.Word;
 
 public abstract class Node {
     private Word word = null;
@@ -35,4 +32,15 @@ public abstract class Node {
         return word.getLine();
     }
 
+    public Word getWord() {
+        return word;
+    }
+
+    public void checkError() {
+
+    }
+
+    public String getName() {
+        return word.getWord();
+    }
 }

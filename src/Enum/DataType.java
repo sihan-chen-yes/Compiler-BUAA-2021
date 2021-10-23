@@ -1,5 +1,8 @@
 package Enum;
 public enum DataType {
     INT,
-    VOID
+    VOID,
+    INT_ARRAY_1D,
+    INT_ARRAY_2D,
+    UNDEFINED,
 }

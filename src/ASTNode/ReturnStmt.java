@@ -1,5 +1,6 @@
 package ASTNode;
 
+import GrammarAnalysis.ErrorAnalysis;
 import WordAnalysis.Word;
 
 public class ReturnStmt extends Node {
@@ -17,5 +18,13 @@ public class ReturnStmt extends Node {
 
     public boolean isVoid() {
         return Exp == null;
+    }
+
+    public void checkError() {
+        if (Exp != null) {
+            ErrorAnalysis.setReturned(true);
+            ErrorAnalysis.setReturned(getWord());
+            Exp.checkError();
+        }
     }
 }

@@ -17,9 +17,8 @@ public class Compiler {
         GrammarAnalysis grammarAnalysis = new GrammarAnalysis(wordList,outputFile,errorAnalysis);
         grammarAnalysis.recursionDown();
         grammarAnalysis.saveGrammarAnalysis();
-        Node root = grammarAnalysis.getASTroot();
-        errorAnalysis.deliverAST(root);
-        errorAnalysis.checkError();
+        CompUnit root = (CompUnit) grammarAnalysis.getASTroot();
+        root.checkError();
         errorAnalysis.saveErrorAnalysis();
     }
 }

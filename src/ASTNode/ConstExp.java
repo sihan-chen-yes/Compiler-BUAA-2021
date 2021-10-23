@@ -13,4 +13,8 @@ public class ConstExp extends Node {
         super.link(node);
         AddExp = node;
     }
+
+    public void checkError() {
+        AddExp.checkError();
+    }
 }

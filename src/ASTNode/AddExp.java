@@ -1,9 +1,10 @@
 package ASTNode;
 
-import java.util.ArrayList;
+import Enum.DataType;
 
+import java.util.ArrayList;
 public class AddExp extends Node {
-    private ArrayList<Node> MulExps = new ArrayList<>();
+    private ArrayList<MulExp> MulExps = new ArrayList<>();
 
     public AddExp(int pos) {
         super(pos);
@@ -12,10 +13,24 @@ public class AddExp extends Node {
     @Override
     public void link(Node node) {
         super.link(node);
-        MulExps.add(node);
+        MulExps.add((MulExp) node);
     }
 
-    public ArrayList<Node> getMulExps() {
+    public ArrayList<MulExp> getMulExps() {
         return MulExps;
+    }
+
+    public void checkError() {
+        for (Node mulExp:MulExps) {
+            mulExp.checkError();
+        }
+    }
+
+    public DataType getDataType() {
+        if (MulExps.size() == 1) {
+            return MulExps.get(0).getDataType();
+        } else {
+            return DataType.INT;
+        }
     }
 }

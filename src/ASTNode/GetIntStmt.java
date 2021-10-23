@@ -16,4 +16,8 @@ public class GetIntStmt extends Node {
     public Node getLVal() {
         return LVal;
     }
+
+    public void checkError() {
+        LVal.checkError();
+    }
 }

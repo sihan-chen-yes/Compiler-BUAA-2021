@@ -12,4 +12,8 @@ public class Cond extends Node {
         super.link(node);
         LOrExp = node;
     }
+
+    public void checkError() {
+        LOrExp.checkError();
+    }
 }
