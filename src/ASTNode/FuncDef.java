@@ -48,7 +48,7 @@ public class FuncDef extends Node {
     }
 
     public void checkError() {
-        ErrorAnalysis.startFuncDef(getName());
+        ErrorAnalysis.startFuncDef(getName(),getDataType());
         if (funcFParams != null) {
             funcFParams.checkError();
         }
@@ -66,11 +66,7 @@ public class FuncDef extends Node {
         block.checkError();
         if (getFuncType() == DataType.INT) {
             if (!block.lastReturned()) {
-                ErrorAnalysis.addError(getLine(),ErrorType.unReturn);
-            }
-        } else if (getFuncType() == DataType.VOID){
-            if (ErrorAnalysis.hasReturned()) {
-                ErrorAnalysis.addError(ErrorAnalysis.getReturned().getLine(),ErrorType.redundantReturn);
+                ErrorAnalysis.addError(block.getLastRBRACE().getLine(),ErrorType.unReturn);
             }
         }
     }

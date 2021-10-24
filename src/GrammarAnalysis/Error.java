@@ -69,7 +69,13 @@ public class Error implements Comparable {
         if (this.getLine() < error.getLine()) {
             return -1;
         } else if (this.getLine() == error.getLine()) {
-            return 0;
+            if (this.errorCode < ((Error) o).errorCode) {
+                return -1;
+            } else if (this.errorCode == ((Error) o).errorCode) {
+                return 0;
+            } else {
+                return 1;
+            }
         } else {
             return 1;
         }

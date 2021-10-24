@@ -1,7 +1,7 @@
 package GrammarAnalysis;
 
+import Enum.DataType;
 import Enum.ErrorType;
-import WordAnalysis.Word;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -9,23 +9,27 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-
 public class ErrorAnalysis {
     private FileWriter writer;
     private static ArrayList<Error> errorList = new ArrayList<>();
     private static SymbolTable symbolTable = new SymbolTable();
     private static int layer = 0;
+    private static boolean on = true;
 
     private static String funcName = null;
+    private static DataType retType;
 
-    private static boolean hasReturned = false;
-
-    private static Word returned;
-
-    public static void startFuncDef(String funcName) {
+    public static void startFuncDef(String funcName,DataType dataType) {
         ErrorAnalysis.funcName = funcName;
-        hasReturned = false;
-        returned = null;
+        ErrorAnalysis.retType = dataType;
+    }
+
+    public static DataType getRetType() {
+        return retType;
+    }
+
+    public static void setRetType(DataType retType) {
+        ErrorAnalysis.retType = retType;
     }
 
     public ErrorAnalysis(File errorFile) {
@@ -36,26 +40,16 @@ public class ErrorAnalysis {
         }
     }
 
-    public static boolean hasReturned() {
-        return hasReturned;
-    }
-
-    public static void setReturned(boolean hasReturned) {
-        ErrorAnalysis.hasReturned = hasReturned;
-    }
-
-    public static Word getReturned() {
-        return returned;
-    }
-
-    public static void setReturned(Word returned) {
-        ErrorAnalysis.returned = returned;
-    }
-
     public static void addError(int line, ErrorType type) {
-        Error error;
-        error = new Error(line,type);
-        errorList.add(error);
+        if (on) {
+            Error error;
+            error = new Error(line,type);
+            errorList.add(error);
+        }
+    }
+
+    public static void setOn(boolean on) {
+        ErrorAnalysis.on = on;
     }
 
     public static SymbolTable getSymbolTable() {

@@ -16,7 +16,7 @@ public class Compiler {
         ErrorAnalysis errorAnalysis = new ErrorAnalysis(errorFile);
         GrammarAnalysis grammarAnalysis = new GrammarAnalysis(wordList,outputFile,errorAnalysis);
         grammarAnalysis.recursionDown();
-        grammarAnalysis.saveGrammarAnalysis();
+//        grammarAnalysis.saveGrammarAnalysis();
         CompUnit root = (CompUnit) grammarAnalysis.getASTroot();
         root.checkError();
         errorAnalysis.saveErrorAnalysis();

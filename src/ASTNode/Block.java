@@ -21,6 +21,7 @@ public class Block extends Node {
         return blockItems;
     }
 
+
     public void checkError() {
         ErrorAnalysis.addLayer();
         for (Node item:blockItems) {

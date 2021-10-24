@@ -9,7 +9,7 @@ import Enum.*;
 import java.util.ArrayList;
 
 public class MainFuncDef extends Node {
-    private Node block;
+    private Block block;
 
     public MainFuncDef(Word word,int pos) {
         super(word,pos);
@@ -18,11 +18,11 @@ public class MainFuncDef extends Node {
     @Override
     public void link(Node node) {
         super.link(node);
-        block = node;
+        block = (Block) node;
     }
 
     public void checkError() {
-        ErrorAnalysis.startFuncDef(getName());
+        ErrorAnalysis.startFuncDef(getName(),DataType.INT);
         ArrayList<FuncFParam> FParams = new ArrayList<>();
         SymbolTable symbolTable = ErrorAnalysis.getSymbolTable();
         SymbolTableEntry symbolTableEntry = new SymbolTableEntry(getWord(), DeclType.FUNC,DataType.INT,FParams);
@@ -30,8 +30,8 @@ public class MainFuncDef extends Node {
             ErrorAnalysis.addError(getLine(), ErrorType.reDef);
         }
         block.checkError();
-        if (block instanceof Block && !((Block) block).lastReturned()) {
-            ErrorAnalysis.addError(getLine(), ErrorType.unReturn);
+        if (!(block.lastReturned())) {
+            ErrorAnalysis.addError(block.getLastRBRACE().getLine(),ErrorType.unReturn);
         }
     }
 }

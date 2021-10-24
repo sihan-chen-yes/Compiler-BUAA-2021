@@ -1,9 +1,10 @@
 package GrammarAnalysis;
 
-import ASTNode.*;
 import ASTNode.Number;
-import WordAnalysis.*;
-import Enum.*;
+import ASTNode.*;
+import Enum.DataType;
+import Enum.ErrorType;
+import WordAnalysis.Word;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -27,11 +28,11 @@ public class GrammarAnalysis {
 
     public GrammarAnalysis(ArrayList<Word> wordList, File outputFile,ErrorAnalysis errorAnalysis) {
         this.wordList = wordList;
-        try {
-            this.writer = new FileWriter(outputFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            this.writer = new FileWriter(outputFile);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         this.errorAnalysis = errorAnalysis;
     }
 
@@ -161,30 +162,6 @@ public class GrammarAnalysis {
 
     public Boolean isEqOp() {
         return getWordClass().equals("EQL") || getWordClass().equals("NEQ");
-    }
-
-    public Boolean hasASSIGN() {
-        int i = 0;
-        while (!getPeekSymbolClass(i).equals("SEMICN") && !getPeekSymbolClass(i).equals("EOF")) {
-            //一直往后看直到遇到;
-            if (getPeekSymbolClass(i).equals("ASSIGN")) {
-                return true;
-            }
-            i++;
-        }
-        return false;
-    }
-
-    public Boolean hasGETINTTK() {
-        int i = 0;
-        while (!getPeekSymbolClass(i).equals("SEMICN") && !getPeekSymbolClass(i).equals("EOF")) {
-            //一直往后看直到遇到;
-            if (getPeekSymbolClass(i).equals("GETINTTK")) {
-                return true;
-            }
-            i++;
-        }
-        return false;
     }
 
     public void CompUnit() {
@@ -537,6 +514,7 @@ public class GrammarAnalysis {
     }
 
     public Node EmptyStmt() {
+        assert getWordClass().equals("SEMICN");
         getWord();
         return new EmptyStmt(pos - 1);
     }
@@ -652,11 +630,27 @@ public class GrammarAnalysis {
     }
 
     public Node Stmt() {
-        //一定不存在异常情况 子stmt只是逻辑判断的提取 不需要管curNode和输出
+        //一定不存在异常情况 子stmt只是逻辑判断的提取
+        //先假读 LVal
+        int origin_pos = pos - 1;
+        ErrorAnalysis.setOn(false);
+        boolean isAssign = false;
+        boolean isGetInt = false;
+        LVal();
+        if (getWordClass().equals("ASSIGN")) {
+            isAssign = true;
+            getWord();
+            if (getWordClass().equals("GETINTTK")) {
+                isGetInt = true;
+            }
+        }
+        ErrorAnalysis.setOn(true);
+        pos = origin_pos;
+        getWord();
         Node node = null;
-        if (getWordClass().equals("IDENFR") && hasASSIGN()) {
+        if (isAssign) {
             //LVal两种
-            if (hasGETINTTK()) {
+            if (isGetInt) {
                 node = GetIntStmt();
             } else {
                 node = AssignStmt();

@@ -142,10 +142,21 @@ public class SymbolTable {
         return DataType.UNDEFINED;
     }
 
+
     public DataType queryLocalDataType(String name,String funcName) {
         for (int i = funcToDecl.get(funcName).size() - 1;i >= 0;i--) {
             if (funcToDecl.get(funcName).get(i).getName().equals(name)) {
                 return funcToDecl.get(funcName).get(i).getDataType();
+            }
+        }
+        for (SymbolTableEntry symbolTableEntry:global) {
+            if (symbolTableEntry.getName().equals(funcName)) {
+                ArrayList<FuncFParam> funcFParams = queryFuncFParam(funcName);
+                for (FuncFParam funcFParam:funcFParams) {
+                    if (funcFParam.getName().equals(name)) {
+                        return funcFParam.getDataType();
+                    }
+                }
             }
         }
         return queryGlobalDataType(name);

@@ -1,10 +1,11 @@
 package ASTNode;
 
+import Enum.DataType;
 import GrammarAnalysis.ErrorAnalysis;
 import WordAnalysis.Word;
-
+import Enum.*;
 public class ReturnStmt extends Node {
-    private Node Exp = null;
+    private Exp Exp = null;
 
     public ReturnStmt(Word word,int pos) {
         super(word,pos);
@@ -13,7 +14,7 @@ public class ReturnStmt extends Node {
     @Override
     public void link(Node node) {
         super.link(node);
-        Exp = node;
+        Exp = (Exp) node;
     }
 
     public boolean isVoid() {
@@ -21,9 +22,8 @@ public class ReturnStmt extends Node {
     }
 
     public void checkError() {
-        if (Exp != null) {
-            ErrorAnalysis.setReturned(true);
-            ErrorAnalysis.setReturned(getWord());
+        if (Exp != null && ErrorAnalysis.getRetType() == DataType.VOID) {
+            ErrorAnalysis.addError(getLine(), ErrorType.redundantReturn);
             Exp.checkError();
         }
     }
