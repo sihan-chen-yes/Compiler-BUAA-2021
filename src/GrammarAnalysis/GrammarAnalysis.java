@@ -28,11 +28,11 @@ public class GrammarAnalysis {
 
     public GrammarAnalysis(ArrayList<Word> wordList, File outputFile,ErrorAnalysis errorAnalysis) {
         this.wordList = wordList;
-//        try {
-//            this.writer = new FileWriter(outputFile);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            this.writer = new FileWriter(outputFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         this.errorAnalysis = errorAnalysis;
     }
 
@@ -194,6 +194,7 @@ public class GrammarAnalysis {
     }
 
     public Node ConstDef() {
+        assert getWordClass().equals("IDENFR");
         ConstDef node = new ConstDef(word,pos - 1);
         int dim = 0;
         if (getWordClass().equals("IDENFR")) {
@@ -280,6 +281,7 @@ public class GrammarAnalysis {
     }
 
     public Node VarDef() {
+        assert getWordClass().equals("IDENFR");
         VarDef node = new VarDef(word,pos - 1);
         int dim = 0;
         if (getWordClass().equals("IDENFR")) {
@@ -418,6 +420,7 @@ public class GrammarAnalysis {
                 node.link(BlockItem());
             }
             if (getWordClass().equals("RBRACE")) {
+                assert getWordClass().equals("RBRACE");
                 node.setLastRBRACE(word);
                 getWord();
             }
@@ -562,6 +565,7 @@ public class GrammarAnalysis {
     }
 
     public Node BreakStmt() {
+        assert getWordClass().equals("BREAKTK");
         BreakStmt node = new BreakStmt(word,pos - 1);
         getWord();
         if (getWordClass().equals("SEMICN")) {
@@ -574,6 +578,7 @@ public class GrammarAnalysis {
     }
 
     public Node ContinueStmt() {
+        assert getWordClass().equals("CONTINUETK");
         ContinueStmt node = new ContinueStmt(word,pos - 1);
         getWord();
         if (getWordClass().equals("SEMICN")) {
@@ -586,6 +591,7 @@ public class GrammarAnalysis {
     }
 
     public Node ReturnStmt() {
+        assert getWordClass().equals("RETURNTK");
         ReturnStmt node = new ReturnStmt(word,pos - 1);
         getWord();
         if (isExpPrefix()) {
@@ -601,6 +607,7 @@ public class GrammarAnalysis {
     }
 
     public Node PrintStmt() {
+        assert getWordClass().equals("PRTINTFTK");
         PrintStmt node = new PrintStmt(word,pos - 1);
         getWord();
         if (getWordClass().equals("LPARENT")) {
@@ -681,6 +688,7 @@ public class GrammarAnalysis {
     }
 
     public Node LVal() {
+        assert getWordClass().equals("IDENFR");
         LVal node = new LVal(word,pos - 1);
         if (getWordClass().equals("IDENFR")) {
             getWord();

@@ -179,13 +179,15 @@ public class WordAnalysis {
             token += c;
             getChar();
             if (c == '*') {
+                //注释开始 注释中可能有\n
                 while (true) {
                     do {
                         token += c;
                         getChar();
+                        setLine();
                     } while (c != '*');
-                    char pre = c;
-                    getChar();
+                    char pre = c;//为 *
+                    getChar();//预读 * 之后的字符
                     if (c == '/') {
                         token += pre;
                         token += c;
@@ -194,12 +196,14 @@ public class WordAnalysis {
                     } else {
                         retract();
                         c = pre;
+                        //不是/ 注释还没有结束 回退再找下一个 *
                     }
                 }
             } else if (c == '/') {
                 do {
                     token += c;
                     getChar();
+                    setLine();
                 } while (c != '\n' && sym != EOF);
                 word = new Word("ANNO",token,line);
             } else {
@@ -214,11 +218,15 @@ public class WordAnalysis {
         judgeEnd();
         do {
             getChar();
-            if (c == '\n') {
-                line++;
-            }
+            setLine();
         } while (c == '\n' || c == '\r' || c == '\t' || c == ' ');
         judgeEnd();
+    }
+
+    public void setLine() {
+        if (c == '\n') {
+            line++;
+        }
     }
 
     public void judgeEnd() throws ReadEOFException {

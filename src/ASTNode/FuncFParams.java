@@ -28,7 +28,6 @@ public class FuncFParams extends Node {
         for (FuncFParam funcFParam:funcFParams) {
             if (nameSet.contains(funcFParam.getName())) {
                 ErrorAnalysis.addError(funcFParam.getLine(),ErrorType.reDef);
-                return;
             } else {
                 nameSet.add(funcFParam.getName());
             }
