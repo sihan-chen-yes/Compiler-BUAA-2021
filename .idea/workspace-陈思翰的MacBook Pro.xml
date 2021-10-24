@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="5139c10c-b954-46fa-ac0c-c1141f68707b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/Attribute.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/runConfigurations.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/compiler.iml" beforeDir="false" afterPath="$PROJECT_DIR$/compiler.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Compiler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Compiler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/DataType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/DataType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/DeclType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/DeclType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Error.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Error.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ErrorAnalysis.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ErrorAnalysis.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ErrorType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ErrorType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GrammarAnalysis.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GrammarAnalysis.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GrammarType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GrammarType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Node.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Node.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ReadEOFException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ReadEOFException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SymbolTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SymbolTable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SymbolTableEntry.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SymbolTableEntry.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Word.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Word.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/WordAnalysis.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WordAnalysis.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Enum" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="ProjectId" id="1zXO2RjIaAcLIIFl8Nu98ksqvg8" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.0" />
+    <property name="restartRequiresConfirmation" value="false" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.completion" />
+  </component>
+  <component name="RunManager">
+    <configuration name="Compiler" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="Compiler" />
+      <module name="compiler" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.Compiler" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="5139c10c-b954-46fa-ac0c-c1141f68707b" name="Changes" comment="" />
+      <created>1634290760832</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1634290760832</updated>
+      <workItem from="1634290761712" duration="7650000" />
+      <workItem from="1634352243212" duration="122000" />
+      <workItem from="1634363737214" duration="8698000" />
+      <workItem from="1634435399351" duration="32121000" />
+      <workItem from="1634545300721" duration="219000" />
+      <workItem from="1634545531833" duration="16447000" />
+      <workItem from="1634607717350" duration="12953000" />
+      <workItem from="1634631395379" duration="10309000" />
+      <workItem from="1634653585131" duration="4015000" />
+      <workItem from="1634712801707" duration="10184000" />
+      <workItem from="1634740796607" duration="5593000" />
+      <workItem from="1634833664129" duration="274000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/GrammarAnalysis.java</url>
+          <line>878</line>
+          <option name="timeStamp" value="20" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/GrammarAnalysis.java</url>
+          <line>409</line>
+          <option name="timeStamp" value="57" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-method">
+          <url>file://$PROJECT_DIR$/src/GrammarAnalysis.java</url>
+          <line>919</line>
+          <properties class="GrammarAnalysis" method="FuncRParams">
+            <option name="EMULATED" value="true" />
+          </properties>
+          <option name="timeStamp" value="52" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="Application">
+        <watch expression="word" language="JAVA" />
+        <watch expression="funcRet" language="JAVA" />
+        <watch expression="peekWord" language="JAVA" />
+        <watch expression="wordAndGrammar" language="JAVA" />
+        <watch expression="returned" language="JAVA" />
+        <watch expression="Ident" language="JAVA" />
+        <watch expression="line" language="JAVA" />
+        <watch expression="errorList" language="JAVA" />
+      </configuration>
+    </watches-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
