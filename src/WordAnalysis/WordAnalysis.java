@@ -203,7 +203,7 @@ public class WordAnalysis {
                 do {
                     token += c;
                     getChar();
-                    setLine();
+                    setLine();//出循环的时候已经读了\n 需要设置行号
                 } while (c != '\n' && sym != EOF);
                 word = new Word("ANNO",token,line);
             } else {
