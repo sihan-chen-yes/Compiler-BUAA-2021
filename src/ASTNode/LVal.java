@@ -11,6 +11,8 @@ import java.util.ArrayList;
 public class LVal extends Node {
     private ArrayList<Exp> exps = new ArrayList<>();
     private DataType dataType;
+    private int length1D;
+    private int length2D;
 
     public LVal(Word word, int pos) {
         super(word,pos);
@@ -67,5 +69,22 @@ public class LVal extends Node {
         for (Exp exp:exps) {
             exp.checkError();
         }
+    }
+
+    public void setLength() {
+        if (dataType == DataType.INT_ARRAY_1D) {
+            length1D = exps.get(0).getValue();
+        } else if (dataType == DataType.INT_ARRAY_2D) {
+            length1D = exps.get(0).getValue();
+            length2D = exps.get(1).getValue();
+        }
+    }
+
+    public int getLength1D() {
+        return length1D;
+    }
+
+    public int getLength2D() {
+        return length2D;
     }
 }

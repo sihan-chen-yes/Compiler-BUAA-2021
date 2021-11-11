@@ -29,4 +29,36 @@ public class InitVal extends Node {
             initVal.checkError();
         }
     }
+
+    public int getValue() {
+        //编译期间求值
+        return exp.getValue();
+    }
+
+    public ArrayList<Integer> getValues1D() {
+        //编译期间求值
+        ArrayList<Integer> values1D = new ArrayList<>();
+        for (InitVal initVal:initVals) {
+            values1D.add(initVal.getValue());
+        }
+        return values1D;
+    }
+
+    public ArrayList<ArrayList<Integer>> getValues2D() {
+        //编译期间求值
+        ArrayList<ArrayList<Integer>> values2D = new ArrayList<>();
+        for (InitVal initVal:initVals) {
+            values2D.add(initVal.getValues1D());
+        }
+        return values2D;
+    }
+
+    public int genMidCode() {
+        return exp.genMidCode();
+    }
+
+    public ArrayList<InitVal> getInitVals() {
+        return initVals;
+    }
+
 }

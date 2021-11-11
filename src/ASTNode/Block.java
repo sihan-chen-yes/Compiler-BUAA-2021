@@ -1,5 +1,6 @@
 package ASTNode;
 import GrammarAnalysis.ErrorAnalysis;
+import MidCodeGeneration.MidCodeGener;
 import WordAnalysis.Word;
 
 import java.util.ArrayList;
@@ -49,5 +50,15 @@ public class Block extends Node {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public void genMidCode() {
+        MidCodeGener.addLayer();
+        for (Node item:blockItems) {
+            item.genMidCode();
+        }
+        MidCodeGener.getSymbolTable().removeLocal(MidCodeGener.getLayer(),MidCodeGener.getFuncName());
+        MidCodeGener.subLayer();
     }
 }

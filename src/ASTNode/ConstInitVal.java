@@ -30,4 +30,27 @@ public class ConstInitVal extends Node {
             constInitVal.checkError();
         }
     }
+
+    public int getValue() {
+        //编译期间求值
+        return constExp.getValue();
+    }
+
+    public ArrayList<Integer> getValues1D() {
+        //编译期间求值
+        ArrayList<Integer> values1D = new ArrayList<>();
+        for (ConstInitVal constInitVal:constInitVals) {
+            values1D.add(constInitVal.getValue());
+        }
+        return values1D;
+    }
+
+    public ArrayList<ArrayList<Integer>> getValues2D() {
+        //编译期间求值
+        ArrayList<ArrayList<Integer>> values2D = new ArrayList<>();
+        for (ConstInitVal constInitVal:constInitVals) {
+            values2D.add(constInitVal.getValues1D());
+        }
+        return values2D;
+    }
 }

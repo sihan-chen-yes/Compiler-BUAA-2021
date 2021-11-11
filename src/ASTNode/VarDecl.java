@@ -38,4 +38,12 @@ public class VarDecl extends Node {
             varDef.checkError();
         }
     }
+
+    @Override
+    public int genMidCode() {
+        for (VarDef varDef:VarDefs) {
+            varDef.genMidCode();
+        }
+        return 0;
+    }
 }

@@ -1,7 +1,7 @@
 package ASTNode;
 import Enum.*;
 public class Exp extends Node {
-    private Node AddExp;
+    private AddExp AddExp;
 
     public Exp(int pos) {
         super(pos);
@@ -10,7 +10,7 @@ public class Exp extends Node {
     @Override
     public void link(Node node) {
         super.link(node);
-        AddExp = node;
+        AddExp = (AddExp) node;
     }
 
     public Node getAddExp() {
@@ -23,6 +23,10 @@ public class Exp extends Node {
 
     public DataType getDataType() {
         assert AddExp instanceof AddExp;
-        return ((AddExp) AddExp).getDataType();
+        return AddExp.getDataType();
+    }
+
+    public int getValue() {
+        return AddExp.getValue();
     }
 }

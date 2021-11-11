@@ -1,9 +1,10 @@
 package ASTNode;
-import Enum.DataType;
-import Enum.ErrorType;
+import Enum.*;
 import GrammarAnalysis.ErrorAnalysis;
 import GrammarAnalysis.SymbolTable;
 import GrammarAnalysis.SymbolTableEntry;
+import MidCodeGeneration.MidCodeEntry;
+import MidCodeGeneration.MidCodeGener;
 import WordAnalysis.Word;
 
 import java.util.ArrayList;
@@ -67,6 +68,73 @@ public class ConstDef extends Node {
         }
         if (ConstInitVal != null) {
             ConstInitVal.checkError();
+        }
+    }
+
+    public int getDim() {
+        return dim;
+    }
+
+    public int getLength1D() {
+        assert constExps.size() == 1;
+        return constExps.get(0).getValue();
+    }
+
+    public int getLength2D() {
+        assert constExps.size() == 2;
+        return constExps.get(1).getValue();
+    }
+
+    public int getValue() {
+        assert dim == 0;
+        return ConstInitVal.getValue();
+    }
+
+    public ArrayList<Integer> getValues1D() {
+        assert dim != 0;
+        return ConstInitVal.getValues1D();
+    }
+
+    public ArrayList<ArrayList<Integer>> getValues2D() {
+        assert dim != 0;
+        return ConstInitVal.getValues2D();
+    }
+
+    public int genMidCode() {
+        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
+        ConstDecl constDecl = (ConstDecl) this.getFather();
+        if (MidCodeGener.getLayer() == 0) {
+            //全局
+            SymbolTableEntry symbolTableEntry = new SymbolTableEntry(getWord(),constDecl.getDeclType(),
+                    dataType);
+            setEntryInfo(symbolTableEntry,true);
+            symbolTable.insertGlobal(symbolTableEntry);
+            MidCodeGener.addMidCodeEntry(new MidCodeEntry(OpType.GLOBAL_DECLARE,null,null,getWord()));
+        } else {
+            //局部
+            SymbolTableEntry symbolTableEntry = new SymbolTableEntry(getWord(),constDecl.getDeclType(),
+                    dataType,MidCodeGener.getLayer());
+            setEntryInfo(symbolTableEntry,false);
+            symbolTable.insertLocal(symbolTableEntry,MidCodeGener.getFuncName());
+        }
+        return 0;
+    }
+
+    public void setEntryInfo(SymbolTableEntry symbolTableEntry,boolean isGlobal) {
+        if (dim == 0) {
+            symbolTableEntry.setValue(getValue());
+        } else if (dim == 1) {
+            symbolTableEntry.setLength1D(getLength1D());
+            symbolTableEntry.setValues1D(getValues1D());
+        } else {
+            assert dim == 2;
+            symbolTableEntry.setLength1D(getLength1D());
+            symbolTableEntry.setLength2D(getLength2D());
+            symbolTableEntry.setValues2D(getValues2D());
+        }
+        symbolTableEntry.setSize();
+        if (isGlobal) {
+            symbolTableEntry.setgpAddr();
         }
     }
 }

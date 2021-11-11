@@ -1,15 +1,20 @@
-import ASTNode.*;
-import GrammarAnalysis.*;
-import WordAnalysis.*;
+import ASTNode.CompUnit;
+import GrammarAnalysis.ErrorAnalysis;
+import GrammarAnalysis.GrammarAnalysis;
+import MidCodeGeneration.MidCodeGener;
+import WordAnalysis.Word;
+import WordAnalysis.WordAnalysis;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.util.ArrayList;
 
 public class Compiler {
     public static void main(String[] args) {
         File readFile = new File("testfile.txt");
         File outputFile = new File("output.txt");
         File errorFile = new File("error.txt");
+        File midCodeFile = new File("midcode.txt");
+        File targetCodeFile = new File("mips.txt");
         WordAnalysis wordAnalysis = new WordAnalysis(readFile);
         ArrayList<Word> wordList = wordAnalysis.getWordList();
         ErrorAnalysis errorAnalysis = new ErrorAnalysis(errorFile);
@@ -18,6 +23,14 @@ public class Compiler {
 //        grammarAnalysis.saveGrammarAnalysis();
         CompUnit root = (CompUnit) grammarAnalysis.getASTroot();
         root.checkError();
-        errorAnalysis.saveErrorAnalysis();
+        if (errorAnalysis.findErrors()) {
+            errorAnalysis.saveErrorAnalysis();
+        } else {
+            MidCodeGener midCodeGener = new MidCodeGener(midCodeFile);
+            root.genMidCode();
+            System.out.println("genMidcode OK");
+            midCodeGener.saveMidCode();
+//            TargetCodeGener targetCodeGener = new TargetCodeGener(midCodeGener.getMidCodeList(),targetCodeFile);
+        }
     }
 }

@@ -1,10 +1,11 @@
 package ASTNode;
-import Enum.*;
 import GrammarAnalysis.ErrorAnalysis;
 import GrammarAnalysis.SymbolTable;
 import GrammarAnalysis.SymbolTableEntry;
+import MidCodeGeneration.MidCodeEntry;
+import MidCodeGeneration.MidCodeGener;
 import WordAnalysis.Word;
-
+import Enum.*;
 import java.util.ArrayList;
 
 public class FuncDef extends Node {
@@ -69,5 +70,29 @@ public class FuncDef extends Node {
                 ErrorAnalysis.addError(block.getLastRBRACE().getLine(),ErrorType.unReturn);
             }
         }
+    }
+
+    @Override
+    public int genMidCode() {
+        MidCodeGener.startFuncDef(getName());
+        ArrayList<FuncFParam> FParams;
+        if (funcFParams == null) {
+            FParams = new ArrayList<>();
+        } else {
+            FParams = funcFParams.getFuncFParams();
+        }
+        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
+        SymbolTableEntry symbolTableEntry = new SymbolTableEntry(getWord(),DeclType.FUNC,getDataType(),FParams);
+        symbolTable.insertGlobal(symbolTableEntry);
+        for (FuncFParam funcFParam:FParams) {
+            symbolTableEntry = new SymbolTableEntry(funcFParam.getWord(),
+                    DeclType.PARAM,DataType.INT,MidCodeGener.getLayer());
+            symbolTableEntry.setSize();
+        }
+        MidCodeGener.addMidCodeEntry(new MidCodeEntry(OpType.FUNC_DECLARE,null,null,getWord()));
+        block.genMidCode();
+        MidCodeGener.getSymbolTable().setLocalAddr(MidCodeGener.getFuncName());
+        MidCodeGener.getSymbolTable().refactorName(MidCodeGener.getFuncName());
+        return 0;
     }
 }

@@ -20,4 +20,9 @@ public class BlockStmt extends Node {
     public void checkError() {
         block.checkError();
     }
+
+    @Override
+    public void genMidCode() {
+        block.genMidCode();
+    }
 }

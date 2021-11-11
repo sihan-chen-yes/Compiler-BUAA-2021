@@ -4,7 +4,8 @@ import Enum.*;
 import java.util.ArrayList;
 
 public class MulExp extends Node {
-    private ArrayList<Node> UnaryExps = new ArrayList<>();
+    private ArrayList<UnaryExp> UnaryExps = new ArrayList<>();
+    private ArrayList<CalType> calTypes = new ArrayList<>();
 
     public MulExp(int pos) {
         super(pos);
@@ -13,10 +14,10 @@ public class MulExp extends Node {
     @Override
     public void link(Node node) {
         super.link(node);
-        UnaryExps.add(node);
+        UnaryExps.add((UnaryExp) node);
     }
 
-    public ArrayList<Node> getUnaryExps() {
+    public ArrayList<UnaryExp> getUnaryExps() {
         return UnaryExps;
     }
 
@@ -29,9 +30,35 @@ public class MulExp extends Node {
     public DataType getDataType() {
         if (UnaryExps.size() == 1) {
             assert UnaryExps.get(0) instanceof UnaryExp;
-            return ((UnaryExp) UnaryExps.get(0)).getDataType();
+            return UnaryExps.get(0).getDataType();
         } else {
             return DataType.INT;
+        }
+    }
+
+    public int getValue() {
+        int value = UnaryExps.get(0).getValue();
+        for (int i = 1;i < UnaryExps.size();i++) {
+            if (calTypes.get(i - 1) == CalType.mul) {
+                value *= UnaryExps.get(i).getValue();
+            } else if (calTypes.get(i - 1) == CalType.div) {
+                value /= UnaryExps.get(i).getValue();
+            } else {
+                assert calTypes.get(i - 1) == CalType.mod;
+                value %= UnaryExps.get(i).getValue();
+            }
+        }
+        return value;
+    }
+
+    public void insertCaltype(String word) {
+        assert word.equals("*") || word.equals("/") || word.equals("%");
+        if (word.equals("*")) {
+            calTypes.add(CalType.mul);
+        } else if (word.equals("/")) {
+            calTypes.add(CalType.div);
+        } else {
+            calTypes.add(CalType.mod);
         }
     }
 }

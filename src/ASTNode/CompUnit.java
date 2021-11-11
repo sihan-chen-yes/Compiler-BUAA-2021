@@ -45,4 +45,15 @@ public class CompUnit extends Node {
         }
         MainFuncDef.checkError();
     }
+
+    public int genMidCode() {
+        for (Node decl:Decls) {
+            decl.genMidCode();
+        }
+        for (Node funcDef:FuncDefs) {
+            funcDef.genMidCode();
+        }
+        MainFuncDef.genMidCode();
+        return 0;
+    }
 }

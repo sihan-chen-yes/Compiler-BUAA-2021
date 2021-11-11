@@ -15,6 +15,7 @@ public class ErrorAnalysis {
     private static SymbolTable symbolTable = new SymbolTable();
     private static int layer = 0;
     private static boolean on = true;
+    //是否将错误加入错误列表
 
     private static String funcName = null;
     private static DataType retType;
@@ -26,10 +27,6 @@ public class ErrorAnalysis {
 
     public static DataType getRetType() {
         return retType;
-    }
-
-    public static void setRetType(DataType retType) {
-        ErrorAnalysis.retType = retType;
     }
 
     public ErrorAnalysis(File errorFile) {
@@ -85,5 +82,9 @@ public class ErrorAnalysis {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean findErrors() {
+        return !errorList.isEmpty();
     }
 }

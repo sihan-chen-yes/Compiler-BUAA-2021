@@ -40,6 +40,10 @@ public abstract class Node {
 
     }
 
+    public int genMidCode() {
+        return 0;
+    }
+
     public String getName() {
         return word.getWord();
     }

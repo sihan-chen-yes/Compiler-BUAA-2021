@@ -726,6 +726,7 @@ public class GrammarAnalysis {
         node.link(MulExp());
         addNonTermimal("<AddExp>");
         while (isAddOp()) {
+            node.insertCaltype(word.getWord());
             getWord();
             node.link(MulExp());
             addNonTermimal("<AddExp>");
@@ -785,18 +786,22 @@ public class GrammarAnalysis {
         } else if (isPrimaryExpPrefix()) {
             node.link(PrimaryExp());
         } else if (isUnaryOp()) {
-            UnaryOp();
+            String sym = UnaryOp();
             node = UnaryExp();
+            ((UnaryExp) node).insertCaltype(sym);
         }
         addNonTermimal("<UnaryExp>");
         return node;
     }
 
-    public void UnaryOp() {
+    public String UnaryOp() {
+        String sym = null;
         if (isUnaryOp()) {
+            sym = word.getWord();
             getWord();
         }
         addNonTermimal("<UnaryOp>");
+        return sym;
     }
 
     public Node FuncRParams() {
@@ -819,6 +824,7 @@ public class GrammarAnalysis {
         node.link(UnaryExp());
         addNonTermimal("<MulExp>");
         while (isMulOp()) {
+            node.insertCaltype(word.getWord());
             getWord();
             node.link(UnaryExp());
             addNonTermimal("<MulExp>");
@@ -827,10 +833,11 @@ public class GrammarAnalysis {
     }
 
     public Node RelExp() {
-        Node node = new RelExp(pos - 1);
+        RelExp node = new RelExp(pos - 1);
         node.link(AddExp());
         addNonTermimal("<RelExp>");
         while (isRelOp()) {
+            node.insertCaltype(word.getWord());
             getWord();
             node.link(AddExp());
             addNonTermimal("<RelExp>");
@@ -839,10 +846,11 @@ public class GrammarAnalysis {
     }
 
     public Node EqExp() {
-        Node node = new EqExp(pos - 1);
+        EqExp node = new EqExp(pos - 1);
         node.link(RelExp());
         addNonTermimal("<EqExp>");
         while (isEqOp()) {
+            node.insertCaltype(word.getWord());
             getWord();
             node.link(RelExp());
             addNonTermimal("<EqExp>");

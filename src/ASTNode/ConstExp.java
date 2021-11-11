@@ -2,7 +2,7 @@ package ASTNode;
 
 
 public class ConstExp extends Node {
-    private Node AddExp;
+    private AddExp AddExp;
 
     public ConstExp(int pos) {
         super(pos);
@@ -11,10 +11,14 @@ public class ConstExp extends Node {
     @Override
     public void link(Node node) {
         super.link(node);
-        AddExp = node;
+        AddExp = (AddExp) node;
     }
 
     public void checkError() {
         AddExp.checkError();
+    }
+
+    public int getValue() {
+        return AddExp.getValue();
     }
 }

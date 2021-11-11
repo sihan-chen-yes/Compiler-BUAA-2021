@@ -1,7 +1,7 @@
 package ASTNode;
 
 public class Cond extends Node {
-    private Node LOrExp;
+    private LOrExp LOrExp;
 
     public Cond(int pos) {
         super(pos);
@@ -10,7 +10,7 @@ public class Cond extends Node {
     @Override
     public void link(Node node) {
         super.link(node);
-        LOrExp = node;
+        LOrExp = (LOrExp) node;
     }
 
     public void checkError() {

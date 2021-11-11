@@ -37,4 +37,12 @@ public class ConstDecl extends Node {
             constDef.checkError();
         }
     }
+
+    @Override
+    public int genMidCode() {
+        for (Node constDef:ConstDefs) {
+            constDef.genMidCode();
+        }
+        return 0;
+    }
 }

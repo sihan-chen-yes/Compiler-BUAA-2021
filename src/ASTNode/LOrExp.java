@@ -1,7 +1,6 @@
 package ASTNode;
 
 import java.util.ArrayList;
-
 public class LOrExp extends Node {
     private ArrayList<Node> LAndExps = new ArrayList<>();
 
