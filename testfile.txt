@@ -1,4 +1,11 @@
+const int a = 1;
+const int b[a] = {0};
+const int c[1][1] = {{0}};
+int d = 1;
+int try() {
+    return 1;
+}
 int main() {
-    // asdsa
-    return 1
+    const int a[1] = {a};
+    return 1;
 }
