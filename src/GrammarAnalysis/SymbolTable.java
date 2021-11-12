@@ -31,7 +31,7 @@ public class SymbolTable {
         }
     }
 
-    public boolean insertLocal(SymbolTableEntry symbolTableEntry,String funcName) {
+    public boolean insertLocal(SymbolTableEntry symbolTableEntry, String funcName) {
         assert funcToDecl.containsKey(funcName);
         int layer = symbolTableEntry.getLayer();
         if (queryLocalReDefined(symbolTableEntry.getName(), funcName,layer)) {
@@ -43,7 +43,7 @@ public class SymbolTable {
         }
     }
 
-    public void removeLocal(int layer,String funcName) {
+    public void removeLocal(int layer, String funcName) {
         //错误处理时使用
         Iterator iterator = funcToDecl.get(funcName).iterator();
         while (iterator.hasNext()) {
@@ -88,7 +88,7 @@ public class SymbolTable {
         return DataType.UNDEFINED;
     }
 
-    public boolean queryLocalReDefined(String name,String funcName,int layer) {
+    public boolean queryLocalReDefined(String name, String funcName, int layer) {
         //局部变量是否重复声明
         //和参数重名
         if (layer == 1) {
@@ -152,7 +152,7 @@ public class SymbolTable {
         return DataType.UNDEFINED;
     }
 
-    public DataType queryLocalDataType(String name,String funcName) {
+    public DataType queryLocalDataType(String name, String funcName) {
         for (int i = funcToDecl.get(funcName).size() - 1;i >= 0;i--) {
             if (funcToDecl.get(funcName).get(i).getName().equals(name)) {
                 return funcToDecl.get(funcName).get(i).getDataType();
@@ -181,7 +181,7 @@ public class SymbolTable {
         return fParams;
     }
 
-    public boolean isConst(String funcName,String Ident) {
+    public boolean isConst(String funcName, String Ident) {
         //错误检查时使用
         assert funcToDecl.containsKey(funcName);
         for (int i = funcToDecl.get(funcName).size() - 1;i >= 0;i--) {
@@ -191,6 +191,12 @@ public class SymbolTable {
                 } else {
                     return false;
                 }
+            }
+        }
+        ArrayList<FuncFParam> funcFParams = queryFuncFParam(funcName);
+        for (FuncFParam funcFParam:funcFParams) {
+            if (funcFParam.getName().equals(Ident)) {
+                return false;
             }
         }
         for (SymbolTableEntry symbolTableEntry:global) {
@@ -218,7 +224,7 @@ public class SymbolTable {
         return symbolTableEntry;
     }
 
-    public SymbolTableEntry search_local(String func,Word word) {
+    public SymbolTableEntry search_local(String func, Word word) {
         //生成目标代码
         ArrayList<SymbolTableEntry> local = fullFunc.get(func);
         SymbolTableEntry symbolTableEntry = null;
@@ -233,7 +239,7 @@ public class SymbolTable {
         return symbolTableEntry;
     }
 
-    public SymbolTableEntry searchDefinedData(String func,Word word) {
+    public SymbolTableEntry searchDefinedEntry(String func, Word word) {
         //编译时利用符号表求值
         SymbolTableEntry symbolTableEntry = null;
         if (func != null) {
@@ -252,6 +258,10 @@ public class SymbolTable {
         }
         assert symbolTableEntry != null;
         return symbolTableEntry;
+    }
+
+    public String getRefactorName(String funcName,Word word) {
+        return word.getWord() + searchDefinedEntry(funcName,word).getLine();
     }
 
     public static int getOffset_gp() {
@@ -278,7 +288,7 @@ public class SymbolTable {
     }
 
     public void reset() {
-        offset_sp = 4;
+        offset_sp = 0;
     }
 
     public int getLocalSize(String func) {
@@ -288,17 +298,26 @@ public class SymbolTable {
             size += local.get(i).getSize();
         }
         return size + 4;
-        //还有一个 ra
+        //最开始还有一个 ra
     }
 
     public int getRaAddr(String func) {
-        return getLocalSize(func);
+        return getLocalSize(func) - 4;
     }
 
     public void refactorName(String func) {
         ArrayList<SymbolTableEntry> local = fullFunc.get(func);
         for (int i = 0;i < local.size() - 1;i++) {
-            local.get(i).refactorName();
+            if (local.get(i).getDeclType() != DeclType.TEMP) {
+                local.get(i).refactorName();
+            }
         }
+    }
+
+    public void insertLocalTemp(String temp,String funcName) {
+        SymbolTableEntry symbolTableEntry = new SymbolTableEntry(
+                new Word("TEMP",temp,-1), DeclType.TEMP,DataType.INT);
+        symbolTableEntry.setSize();
+        fullFunc.get(funcName).add(symbolTableEntry);
     }
 }

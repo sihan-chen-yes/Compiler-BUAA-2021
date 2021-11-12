@@ -1,8 +1,8 @@
 package ASTNode;
 
 import Enum.*;
-import GrammarAnalysis.SymbolTable;
 import GrammarAnalysis.SymbolTableEntry;
+import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 
 import java.util.ArrayList;
@@ -50,15 +50,14 @@ public class UnaryExp extends Node {
         } else {
             assert unary instanceof LVal && ((LVal) unary).getDataType() == DataType.INT;
             ((LVal) unary).setLength();
-            SymbolTable symbolTable = MidCodeGener.getSymbolTable();
             SymbolTableEntry symbolTableEntry = MidCodeGener.getSymbolTable().
-                    searchDefinedData(MidCodeGener.getFuncName(),unary.getWord());
+                    searchDefinedEntry(MidCodeGener.getFuncName(),unary.getWord());
             if (((LVal) unary).getBrackNum() == 0) {
                 value = symbolTableEntry.getValue();
             } else if (((LVal) unary).getBrackNum() == 1) {
-                value = symbolTableEntry.getValue1D(((LVal) unary).getLength1D());
+                value = symbolTableEntry.getValue1D(((LVal) unary).getI());
             } else {
-                value = symbolTableEntry.getValue2D(((LVal) unary).getLength1D(),((LVal) unary).getLength2D());
+                value = symbolTableEntry.getValue2D(((LVal) unary).getI(),((LVal) unary).getJ());
             }
         }
         for (int i = 0;i < calTypes.size();i++) {
@@ -80,5 +79,31 @@ public class UnaryExp extends Node {
         } else {
             calTypes.add(CalType.not);
         }
+    }
+
+    @Override
+    public String genMidCode() {
+        //Todo
+        int cnt = 0;
+        for (CalType calType:calTypes) {
+            if (calType == CalType.sub) {
+                cnt++;
+            }
+        }
+        String temp = unary.genMidCode();
+        if (cnt % 2 != 0) {
+            String dst = MidCodeGener.genTemp();
+            MidCodeGener.addMidCodeEntry(
+                    new MidCodeEntry(
+                            OpType.NEG,
+                            temp,
+                            null,
+                            null,
+                            dst
+                    )
+            );
+            return dst;
+        }
+        return temp;
     }
 }

@@ -1,11 +1,46 @@
-const int a = 1;
-const int b[a] = {0};
-const int c[1][1] = {{0}};
-int d = 1;
-int try() {
+int a = 5;
+int b[2] = {1,1 * -9};
+const int c[2] = {1,2};
+
+void try1(int a) {
+    int b = 3;
+    {
+        int a = 3;
+    }
+    int c[c[1]] ={1,2};
+
+    return;
+}
+
+int try2(int d[]) {
+    int a[2] = {1,2,3};
+    int c[2][2] = {{1,a[0]},{1,1}};
+    int b[3] = {a[0],c[0][0],1};
+    c[0][0] = a[0];
     return 1;
 }
+
+int try3(int c,int d,int e,int f,int g[][2],int h[]) {
+    c = d + e;
+    const int b[2] = {1,2 * 2};
+    int a[3] = {b[0],2 * 2,b[0] * 2};
+    int i[2][2] = {{1,1},{1,1}};
+    return try2(b[0]);
+}
+
+int try4() {
+  return 1;
+}
+
 int main() {
-    const int a[1] = {a};
+    const int b[2] = {1,2 * 2};
+    int a[3] = {b[0],2 * 2,-b[0] * 2};
+    a[0] = 5;
+    int g[2][2] = {{1,1},{1,1}};
+    int c = try4();
+    c = try4();
+    c = getint();
+    c = try3(c,2,3,4,g,g[1]);
+    printf("123%d21%d\n",1,2);
     return 1;
 }

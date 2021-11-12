@@ -5,4 +5,5 @@ public enum DeclType {
     CONST,
     FUNC,
     PARAM,
+    TEMP,
 }

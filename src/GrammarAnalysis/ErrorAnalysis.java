@@ -75,7 +75,7 @@ public class ErrorAnalysis {
             Iterator iterator = errorList.iterator();
             while (iterator.hasNext()) {
                 Error error = (Error) iterator.next();
-                writer.write(String.format("%d %c\n",error.getLine(),error.getErrorCode()));
+                writer.write(error.getMsg() + " " + String.format("%d %c\n",error.getLine(),error.getErrorCode()));
             }
             writer.flush();
             writer.close();

@@ -1,6 +1,9 @@
 package ASTNode;
 
 import Enum.*;
+import MidCodeGeneration.MidCodeEntry;
+import MidCodeGeneration.MidCodeGener;
+
 import java.util.ArrayList;
 
 public class MulExp extends Node {
@@ -60,5 +63,32 @@ public class MulExp extends Node {
         } else {
             calTypes.add(CalType.mod);
         }
+    }
+
+    @Override
+    public String genMidCode() {
+        String temp1 = UnaryExps.get(0).genMidCode();
+        for (int i = 1;i < UnaryExps.size();i++) {
+            String temp2 = UnaryExps.get(i).genMidCode();
+            CalType calType = calTypes.get(i - 1);
+            String temp3 = MidCodeGener.genTemp();
+            OpType op = null;
+            if (calType == CalType.mul) {
+                op = OpType.MULT;
+            } else if (calType == CalType.div) {
+                op = OpType.DIV;
+            } else {
+                op = OpType.MOD;
+            }
+            MidCodeGener.addMidCodeEntry(new MidCodeEntry(
+                    op,
+                    temp1,
+                    temp2,
+                    null,
+                    temp3
+            ));
+            temp1 = temp3;
+        }
+        return temp1;
     }
 }

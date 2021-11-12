@@ -11,6 +11,7 @@ import java.util.Iterator;
 public class MidCodeGener {
     private FileWriter writer;
     private static ArrayList<MidCodeEntry> midCodeList = new ArrayList<>();
+    private static ArrayList<Str> strList = new ArrayList<>();
     private static SymbolTable symbolTable = new SymbolTable();
     private static int layer = 0;
 
@@ -33,7 +34,14 @@ public class MidCodeGener {
 
     public void saveMidCode() {
         try {
-            Iterator iterator = midCodeList.iterator();
+            writer.write("########################################ASCIIZ START########################################\n");
+            Iterator iterator = strList.iterator();
+            while (iterator.hasNext()) {
+                Str str = (Str) iterator.next();
+                writer.write(str.toString() + "\n");
+            }
+            writer.write("########################################ASCIIZ END########################################\n");
+            iterator = midCodeList.iterator();
             while (iterator.hasNext()) {
                 MidCodeEntry midCodeEntry = (MidCodeEntry) iterator.next();
                 writer.write(midCodeEntry.toString() + "\n");
@@ -75,11 +83,15 @@ public class MidCodeGener {
         //重置sp
     }
 
-    public static int getTemp_num() {
-        return temp_num++;
+    public static String genTemp() {
+        String temp = "T_" + Integer.toString(temp_num++);
+        symbolTable.insertLocalTemp(temp,funcName);
+        return temp;
     }
 
-    public static int getStr_num() {
-        return str_num++;
+    public static String genStr(String content) {
+        String str = "str_" + Integer.toString(str_num++);
+        strList.add(new Str(content,str));
+        return str;
     }
 }

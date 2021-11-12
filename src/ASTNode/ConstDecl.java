@@ -9,6 +9,7 @@ public class ConstDecl extends Node {
     private DeclType declType = DeclType.CONST;
     private BType BType = null;
     private ArrayList<ConstDef> ConstDefs = new ArrayList<>();
+
     public ConstDecl(int pos) {
         super(pos);
     }
@@ -39,10 +40,10 @@ public class ConstDecl extends Node {
     }
 
     @Override
-    public int genMidCode() {
+    public String genMidCode() {
         for (Node constDef:ConstDefs) {
             constDef.genMidCode();
         }
-        return 0;
+        return super.genMidCode();
     }
 }

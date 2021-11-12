@@ -5,7 +5,7 @@ import WordAnalysis.Word;
 import Enum.*;
 
 public class BreakStmt extends Node {
-    public BreakStmt(Word word,int pos) {
+    public BreakStmt(Word word, int pos) {
         super(word,pos);
     }
 

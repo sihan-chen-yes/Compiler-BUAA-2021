@@ -1,7 +1,8 @@
 package Enum;
 
 public enum CalType {
-    add, sub, not,
+    add, sub,
+    not,
     mul,div,mod,
     lt,gt,le,ge,
     eq,neq

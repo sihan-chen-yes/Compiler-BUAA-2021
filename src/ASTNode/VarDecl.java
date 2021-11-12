@@ -40,10 +40,10 @@ public class VarDecl extends Node {
     }
 
     @Override
-    public int genMidCode() {
+    public String genMidCode() {
         for (VarDef varDef:VarDefs) {
             varDef.genMidCode();
         }
-        return 0;
+        return super.genMidCode();
     }
 }

@@ -53,12 +53,13 @@ public class Block extends Node {
     }
 
     @Override
-    public void genMidCode() {
+    public String genMidCode() {
         MidCodeGener.addLayer();
         for (Node item:blockItems) {
             item.genMidCode();
         }
         MidCodeGener.getSymbolTable().removeLocal(MidCodeGener.getLayer(),MidCodeGener.getFuncName());
         MidCodeGener.subLayer();
+        return super.genMidCode();
     }
 }

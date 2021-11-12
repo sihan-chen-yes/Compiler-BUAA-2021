@@ -36,7 +36,7 @@ public class SymbolTableEntry {
         name = Ident.getWord();
     }
 
-    public SymbolTableEntry(Word Ident, DeclType declType, DataType retType,ArrayList<FuncFParam> FParams) {
+    public SymbolTableEntry(Word Ident, DeclType declType, DataType retType, ArrayList<FuncFParam> FParams) {
         //函数声明
         this.Ident = Ident;
         this.declType = declType;
@@ -135,7 +135,7 @@ public class SymbolTableEntry {
     }
 
     public void setSize() {
-        if (declType == DeclType.PARAM) {
+        if (declType == DeclType.PARAM || declType == DeclType.TEMP) {
             //是参数
             if (dataType == DataType.INT || dataType == DataType.INT_ARRAY_1D || dataType == DataType.INT_ARRAY_2D) {
                 size = 4;
@@ -150,6 +150,10 @@ public class SymbolTableEntry {
                 size = length1D * length2D * 4;
             }
         }
+    }
+
+    public void setParamLength2D(int length2D) {
+        this.length2D = length2D;
     }
 
     public void setgpAddr() {

@@ -5,7 +5,7 @@ public class Word {
     private String word;
     private int line;
 
-    public Word(String className,String word,int line) {
+    public Word(String className, String word, int line) {
         this.className = className;
         this.word = word;
         this.line = line;

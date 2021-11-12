@@ -22,4 +22,9 @@ public class FuncRParam extends Node {
     public void checkError() {
         exp.checkError();
     }
+
+    @Override
+    public String genMidCode() {
+        return exp.genMidCode();
+    }
 }

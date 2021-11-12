@@ -1,18 +1,22 @@
 package ASTNode;
 
 import Enum.DataType;
+import Enum.ErrorType;
+import Enum.OpType;
 import GrammarAnalysis.ErrorAnalysis;
 import GrammarAnalysis.SymbolTable;
+import MidCodeGeneration.MidCodeEntry;
+import MidCodeGeneration.MidCodeGener;
 import WordAnalysis.Word;
-import Enum.*;
 
 import java.util.ArrayList;
 
 public class LVal extends Node {
     private ArrayList<Exp> exps = new ArrayList<>();
+    private DataType identType;
     private DataType dataType;
-    private int length1D;
-    private int length2D;
+    private int i;
+    private int j;
 
     public LVal(Word word, int pos) {
         super(word,pos);
@@ -36,14 +40,14 @@ public class LVal extends Node {
         SymbolTable symbolTable = ErrorAnalysis.getSymbolTable();
         int layer = ErrorAnalysis.getLayer();
         if (layer == 0) {
-            dataType = symbolTable.queryGlobalDataType(getName());
-            if (dataType == DataType.UNDEFINED) {
+            identType = symbolTable.queryGlobalDataType(getName());
+            if (identType == DataType.UNDEFINED) {
                 ErrorAnalysis.addError(getLine(), ErrorType.unDef);
-            } else if (dataType == DataType.INT_ARRAY_1D) {
+            } else if (identType == DataType.INT_ARRAY_1D) {
                 if (exps.size() == 1) {
                     dataType = DataType.INT;
                 }
-            } else if (dataType == DataType.INT_ARRAY_2D) {
+            } else if (identType == DataType.INT_ARRAY_2D) {
                 if (exps.size() == 1) {
                     dataType = DataType.INT_ARRAY_1D;
                 } else if (exps.size() == 2) {
@@ -51,18 +55,24 @@ public class LVal extends Node {
                 }
             }
         } else {
-            dataType = symbolTable.queryLocalDataType(getName(),ErrorAnalysis.getFuncName());
-            if (dataType == DataType.UNDEFINED) {
+            identType = symbolTable.queryLocalDataType(getName(),ErrorAnalysis.getFuncName());
+            if (identType == DataType.UNDEFINED) {
                 ErrorAnalysis.addError(getLine(), ErrorType.unDef);
-            } else if (dataType == DataType.INT_ARRAY_1D) {
+            } else if (identType == DataType.INT) {
+                dataType = DataType.INT;
+            } else if (identType == DataType.INT_ARRAY_1D) {
                 if (exps.size() == 1) {
                     dataType = DataType.INT;
+                } else {
+                    dataType = DataType.INT_ARRAY_1D;
                 }
-            } else if (dataType == DataType.INT_ARRAY_2D) {
+            } else if (identType == DataType.INT_ARRAY_2D) {
                 if (exps.size() == 1) {
                     dataType = DataType.INT_ARRAY_1D;
                 } else if (exps.size() == 2) {
                     dataType = DataType.INT;
+                } else {
+                    dataType = DataType.INT_ARRAY_2D;
                 }
             }
         }
@@ -72,19 +82,71 @@ public class LVal extends Node {
     }
 
     public void setLength() {
-        if (dataType == DataType.INT_ARRAY_1D) {
-            length1D = exps.get(0).getValue();
-        } else if (dataType == DataType.INT_ARRAY_2D) {
-            length1D = exps.get(0).getValue();
-            length2D = exps.get(1).getValue();
+        if (identType == DataType.INT_ARRAY_1D) {
+            i = exps.get(0).getValue();
+        } else if (identType == DataType.INT_ARRAY_2D) {
+            i = exps.get(0).getValue();
+            j = exps.get(1).getValue();
         }
     }
 
-    public int getLength1D() {
-        return length1D;
+    public DataType getIdentType() {
+        return identType;
     }
 
-    public int getLength2D() {
-        return length2D;
+    public int getI() {
+        return i;
+    }
+
+    public int getJ() {
+        return j;
+    }
+
+    @Override
+    public String genMidCode() {
+        if (getFather() instanceof UnaryExp) {
+            //只有在右边时产生MidCode
+            String Ident = MidCodeGener.getSymbolTable().getRefactorName(MidCodeGener.getFuncName(),getWord());
+            if (exps.isEmpty()) {
+                return Ident;
+            } else if (exps.size() == 1) {
+                if (dataType == DataType.INT) {
+                    String temp = MidCodeGener.genTemp();
+                    MidCodeGener.addMidCodeEntry(
+                            new MidCodeEntry(
+                                    OpType.LOAD_ARRAY_1D,
+                                    Ident,
+                                    Integer.toString(i),
+                                    null,
+                                    temp));
+                    return temp;
+                } else {
+                    assert dataType == DataType.INT_ARRAY_1D && identType == DataType.INT_ARRAY_2D;
+                    String temp = MidCodeGener.genTemp();//是一个地址
+                    MidCodeGener.addMidCodeEntry(
+                            new MidCodeEntry(
+                                    OpType.LOAD_ARRDESS,
+                                    Ident,
+                                    Integer.toString(i),
+                                    null,
+                                    temp
+                            )
+                    );
+                    return temp;
+                }
+            } else {
+                assert exps.size() == 2 && dataType == DataType.INT;
+                String temp = MidCodeGener.genTemp();
+                MidCodeGener.addMidCodeEntry(
+                        new MidCodeEntry(
+                                OpType.LOAD_ARRAY_2D,
+                                Ident,
+                                Integer.toString(i),
+                                Integer.toString(j),
+                                temp));
+                return temp;
+            }
+        }
+        return super.genMidCode();
     }
 }

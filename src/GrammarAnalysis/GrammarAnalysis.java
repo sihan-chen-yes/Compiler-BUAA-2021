@@ -26,7 +26,7 @@ public class GrammarAnalysis {
 
     private ErrorAnalysis errorAnalysis;
 
-    public GrammarAnalysis(ArrayList<Word> wordList, File outputFile,ErrorAnalysis errorAnalysis) {
+    public GrammarAnalysis(ArrayList<Word> wordList, File outputFile, ErrorAnalysis errorAnalysis) {
         this.wordList = wordList;
         try {
             this.writer = new FileWriter(outputFile);

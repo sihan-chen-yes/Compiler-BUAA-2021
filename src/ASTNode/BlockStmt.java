@@ -22,7 +22,8 @@ public class BlockStmt extends Node {
     }
 
     @Override
-    public void genMidCode() {
+    public String genMidCode() {
         block.genMidCode();
+        return super.genMidCode();
     }
 }

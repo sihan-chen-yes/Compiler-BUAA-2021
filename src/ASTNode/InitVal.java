@@ -53,7 +53,7 @@ public class InitVal extends Node {
         return values2D;
     }
 
-    public int genMidCode() {
+    public String genMidCode() {
         return exp.genMidCode();
     }
 

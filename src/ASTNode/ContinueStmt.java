@@ -4,7 +4,7 @@ import GrammarAnalysis.ErrorAnalysis;
 import WordAnalysis.Word;
 import Enum.*;
 public class ContinueStmt extends Node {
-    public ContinueStmt(Word word,int pos) {
+    public ContinueStmt(Word word, int pos) {
         super(word,pos);
     }
 

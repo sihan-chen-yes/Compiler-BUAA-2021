@@ -13,7 +13,7 @@ public class FuncDef extends Node {
     private FuncFParams funcFParams = null;
     private Block block;
 
-    public FuncDef(Word word,int pos) {
+    public FuncDef(Word word, int pos) {
         super(word,pos);
     }
 
@@ -73,7 +73,7 @@ public class FuncDef extends Node {
     }
 
     @Override
-    public int genMidCode() {
+    public String genMidCode() {
         MidCodeGener.startFuncDef(getName());
         ArrayList<FuncFParam> FParams;
         if (funcFParams == null) {
@@ -86,13 +86,17 @@ public class FuncDef extends Node {
         symbolTable.insertGlobal(symbolTableEntry);
         for (FuncFParam funcFParam:FParams) {
             symbolTableEntry = new SymbolTableEntry(funcFParam.getWord(),
-                    DeclType.PARAM,DataType.INT,MidCodeGener.getLayer());
+                    DeclType.PARAM,funcFParam.getDataType(),MidCodeGener.getLayer());
             symbolTableEntry.setSize();
+            if (funcFParam.getDataType() == DataType.INT_ARRAY_2D) {
+                symbolTableEntry.setParamLength2D(funcFParam.getLength2D());
+            }
+            symbolTable.insertLocal(symbolTableEntry,MidCodeGener.getFuncName());
         }
-        MidCodeGener.addMidCodeEntry(new MidCodeEntry(OpType.FUNC_DECLARE,null,null,getWord()));
+        MidCodeGener.addMidCodeEntry(new MidCodeEntry(OpType.FUNC_DECLARE,null,null,null,getName()));
         block.genMidCode();
         MidCodeGener.getSymbolTable().setLocalAddr(MidCodeGener.getFuncName());
         MidCodeGener.getSymbolTable().refactorName(MidCodeGener.getFuncName());
-        return 0;
+        return super.genMidCode();
     }
 }

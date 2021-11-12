@@ -46,7 +46,7 @@ public class CompUnit extends Node {
         MainFuncDef.checkError();
     }
 
-    public int genMidCode() {
+    public String genMidCode() {
         for (Node decl:Decls) {
             decl.genMidCode();
         }
@@ -54,6 +54,6 @@ public class CompUnit extends Node {
             funcDef.genMidCode();
         }
         MainFuncDef.genMidCode();
-        return 0;
+        return super.genMidCode();
     }
 }

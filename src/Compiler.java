@@ -9,7 +9,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class Compiler {
-    public static void main(String[] args) {
+    public static void main(java.lang.String[] args) {
         File readFile = new File("testfile.txt");
         File outputFile = new File("output.txt");
         File errorFile = new File("error.txt");
@@ -25,6 +25,7 @@ public class Compiler {
         root.checkError();
         if (errorAnalysis.findErrors()) {
             errorAnalysis.saveErrorAnalysis();
+            System.out.println("find errors!");
         } else {
             MidCodeGener midCodeGener = new MidCodeGener(midCodeFile);
             root.genMidCode();

@@ -1,4 +1,7 @@
 package ASTNode;
+import Enum.*;
+import MidCodeGeneration.MidCodeEntry;
+import MidCodeGeneration.MidCodeGener;
 
 public class GetIntStmt extends Node {
     private Node LVal;
@@ -19,5 +22,19 @@ public class GetIntStmt extends Node {
 
     public void checkError() {
         LVal.checkError();
+    }
+
+    @Override
+    public String genMidCode() {
+        String temp = MidCodeGener.genTemp();
+        MidCodeGener.addMidCodeEntry(
+                new MidCodeEntry(
+                        OpType.GETINT,
+                        null,
+                        null,
+                        null,
+                        temp)
+        );
+        return temp;
     }
 }

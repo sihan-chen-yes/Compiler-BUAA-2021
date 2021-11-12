@@ -29,4 +29,9 @@ public class Exp extends Node {
     public int getValue() {
         return AddExp.getValue();
     }
+
+    @Override
+    public String genMidCode() {
+        return AddExp.genMidCode();
+    }
 }

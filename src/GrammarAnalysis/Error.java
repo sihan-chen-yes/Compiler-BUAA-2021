@@ -80,4 +80,8 @@ public class Error implements Comparable {
             return 1;
         }
     }
+
+    public String getMsg() {
+        return msg;
+    }
 }

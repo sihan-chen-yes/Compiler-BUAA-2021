@@ -1,5 +1,7 @@
 package ASTNode;
-import Enum.*;
+import Enum.DataType;
+import Enum.ErrorType;
+import Enum.OpType;
 import GrammarAnalysis.ErrorAnalysis;
 import GrammarAnalysis.SymbolTable;
 import GrammarAnalysis.SymbolTableEntry;
@@ -15,7 +17,7 @@ public class ConstDef extends Node {
     private ConstInitVal ConstInitVal = null;
     private int dim;
 
-    public ConstDef(Word word,int pos) {
+    public ConstDef(Word word, int pos) {
         super(word,pos);
     }
 
@@ -34,7 +36,7 @@ public class ConstDef extends Node {
     }
 
     public void setDataType(DataType type) {
-        if (dataType == DataType.INT) {
+        if (type == DataType.INT) {
             if (dim == 0) {
                 dataType = DataType.INT;
             } else if (dim == 1) {
@@ -100,7 +102,7 @@ public class ConstDef extends Node {
         return ConstInitVal.getValues2D();
     }
 
-    public int genMidCode() {
+    public String genMidCode() {
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         ConstDecl constDecl = (ConstDecl) this.getFather();
         if (MidCodeGener.getLayer() == 0) {
@@ -109,15 +111,49 @@ public class ConstDef extends Node {
                     dataType);
             setEntryInfo(symbolTableEntry,true);
             symbolTable.insertGlobal(symbolTableEntry);
-            MidCodeGener.addMidCodeEntry(new MidCodeEntry(OpType.GLOBAL_DECLARE,null,null,getWord()));
+            MidCodeGener.addMidCodeEntry(new MidCodeEntry(OpType.GLOBAL_DECLARE,null,null,null,getName()));
         } else {
             //局部
             SymbolTableEntry symbolTableEntry = new SymbolTableEntry(getWord(),constDecl.getDeclType(),
                     dataType,MidCodeGener.getLayer());
             setEntryInfo(symbolTableEntry,false);
             symbolTable.insertLocal(symbolTableEntry,MidCodeGener.getFuncName());
+            //Todo 可以优化 const
+            String Ident = getName() + getLine();
+            if (dataType == DataType.INT) {
+                int value = symbolTableEntry.getValue();
+                MidCodeGener.addMidCodeEntry(new MidCodeEntry(OpType.ASSIGN,Ident,null,null,Integer.toString(value)));
+            } else if (dataType == DataType.INT_ARRAY_1D) {
+                ArrayList<Integer> values1D = symbolTableEntry.getValues1D();
+                for (int i = 0;i < values1D.size();i++) {
+                    int value = values1D.get(i);
+                    MidCodeGener.addMidCodeEntry(
+                            new MidCodeEntry(
+                                    OpType.STORE_ARRAY_1D,
+                                    Ident,
+                                    Integer.toString(i),
+                                    null,
+                                    Integer.toString(value)));
+                }
+            } else {
+                ArrayList<ArrayList<Integer>> values2D = symbolTableEntry.getValues2D();
+                for (int i = 0;i < values2D.size();i++) {
+                    ArrayList<Integer> values1D = values2D.get(i);
+                    for (int j = 0;j < values1D.size();i++) {
+                        int value = values1D.get(j);
+                        MidCodeGener.addMidCodeEntry(
+                                new MidCodeEntry(
+                                        OpType.STORE_ARRAY_2D,
+                                        Ident,
+                                        Integer.toString(i),
+                                        Integer.toString(j),
+                                        Integer.toString(value)
+                                        ));
+                    }
+                }
+            }
         }
-        return 0;
+        return super.genMidCode();
     }
 
     public void setEntryInfo(SymbolTableEntry symbolTableEntry,boolean isGlobal) {

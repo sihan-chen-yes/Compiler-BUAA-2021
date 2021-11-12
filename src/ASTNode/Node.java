@@ -7,7 +7,7 @@ public abstract class Node {
     private Node father = null;
     int pos;
 
-    public Node(Word word,int pos) {
+    public Node(Word word, int pos) {
         this.word = word;
         this.pos = pos;
     }
@@ -40,11 +40,11 @@ public abstract class Node {
 
     }
 
-    public int genMidCode() {
-        return 0;
+    public String genMidCode() {
+        return "";
     }
 
-    public String getName() {
+    public java.lang.String getName() {
         return word.getWord();
     }
 }

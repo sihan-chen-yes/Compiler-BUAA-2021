@@ -3,6 +3,8 @@ package ASTNode;
 import Enum.DataType;
 import GrammarAnalysis.ErrorAnalysis;
 import GrammarAnalysis.SymbolTable;
+import MidCodeGeneration.MidCodeEntry;
+import MidCodeGeneration.MidCodeGener;
 import WordAnalysis.Word;
 import Enum.*;
 import java.util.ArrayList;
@@ -10,7 +12,7 @@ import java.util.ArrayList;
 public class FuncCall extends Node {
     private FuncRParams FuncRParams ;
 
-    public FuncCall(Word word,int pos) {
+    public FuncCall(Word word, int pos) {
         super(word,pos);
     }
 
@@ -58,6 +60,34 @@ public class FuncCall extends Node {
                     ErrorAnalysis.addError(getLine(),ErrorType.paramsTypeError);
                 }
             }
+        }
+    }
+
+    @Override
+    public String genMidCode() {
+        MidCodeGener.addMidCodeEntry(new MidCodeEntry(OpType.PREPARE_CALL,null,null,null,getName()));
+        //保存上下文
+        ArrayList<FuncRParam> funcRParams;
+        if (FuncRParams == null) {
+            funcRParams = new ArrayList<>();
+        } else {
+            funcRParams = FuncRParams.getFuncRParams();
+        }
+        int i = 0;
+        for (FuncRParam funcRParam:funcRParams) {
+            MidCodeGener.addMidCodeEntry(
+                    new MidCodeEntry(OpType.PUSH_PARAM,funcRParam.genMidCode(),Integer.toString(i++),null,getName()));
+        }
+        MidCodeGener.addMidCodeEntry(new MidCodeEntry(OpType.CALL,null,null,null,getName()));
+        //拉栈 跳转
+        MidCodeGener.addMidCodeEntry(new MidCodeEntry(OpType.FIN_CALL,null,null,null,getName()));
+        //还原栈 恢复上下文
+        if (getDataType() == DataType.INT) {
+            String temp = MidCodeGener.genTemp();
+            MidCodeGener.addMidCodeEntry(new MidCodeEntry(OpType.STORE_RET,null,null,null,temp));
+            return temp;
+        } else {
+            return super.genMidCode();
         }
     }
 }

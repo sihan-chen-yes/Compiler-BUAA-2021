@@ -15,7 +15,7 @@ public class VarDef extends Node {
     private InitVal InitVal = null;
     private int dim;
 
-    public VarDef(Word word,int pos) {
+    public VarDef(Word word, int pos) {
         super(word,pos);
     }
 
@@ -122,38 +122,61 @@ public class VarDef extends Node {
     }
 
     @Override
-    public void genMidCode() {
+    public String genMidCode() {
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         VarDecl varDecl = (VarDecl) this.getFather();
         //全局
         if (MidCodeGener.getLayer() == 0) {
             SymbolTableEntry symbolTableEntry = new SymbolTableEntry(getWord(),varDecl.getDeclType(),
                     dataType);
-            setEntryInfo(symbolTableEntry,true);
+            setEntryInfo(symbolTableEntry);
             symbolTable.insertGlobal(symbolTableEntry);
             MidCodeGener.addMidCodeEntry(new MidCodeEntry(OpType.GLOBAL_DECLARE,
-                    null,null,getWord()));
+                    null,null,null,getName()));
         } else {
             //局部
             SymbolTableEntry symbolTableEntry = new SymbolTableEntry(getWord(),varDecl.getDeclType(),
                     dataType,MidCodeGener.getLayer());
             setEntryDim(symbolTableEntry);
             symbolTable.insertLocal(symbolTableEntry,MidCodeGener.getFuncName());
-            InitVal.genMidCode();
-            MidCodeEntry midCodeEntry;
+            String Ident = getName() +  getLine();
             if (getDim() == 0) {
-                int temp_num = InitVal.genMidCode();
-                Word T = new Word("TEMP","T", )
-                midCodeEntry = new MidCodeEntry(OpType.ASSIGN,)
+                String temp = InitVal.genMidCode();
+                MidCodeGener.addMidCodeEntry(new MidCodeEntry(OpType.ASSIGN,Ident,null,null,temp));
             } else if (getDim() == 1) {
-
+                ArrayList<InitVal> initVals = InitVal.getInitVals();
+                for (int i = 0;i < initVals.size();i++) {
+                    String temp = initVals.get(i).genMidCode();
+                    MidCodeGener.addMidCodeEntry(
+                            new MidCodeEntry(
+                                    OpType.STORE_ARRAY_1D,
+                                    Ident,
+                                    Integer.toString(i),
+                                    null,
+                                    temp));
+                }
             } else {
                 assert dim == 2;
+                ArrayList<InitVal> initVals2D = InitVal.getInitVals();
+                for (int i = 0;i < initVals2D.size();i++) {
+                    ArrayList<InitVal> initVals1D = initVals2D.get(i).getInitVals();
+                    for (int j = 0;j < initVals1D.size();j++) {
+                        String temp = initVals1D.get(j).genMidCode();
+                        MidCodeGener.addMidCodeEntry(
+                                new MidCodeEntry(
+                                        OpType.STORE_ARRAY_2D,
+                                        Ident,
+                                        Integer.toString(i),
+                                        Integer.toString(j),
+                                        temp));
+                    }
+                }
             }
         }
+        return super.genMidCode();
     }
 
-    public void setEntryInfo(SymbolTableEntry symbolTableEntry,boolean isglobal) {
+    public void setEntryInfo(SymbolTableEntry symbolTableEntry) {
         if (dim == 0) {
             symbolTableEntry.setValue(getValue());
         } else if (dim == 1) {
@@ -166,9 +189,7 @@ public class VarDef extends Node {
             symbolTableEntry.setValues2D(getValues2D());
         }
         symbolTableEntry.setSize();
-        if (isglobal) {
-            symbolTableEntry.setgpAddr();
-        }
+        symbolTableEntry.setgpAddr();
     }
 
     public void setEntryDim(SymbolTableEntry symbolTableEntry) {
