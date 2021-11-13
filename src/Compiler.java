@@ -2,6 +2,7 @@ import ASTNode.CompUnit;
 import GrammarAnalysis.ErrorAnalysis;
 import GrammarAnalysis.GrammarAnalysis;
 import MidCodeGeneration.MidCodeGener;
+import TargetCodeGeneration.TargetCodeGener;
 import WordAnalysis.Word;
 import WordAnalysis.WordAnalysis;
 
@@ -29,9 +30,11 @@ public class Compiler {
         } else {
             MidCodeGener midCodeGener = new MidCodeGener(midCodeFile);
             root.genMidCode();
-            System.out.println("genMidcode OK");
+            System.out.println("genMidcode OK\n");
             midCodeGener.saveMidCode();
-//            TargetCodeGener targetCodeGener = new TargetCodeGener(midCodeGener.getMidCodeList(),targetCodeFile);
+            TargetCodeGener targetCodeGener = new TargetCodeGener(targetCodeFile);
+            targetCodeGener.saveTargetCode();
+            System.out.println("genTargetCode OK\n");
         }
     }
 }

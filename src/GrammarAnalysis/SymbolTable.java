@@ -18,6 +18,7 @@ public class SymbolTable {
     private static int offset_sp = 4;
 
 //错误处理！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+
     public boolean insertGlobal(SymbolTableEntry symbolTableEntry) {
         if (queryGlobalDefined(symbolTableEntry)) {
             return false;
@@ -211,11 +212,11 @@ public class SymbolTable {
         return false;//未定义函数
     }
 //错误处理！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
-    public SymbolTableEntry search_global(Word word) {
-        //生成目标代码
+    public SymbolTableEntry search_global(String name) {
+        //生成目标代码时使用
         SymbolTableEntry symbolTableEntry = null;
         for (int i = global.size() - 1;i >= 0;i--) {
-            if (global.get(i).getName().equals(word.getWord())
+            if (global.get(i).getName().equals(name)
                      && global.get(i).getDeclType() != DeclType.FUNC) {
                 symbolTableEntry = global.get(i);
             }
@@ -224,19 +225,38 @@ public class SymbolTable {
         return symbolTableEntry;
     }
 
-    public SymbolTableEntry search_local(String func, Word word) {
-        //生成目标代码
+    public boolean isGlobal(String name) {
+        return search_global(name) != null;
+    }
+
+    public SymbolTableEntry search_local(String func, String name) {
+        //生成目标代码时使用
         ArrayList<SymbolTableEntry> local = fullFunc.get(func);
         SymbolTableEntry symbolTableEntry = null;
         for (int i = local.size() - 1;i >= 0;i--) {
-            if (local.get(i).getName().equals(word.getWord())) {
+            if (local.get(i).getName().equals(name)) {
                 symbolTableEntry = local.get(i);
                 return symbolTableEntry;
             }
         }
-        symbolTableEntry = search_global(word);
         assert symbolTableEntry != null;
         return symbolTableEntry;
+    }
+
+    public boolean isLocal(String func,String name) {
+        return search_local(func,name) != null;
+    }
+
+    public boolean isNumber(String func,String name) {
+        return !isGlobal(name) && !isLocal(func,name);
+    }
+
+    public int searchOffset_sp(String func,String name) {
+        return search_local(func,name).getOffset_sp();
+    }
+
+    public int searchOffset_gp(String name) {
+        return search_global(name).getOffset_gp();
     }
 
     public SymbolTableEntry searchDefinedEntry(String func, Word word) {
@@ -261,7 +281,12 @@ public class SymbolTable {
     }
 
     public String getRefactorName(String funcName,Word word) {
-        return word.getWord() + searchDefinedEntry(funcName,word).getLine();
+        if (isLocal(funcName,word.getWord())) {
+            return word.getWord() + searchDefinedEntry(funcName,word).getLine();
+        } else {
+            assert isGlobal(word.getWord());
+            return word.getWord();
+        }
     }
 
     public static int getOffset_gp() {
@@ -288,7 +313,7 @@ public class SymbolTable {
     }
 
     public void reset() {
-        offset_sp = 0;
+        offset_sp = 4;
     }
 
     public int getLocalSize(String func) {
@@ -298,11 +323,7 @@ public class SymbolTable {
             size += local.get(i).getSize();
         }
         return size + 4;
-        //最开始还有一个 ra
-    }
-
-    public int getRaAddr(String func) {
-        return getLocalSize(func) - 4;
+        //最底下还有一个 ra
     }
 
     public void refactorName(String func) {
@@ -320,4 +341,6 @@ public class SymbolTable {
         symbolTableEntry.setSize();
         fullFunc.get(funcName).add(symbolTableEntry);
     }
+
+
 }

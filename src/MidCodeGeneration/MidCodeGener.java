@@ -1,7 +1,7 @@
 package MidCodeGeneration;
 
 import GrammarAnalysis.SymbolTable;
-
+import Enum.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -10,6 +10,7 @@ import java.util.Iterator;
 
 public class MidCodeGener {
     private FileWriter writer;
+    private static ArrayList<MidCodeEntry> global = new ArrayList<>();
     private static ArrayList<MidCodeEntry> midCodeList = new ArrayList<>();
     private static ArrayList<Str> strList = new ArrayList<>();
     private static SymbolTable symbolTable = new SymbolTable();
@@ -19,6 +20,10 @@ public class MidCodeGener {
 
     private static int temp_num = 0;
     private static int str_num = 0;
+    private String globalStart = "########################################GLOBAL START########################################\n";
+    private String globalEnd = "########################################GLOBAL END##########################################\n";
+    private String asciizStart = "########################################ASCIIZ START########################################\n";
+    private String asciizEnd = "########################################ASCIIZ END##########################################\n";
 
     public MidCodeGener(File midcodeFile) {
         try {
@@ -28,19 +33,34 @@ public class MidCodeGener {
         }
     }
 
-    public ArrayList<MidCodeEntry> getMidCodeList() {
+    public static ArrayList<MidCodeEntry> getMidCodeList() {
         return midCodeList;
+    }
+
+    public static ArrayList<Str> getStrList() {
+        return strList;
+    }
+
+    public static ArrayList<MidCodeEntry> getGlobal() {
+        return global;
     }
 
     public void saveMidCode() {
         try {
-            writer.write("########################################ASCIIZ START########################################\n");
-            Iterator iterator = strList.iterator();
+            writer.write(globalStart);
+            Iterator iterator = global.iterator();
+            while (iterator.hasNext()) {
+                MidCodeEntry midCodeEntry = (MidCodeEntry) iterator.next();
+                writer.write(midCodeEntry.toString() + "\n");
+            }
+            writer.write(globalEnd);
+            writer.write(asciizStart);
+            iterator = strList.iterator();
             while (iterator.hasNext()) {
                 Str str = (Str) iterator.next();
                 writer.write(str.toString() + "\n");
             }
-            writer.write("########################################ASCIIZ END########################################\n");
+            writer.write(asciizEnd);
             iterator = midCodeList.iterator();
             while (iterator.hasNext()) {
                 MidCodeEntry midCodeEntry = (MidCodeEntry) iterator.next();
@@ -74,13 +94,17 @@ public class MidCodeGener {
     }
 
     public static void addMidCodeEntry(MidCodeEntry midCodeEntry) {
-        midCodeList.add(midCodeEntry);
+        if (midCodeEntry.getOpType() == OpType.GLOBAL_DECLARE) {
+            global.add(midCodeEntry);
+        } else {
+            midCodeList.add(midCodeEntry);
+        }
     }
 
     public static void startFuncDef(String funcName) {
         MidCodeGener.funcName = funcName;
         MidCodeGener.getSymbolTable().reset();
-        //重置sp
+        //生成中间代码时 重置sp
     }
 
     public static String genTemp() {

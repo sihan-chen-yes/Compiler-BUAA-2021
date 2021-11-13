@@ -82,10 +82,6 @@ public class SymbolTableEntry {
         return FParams;
     }
 
-    public int getOffset_gp() {
-        return offset_gp;
-    }
-
     public int getValue() {
         return value;
     }
@@ -166,6 +162,14 @@ public class SymbolTableEntry {
         SymbolTable.setOffset_sp(offset_sp + size);
     }
 
+    public int getOffset_sp() {
+        return offset_sp;
+    }
+
+    public int getOffset_gp() {
+        return offset_gp;
+    }
+
     public int getSize() {
         return size;
     }
@@ -174,4 +178,19 @@ public class SymbolTableEntry {
         name = getName() + Integer.toString(getLine());
     }
 
+    public ArrayList<Integer> getFlattenValues() {
+        ArrayList<Integer> flattenValues = new ArrayList<>();
+        if (dataType == DataType.INT) {
+            flattenValues.add(getValue());
+        } else if (dataType == DataType.INT_ARRAY_1D) {
+            flattenValues = getValues1D();
+        } else {
+            assert dataType == DataType.INT_ARRAY_2D;
+            ArrayList<ArrayList<Integer>> values2D = getValues2D();
+            for (ArrayList<Integer> values1D:values2D) {
+                flattenValues.addAll(values1D);
+            }
+        }
+        return flattenValues;
+    }
 }

@@ -13,4 +13,8 @@ public class Str {
     public String toString() {
         return String.format("%s:%s",strIdent,content);
     }
+
+    public String toTargetCode() {
+        return String.format("%s:.asciiz \"%s\"",strIdent,content);
+    }
 }

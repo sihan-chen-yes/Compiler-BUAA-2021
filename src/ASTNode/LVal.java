@@ -107,8 +107,23 @@ public class LVal extends Node {
         if (getFather() instanceof UnaryExp) {
             //只有在右边时产生MidCode
             String Ident = MidCodeGener.getSymbolTable().getRefactorName(MidCodeGener.getFuncName(),getWord());
+            //全局变量或者局部变量 refactor能够确定
             if (exps.isEmpty()) {
-                return Ident;
+                if (dataType == DataType.INT) {
+                    return Ident;
+                } else {
+                    String temp = MidCodeGener.genTemp();//是一个地址
+                    MidCodeGener.addMidCodeEntry(
+                            new MidCodeEntry(
+                                    OpType.LOAD_ARRDESS,
+                                    Ident,
+                                    null,
+                                    null,
+                                    temp
+                            )
+                    );
+                    return temp;
+                }
             } else if (exps.size() == 1) {
                 if (dataType == DataType.INT) {
                     String temp = MidCodeGener.genTemp();
