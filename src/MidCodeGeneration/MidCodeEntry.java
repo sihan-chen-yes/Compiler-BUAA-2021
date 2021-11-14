@@ -1,5 +1,5 @@
 package MidCodeGeneration;
-import Enum.OpType;
+import Enum.*;
 import GrammarAnalysis.SymbolTable;
 import GrammarAnalysis.SymbolTableEntry;
 
@@ -45,7 +45,11 @@ public class MidCodeEntry {
         } else if (opType == OpType.STORE_ARRAY_2D) {
             midCode = String.format("STORE_ARRAY_2D %s %s %s %s", r1,r2,r3,dst);
         } else if (opType == OpType.LOAD_ARRDESS) {
-            midCode = String.format("LOAD_ADDRESS %s %s %s",r1,r2,dst);
+            if (r2 == null) {
+                midCode = String.format("LOAD_ADDRESS %s %s",r1,dst);
+            } else {
+                midCode = String.format("LOAD_ADDRESS %s %s %s",r1,r2,dst);
+            }
         } else if (opType == OpType.ASSIGN) {
             midCode = String.format("ASSIGN %s %s", r1,dst);
         } else if (opType == OpType.PRINT_STRING) {
@@ -102,49 +106,45 @@ public class MidCodeEntry {
         } else if (opType == OpType.LOAD_ARRAY_1D) {
             tarCode += genLoadArray1D();
         } else if (opType == OpType.STORE_ARRAY_1D) {
-            tarCode = String.format("STORE_ARRAY_1D %s %s %s", r1,r2,dst);
+            tarCode += genStoreArray1D();
         } else if (opType == OpType.LOAD_ARRAY_2D) {
-            tarCode = String.format("LOAD_ARRAY_2D %s %s %s %s", r1,r2,r3,dst);
+            tarCode += genLoadArray2D();
         } else if (opType == OpType.STORE_ARRAY_2D) {
-            tarCode = String.format("STORE_ARRAY_2D %s %s %s %s", r1,r2,r3,dst);
+            tarCode += genStoreArray2D();
         } else if (opType == OpType.LOAD_ARRDESS) {
-            if (r2 == null) {
-                tarCode = String.format("LOAD_ADDRESS %s %s",r1,dst);
-            } else {
-                tarCode = String.format("LOAD_ADDRESS %s %s %s",r1,r2,dst);
-            }
+            tarCode += genLoadAddress();
         } else if (opType == OpType.ASSIGN) {
-            tarCode = String.format("ASSIGN %s %s", r1,dst);
+            tarCode += genAssign();
         } else if (opType == OpType.PRINT_STRING) {
-            tarCode = String.format("PRINT_STRING %s", dst);
+            tarCode += genPrintStr();
         } else if (opType == OpType.PRINT_INT) {
-            tarCode = String.format("PRINT_INT %s",dst);
+            tarCode += genPrintInt();
         } else if (opType == OpType.RET_VALUE) {
-            tarCode = String.format("RET_VALUE %s", dst) + funcEnd;
+            tarCode = String.format("#############RET_VALUE %s#############\n", dst) + genRetValue() + funcEnd;
         } else if (opType == OpType.RET_VOID) {
-            tarCode = String.format("RET_VOID") + funcEnd;
+            tarCode = String.format("#############RET_VOID %s#############\n", dst) + genRetVoid() + funcEnd;
         } else if (opType == OpType.EXIT) {
-            tarCode = String.format("EXIT") + funcEnd;
+            tarCode = String.format("#############EXIT#############\n") + genExit() + funcEnd;
         } else if (opType == OpType.GETINT) {
-            tarCode = String.format("GETINT %s", dst);
+            tarCode += genGetInt();
         } else if (opType == OpType.PREPARE_CALL) {
             tarCode += genPrePareCall();
         } else if (opType == OpType.CALL) {
-            tarCode = String.format("CALL %s", dst);
+            tarCode += genCall();
         } else if (opType == OpType.FIN_CALL) {
-            tarCode = String.format("FIN_CALL %s", dst);
+            tarCode += genFinCall();
         } else if (opType == OpType.ADD) {
-            tarCode = String.format("ADD %s %s %s", r1,r2,dst);
+            tarCode += genAdd();
         } else if (opType == OpType.SUB) {
-            tarCode = String.format("SUB %s %s %s", r1,r2,dst);
+            tarCode += genSub();
         } else if (opType == OpType.MULT) {
-            tarCode = String.format("MULT %s %s %s", r1,r2,dst);
+            tarCode += genMult();
         } else if (opType == OpType.DIV) {
-            tarCode = String.format("DIV %s %s %s", r1,r2,dst);
+            tarCode = genDiv();
         } else if (opType == OpType.MOD) {
-            tarCode = String.format("MOD %s %s %s", r1,r2,dst);
+            tarCode += genMod();
         } else if (opType == OpType.NEG) {
-            tarCode = String.format("NEG %s %s",r1,dst);
+            tarCode += genNeg();
         }
         tarCode += end;
         return tarCode;
@@ -167,21 +167,16 @@ public class MidCodeEntry {
     }
 
     public String genPushParam() {
-        //只可能是常数或者局部变量或者全局变量
+        //只可能是常数或者局部变量或者全局变量 arg
         String tarCode;
         String func = MidCodeGener.getFuncName();
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
-        if (symbolTable.isLocal(func,r1)) {
-            tarCode = String.format("lw $t0,%d($sp)",symbolTable.searchOffset_sp(func,r1));
-            tarCode += "\n";
-            tarCode += String.format("sw $t0,-%d($sp)",(Integer.parseInt(r2) + 1) * 4);
-        } else if (symbolTable.isGlobal(r1)) {
-            tarCode = String.format("lw $t0,%d($gp)",symbolTable.searchOffset_gp(r1));
-            tarCode += "\n";
-            tarCode += String.format("sw $t0,-%d($sp)",(Integer.parseInt(r2) + 1) * 4);
-        } else {
-            assert symbolTable.isNumber(MidCodeGener.getFuncName(),r1);
+        if (symbolTable.isNumber(func,r1)) {
             tarCode = String.format("sw %s,-%d($sp)",r1,(Integer.parseInt(r2) + 1) * 4);
+        } else {
+            tarCode = load(r1);
+            tarCode += "\n";
+            tarCode += String.format("sw $t0,-%d($sp)",(Integer.parseInt(r2) + 1) * 4);
         }
         //Todo 寄存器分配
         assert tarCode != null;
@@ -198,18 +193,55 @@ public class MidCodeEntry {
     }
 
     public String load(String name) {
-
-    }
-
-    public String load1D(String name,int i) {
-        //可能是全局或者局部 加载到t0 后续优化reg
+        //Todo
         String tarCode;
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
         if (symbolTable.isLocal(func,name)) {
             int offset = symbolTable.searchOffset_sp(func,name);
-            offset -= i * 4;
             tarCode = String.format("lw $t0,%d($sp)",offset);
+        } else {
+            assert symbolTable.isGlobal(name);
+            int offset = symbolTable.searchOffset_gp(name);
+            tarCode = String.format("lw $t0,%d($gp)",offset);
+        }
+        return tarCode;
+    }
+
+    public String store(String name) {
+        //Todo
+        String tarCode;
+        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
+        String func = MidCodeGener.getFuncName();
+        if (symbolTable.isLocal(func,name)) {
+            int offset = symbolTable.searchOffset_sp(func,name);
+            tarCode = String.format("sw $t0,%d($sp)",offset);
+        } else {
+            assert symbolTable.isGlobal(name);
+            int offset = symbolTable.searchOffset_gp(name);
+            tarCode = String.format("sw $t0,%d($gp)",offset);
+        }
+        return tarCode;
+    }
+
+    public String load1D(String name,int i) {
+        //Todo
+        //可能是全局或者局部 加载到t0 后续优化reg
+        String tarCode;
+        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
+        String func = MidCodeGener.getFuncName();
+        if (symbolTable.isLocal(func,name)) {
+            if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
+                //参数（存的是地址）
+                tarCode = load(name);
+                tarCode += "\n";
+                int offset_addr = i * 4;
+                tarCode += String.format("lw $t0,%d($t0)",offset_addr);
+            } else {
+                int offset = symbolTable.searchOffset_sp(func,name);
+                offset += i * 4;
+                tarCode = String.format("lw $t0,%d($sp)",offset);
+            }
         } else {
             assert symbolTable.isGlobal(name);
             int offset = symbolTable.searchOffset_gp(name);
@@ -219,15 +251,52 @@ public class MidCodeEntry {
         return tarCode;
     }
 
+    public String load2D(String name,int i,int j) {
+        //Todo
+        String tarCode;
+        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
+        String func = MidCodeGener.getFuncName();
+        if (symbolTable.isLocal(func,name)) {
+            if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
+                tarCode = load(name);
+                tarCode += "\n";
+                int length2D = symbolTable.search_local(func,name).getLength2D();
+                int offset = (i * length2D + j) * 4;
+                tarCode += String.format("lw $t0,%d($t0)",offset);
+            } else {
+                int offset = symbolTable.searchOffset_sp(func,name);
+                int length2D = symbolTable.search_local(func,name).getLength2D();
+                offset += (i * length2D + j) * 4;
+                tarCode = String.format("lw $t0,%d($sp)",offset);
+            }
+        } else {
+            assert symbolTable.isGlobal(name);
+            int offset = symbolTable.searchOffset_gp(name);
+            int length2D = symbolTable.search_global(name).getLength2D();
+            offset += (i * length2D + j) * 4;
+            tarCode = String.format("lw $t0,%d($gp)",offset);
+        }
+        return tarCode;
+    }
+
     public String store1D(String name,int i) {
+        //Todo
         //先都用t0 后续优化reg
         String tarCode;
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
         if (symbolTable.isLocal(func,name)) {
-            int offset = symbolTable.searchOffset_sp(func,name);
-            offset -= i * 4;
-            tarCode = String.format("sw $t0,%d($sp)",offset);
+            if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
+                //参数（存的是地址）
+                tarCode = load(name);
+                tarCode += "\n";
+                int offset_addr = i * 4;
+                tarCode += String.format("sw $t0,%d($t0)",offset_addr);
+            } else {
+                int offset = symbolTable.searchOffset_sp(func,name);
+                offset += i * 4;
+                tarCode = String.format("sw $t0,%d($sp)",offset);
+            }
         } else {
             assert symbolTable.isGlobal(name);
             int offset = symbolTable.searchOffset_gp(name);
@@ -237,52 +306,210 @@ public class MidCodeEntry {
         return tarCode;
     }
 
-    public String genLoadArray1D() {
+    public String store2D(String name,int i,int j) {
+        //Todo
+        //先都用t0 后续优化reg
         String tarCode;
-        tarCode = load1D(r1,Integer.parseInt(r1)) + "\n" + store1D(dst,)
-        tarCode +=
-        //Todo 可以优化
+        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
+        String func = MidCodeGener.getFuncName();
+        if (symbolTable.isLocal(func,name)) {
+            if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
+                tarCode = load(name);//得到地址
+                tarCode += "\n";
+                int length2D = symbolTable.search_local(func,name).getLength2D();
+                int offset = (i * length2D + j) * 4;
+                tarCode += String.format("sw $t0,%d($t0)",offset);
+            } else {
+                int offset = symbolTable.searchOffset_sp(func,name);
+                int length2D = symbolTable.search_local(func,name).getLength2D();
+                offset += (i * length2D + j) * 4;
+                tarCode = String.format("sw $t0,%d($sp)",offset);
+            }
+        } else {
+            assert symbolTable.isGlobal(name);
+            int offset = symbolTable.searchOffset_gp(name);
+            int length2D = symbolTable.search_global(name).getLength2D();
+            offset += (i * length2D + j) * 4;
+            tarCode = String.format("sw $t0,%d($gp)",offset);
+        }
+        return tarCode;
     }
 
-//    public String genStoreArray1D() {
-//
-//    }
-//
-//    public String genLoadArray2D() {
-//
-//    }
-//
-//    public String genStoreArray2D() {
-//
-//    }
-//
-//    public String genLoadAddress() {
-//
-//    }
-//
-//    public String genAssign() {
-//
-//    }
-//
-//    public String genPrintStr() {
-//
-//    }
-//
-//    public String genPrintInt() {
-//
-//    }
-//
-//    public String genRetValue() {
-//
-//    }
-//
-//    public String genRetVoid() {
-//
-//    }
-//
-//    public String genGetInt() {
-//
-//    }
+    public String genLoadArray1D() {
+        String tarCode;
+        tarCode = load1D(r1,Integer.parseInt(r2));
+        tarCode += "\n";
+        tarCode += store(dst);
+        //Todo 可以优化
+        return tarCode;
+    }
+
+    public String genStoreArray1D() {
+        String tarCode;
+        //Todo 此处可优化
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
+            tarCode = String.format("li $t0,%s",dst);
+        } else {
+            tarCode = load(dst);
+        }
+        tarCode += "\n";
+        tarCode += store1D(r1,Integer.parseInt(r2));
+        return tarCode;
+    }
+
+    public String genLoadArray2D() {
+        String tarCode;
+        tarCode = load2D(r1,Integer.parseInt(r2),Integer.parseInt(r3));
+        tarCode += "\n";
+        tarCode += store(dst);
+        return tarCode;
+    }
+
+    public String genStoreArray2D() {
+        String tarCode;
+        //Todo 此处可优化
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
+            tarCode = String.format("li $t0,%s",dst);
+        } else {
+            tarCode = load(dst);
+        }
+        tarCode += "\n";
+        tarCode += store2D(r1,Integer.parseInt(r2),Integer.parseInt(r3));
+        return tarCode;
+    }
+
+    public String genLoadAddress() {
+        String tarCode;
+        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
+        String func = MidCodeGener.getFuncName();
+        if (r2 == null) {
+            if (symbolTable.isLocal(func,r1)) {
+                if (symbolTable.search_local(func,r1).getDeclType() == DeclType.PARAM) {
+                    tarCode = load(r1);
+                    tarCode += "\n";
+                    tarCode += store(dst);
+                } else {
+                    int offset_sp = symbolTable.searchOffset_sp(func,r1);
+                    tarCode = String.format("addiu $t0,$sp,%d",offset_sp);
+                    //算出地址
+                    tarCode += "\n";
+                    tarCode += store(dst);
+                }
+            } else {
+                assert symbolTable.isGlobal(r1);
+                int offset_gp = symbolTable.searchOffset_gp(r1);
+                tarCode = String.format("addiu $t0,$gp,%d",offset_gp);
+                //算出地址
+                tarCode += "\n";
+                tarCode += store(dst);
+            }
+        } else {
+            if (symbolTable.isLocal(func,r1)) {
+                if (symbolTable.search_local(func,r1).getDeclType() == DeclType.PARAM) {
+                    tarCode = load(r1);
+                    //参数中的地址 放在t0
+                    tarCode += "\n";
+                    int length2D = symbolTable.search_local(func,r1).getLength2D();
+                    int offset = 4 * (length2D * Integer.parseInt(r2));
+                    tarCode += String.format("addiu $t0,$t0,%d",offset);
+                    tarCode += "\n";
+                    tarCode += store(dst);
+                } else {
+                    int offset_sp = symbolTable.searchOffset_sp(func,r1);
+                    int length2D = symbolTable.search_local(func,r1).getLength2D();
+                    offset_sp += 4 * (length2D * Integer.parseInt(r2));
+                    tarCode = String.format("addiu $t0,$sp,%d",offset_sp);
+                    //算出地址
+                    tarCode += "\n";
+                    tarCode += store(dst);
+                }
+            } else {
+                assert symbolTable.isGlobal(r1);
+                int offset_gp = symbolTable.searchOffset_gp(r1);
+                int length2D = symbolTable.search_local(func,dst).getLength2D();
+                offset_gp += 4 * (length2D * Integer.parseInt(r2));
+                tarCode = String.format("addiu $t0,$gp,%d",offset_gp);
+                //算出地址
+                tarCode += "\n";
+                tarCode += store(dst);
+            }
+        }
+        return tarCode;
+    }
+
+    public String genAssign() {
+        String tarCode;
+        //Todo 此处可优化
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
+            tarCode = String.format("li $t0,%s",dst);
+        } else {
+            tarCode = load(dst);
+        }
+        tarCode += "\n";
+        tarCode += store(r1);
+        return tarCode;
+    }
+
+    public String genPrintStr() {
+        //Todo 寄存器冲突
+        String tarCode;
+        tarCode = String.format("la $a0,%s",dst);
+        tarCode += "\n";
+        tarCode += String.format("li $v0,4");
+        tarCode += "\n";
+        tarCode += String.format("syscall");
+        return tarCode;
+    }
+
+    public String genPrintInt() {
+        String tarCode;
+        //Todo 此处可优化
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
+            tarCode = String.format("li $t0,%s",dst);
+        } else {
+            tarCode = load(dst);
+        }
+        tarCode += "\n";
+        tarCode += String.format("move $a0,$t0");
+        tarCode += "\n";
+        tarCode += String.format("li $v0,1");
+        tarCode += "\n";
+        tarCode += String.format("syscall");
+        return tarCode;
+    }
+
+    public String genRetValue() {
+        String tarCode;
+        //Todo 此处可优化
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
+            tarCode = String.format("li $t0,%s",dst);
+        } else {
+            tarCode = load(dst);
+        }
+        tarCode += "\n";
+        tarCode += String.format("move $v0,$t0");
+        tarCode += "\n";
+        tarCode += String.format("jr $ra");
+        return tarCode;
+    }
+
+    public String genRetVoid() {
+        String tarCode;
+        tarCode = String.format("jr $ra");
+        return tarCode;
+    }
+
+    public String genGetInt() {
+        String tarCode;
+        tarCode = String.format("li $v0,5");
+        tarCode += "\n";
+        tarCode += String.format("syscall");
+        tarCode += "\n";
+        tarCode += String.format("move $t0,$v0");
+        tarCode += "\n";
+        tarCode += store(dst);
+        return tarCode;
+    }
 
     public String genPrePareCall() {
         String tarCode = String.format("sw $ra,0($sp)");
@@ -290,43 +517,167 @@ public class MidCodeEntry {
         return tarCode;
     }
 
-//    public String genCall() {
-//
-//    }
-//
-//    public String genFinCall() {
-//
-//    }
-//
-//    public String genExit() {
-//
-//    }
-//
-//    public String genAdd() {
-//
-//
-//    }
-//
-//    public String genSub() {
-//
-//    }
-//
-//    public String genMult() {
-//
-//    }
-//
-//    public String genDiv() {
-//
-//    }
-//
-//    public String genMod() {
-//
-//    }
-//
-//    public String genNeg() {
-//
-//    }
+    public String genCall() {
+        int size = MidCodeGener.getSymbolTable().getLocalSize(dst);
+        String tarCode;
+        tarCode = String.format("subiu $sp,$sp,%d",size);
+        tarCode += "\n";
+        tarCode += String.format("jal %s",dst);
+        return tarCode;
+    }
 
+    public String genFinCall() {
+        //Todo 恢复 s t a
+        int size = MidCodeGener.getSymbolTable().getLocalSize(dst);
+        String tarCode;
+        tarCode = String.format("addiu $sp,$sp,%d",size);
+        tarCode += "\n";
+        tarCode += String.format("lw $ra,0($sp)");
+        return tarCode;
+    }
 
+    public String genExit() {
+        String tarCode;
+        tarCode = String.format("li $v0,10");
+        tarCode += "\n";
+        tarCode += String.format("syscall");
+        return tarCode;
+    }
+
+    public String loadSec(String name) {
+        String tarCode;
+        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
+        String func = MidCodeGener.getFuncName();
+        if (symbolTable.isLocal(func,name)) {
+            int offset = symbolTable.searchOffset_sp(func,name);
+            tarCode = String.format("lw $t1,%d($sp)",offset);
+        } else {
+            assert symbolTable.isGlobal(name);
+            int offset = symbolTable.searchOffset_gp(name);
+            tarCode = String.format("lw $t1,%d($gp)",offset);
+        }
+        return tarCode;
+    }
+
+    public String genAdd() {
+        String tarCode;
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+            tarCode = String.format("li $t0,%s",r1);
+        } else {
+            tarCode = load(r1);
+        }
+        tarCode += "\n";
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
+            tarCode += String.format("li $t1,%s",r2);
+        } else {
+            tarCode += loadSec(r2);
+        }
+        tarCode += "\n";
+        tarCode += String.format("addu $t0,$t0,$t1");
+        tarCode += "\n";
+        tarCode += store(dst);
+        return tarCode;
+    }
+
+    public String genSub() {
+        String tarCode;
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+            tarCode = String.format("li $t0,%s",r1);
+        } else {
+            tarCode = load(r1);
+        }
+        tarCode += "\n";
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
+            tarCode += String.format("li $t1,%s",r2);
+        } else {
+            tarCode += loadSec(r2);
+        }
+        tarCode += "\n";
+        tarCode += String.format("subu $t0,$t0,$t1");
+        tarCode += "\n";
+        tarCode += store(dst);
+        return tarCode;
+    }
+
+    public String genMult() {
+        String tarCode;
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+            tarCode = String.format("li $t0,%s",r1);
+        } else {
+            tarCode = load(r1);
+        }
+        tarCode += "\n";
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
+            tarCode += String.format("li $t1,%s",r2);
+        } else {
+            tarCode += loadSec(r2);
+        }
+        tarCode += "\n";
+        tarCode += String.format("mult $t0,$t1");
+        tarCode += "\n";
+        tarCode += String.format("mflo $t0");
+        tarCode += "\n";
+        tarCode += store(dst);
+        return tarCode;
+    }
+
+    public String genDiv() {
+        String tarCode;
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+            tarCode = String.format("li $t0,%s",r1);
+        } else {
+            tarCode = load(r1);
+        }
+        tarCode += "\n";
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
+            tarCode += String.format("li $t1,%s",r2);
+        } else {
+            tarCode += loadSec(r2);
+        }
+        tarCode += "\n";
+        tarCode += String.format("div $t0,$t1");
+        tarCode += "\n";
+        tarCode += String.format("mflo $t0");
+        tarCode += "\n";
+        tarCode += store(dst);
+        return tarCode;
+    }
+
+    public String genMod() {
+        String tarCode;
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+            tarCode = String.format("li $t0,%s",r1);
+        } else {
+            tarCode = load(r1);
+        }
+        tarCode += "\n";
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
+            tarCode += String.format("li $t1,%s",r2);
+        } else {
+            tarCode += loadSec(r2);
+        }
+        tarCode += "\n";
+        tarCode += String.format("div $t0,$t1");
+        tarCode += "\n";
+        tarCode += String.format("mfhi $t0");
+        tarCode += "\n";
+        tarCode += store(dst);
+        return tarCode;
+    }
+
+    public String genNeg() {
+        String tarCode;
+        //Todo 此处可优化
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+            tarCode = String.format("li $t0,%s",r1);
+        } else {
+            tarCode = load(r1);
+        }
+        tarCode += "\n";
+        tarCode += String.format("neg $t0,$t0");
+        tarCode += "\n";
+        tarCode += store(dst);
+        return tarCode;
+    }
     //Todo  其他目标代码
 }

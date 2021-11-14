@@ -35,6 +35,14 @@ public class GetIntStmt extends Node {
                         null,
                         temp)
         );
-        return temp;
+        MidCodeGener.addMidCodeEntry(
+                new MidCodeEntry(
+                        OpType.ASSIGN,
+                        MidCodeGener.getSymbolTable().getRefactorName(MidCodeGener.getFuncName(), getLVal().getWord()),
+                        null,null,
+                        temp
+                )
+        );
+        return super.genMidCode();
     }
 }

@@ -1,11 +1,15 @@
 package ASTNode;
 
+import Enum.ErrorType;
+import Enum.OpType;
 import GrammarAnalysis.ErrorAnalysis;
 import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 import WordAnalysis.Word;
-import Enum.*;
+
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PrintStmt extends Node {
     private Word formatWord;
@@ -45,6 +49,7 @@ public class PrintStmt extends Node {
     }
 
     public boolean illegalFormatString() {
+        //转义字符只有\n 一旦出现%必然是%d
         String formatString = formatWord.getWord();
         for (int i = 1;i < formatString.length() - 1;i++) {
             int ASCII = formatString.charAt(i);
@@ -72,16 +77,15 @@ public class PrintStmt extends Node {
     @Override
     public String genMidCode() {
         String formatStr = formatWord.getWord().substring(1,formatWord.getWord().length() - 1);
-        for (String str:formatStr.split("%d")) {
-            MidCodeGener.addMidCodeEntry(
-                    new MidCodeEntry(
-                            OpType.PRINT_STRING,
-                            null,null,null,MidCodeGener.genStr(str)
-                    )
-            );
-        }
-        if (cnt < Exps.size()) {
-            genPrintInt();
+        Pattern pattern = Pattern.compile("%d|[^%]*");
+        Matcher matcher = pattern.matcher(formatStr);
+        while (matcher.find()) {
+            if (matcher.group().equals("%d")) {
+                genPrintInt();
+            } else if (!matcher.group().equals("")){
+                MidCodeGener.addMidCodeEntry(
+                        new MidCodeEntry(OpType.PRINT_STRING,null,null,null,MidCodeGener.genStr(matcher.group())));
+            }
         }
         return super.genMidCode();
     }

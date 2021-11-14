@@ -5,6 +5,7 @@ import Enum.ErrorType;
 import Enum.OpType;
 import GrammarAnalysis.ErrorAnalysis;
 import GrammarAnalysis.SymbolTable;
+import GrammarAnalysis.SymbolTableEntry;
 import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 import WordAnalysis.Word;
@@ -17,6 +18,7 @@ public class LVal extends Node {
     private DataType dataType;
     private int i;
     private int j;
+
 
     public LVal(Word word, int pos) {
         super(word,pos);
@@ -81,7 +83,7 @@ public class LVal extends Node {
         }
     }
 
-    public void setLength() {
+    public void setIndex() {
         if (identType == DataType.INT_ARRAY_1D) {
             i = exps.get(0).getValue();
         } else if (identType == DataType.INT_ARRAY_2D) {
@@ -95,19 +97,46 @@ public class LVal extends Node {
     }
 
     public int getI() {
+        i = exps.get(0).getValue();
         return i;
     }
 
     public int getJ() {
+        j = exps.get(1).getValue();
         return j;
+    }
+
+    public void setDataType() {
+        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
+        SymbolTableEntry symbolTableEntry = symbolTable.searchDefinedEntry(MidCodeGener.getFuncName(),getWord());
+        identType = symbolTableEntry.getDataType();
+        if (identType == DataType.INT) {
+            dataType = DataType.INT;
+        } else if (identType == DataType.INT_ARRAY_1D) {
+            if (exps.size() == 1) {
+                dataType = DataType.INT;
+            } else {
+                dataType = DataType.INT_ARRAY_1D;
+            }
+        } else if (identType == DataType.INT_ARRAY_2D) {
+            if (exps.size() == 1) {
+                dataType = DataType.INT_ARRAY_1D;
+            } else if (exps.size() == 2) {
+                dataType = DataType.INT;
+            } else {
+                dataType = DataType.INT_ARRAY_2D;
+            }
+        }
     }
 
     @Override
     public String genMidCode() {
+        setDataType();
         if (getFather() instanceof UnaryExp) {
             //只有在右边时产生MidCode
             String Ident = MidCodeGener.getSymbolTable().getRefactorName(MidCodeGener.getFuncName(),getWord());
             //全局变量或者局部变量 refactor能够确定
+            refactor(Ident);
             if (exps.isEmpty()) {
                 if (dataType == DataType.INT) {
                     return Ident;
@@ -131,7 +160,7 @@ public class LVal extends Node {
                             new MidCodeEntry(
                                     OpType.LOAD_ARRAY_1D,
                                     Ident,
-                                    Integer.toString(i),
+                                    Integer.toString(getI()),
                                     null,
                                     temp));
                     return temp;
@@ -142,7 +171,7 @@ public class LVal extends Node {
                             new MidCodeEntry(
                                     OpType.LOAD_ARRDESS,
                                     Ident,
-                                    Integer.toString(i),
+                                    Integer.toString(getI()),
                                     null,
                                     temp
                             )
@@ -156,8 +185,8 @@ public class LVal extends Node {
                         new MidCodeEntry(
                                 OpType.LOAD_ARRAY_2D,
                                 Ident,
-                                Integer.toString(i),
-                                Integer.toString(j),
+                                Integer.toString(getI()),
+                                Integer.toString(getJ()),
                                 temp));
                 return temp;
             }

@@ -139,7 +139,7 @@ public class ConstDef extends Node {
                 ArrayList<ArrayList<Integer>> values2D = symbolTableEntry.getValues2D();
                 for (int i = 0;i < values2D.size();i++) {
                     ArrayList<Integer> values1D = values2D.get(i);
-                    for (int j = 0;j < values1D.size();i++) {
+                    for (int j = 0;j < values1D.size();j++) {
                         int value = values1D.get(j);
                         MidCodeGener.addMidCodeEntry(
                                 new MidCodeEntry(

@@ -281,12 +281,14 @@ public class SymbolTable {
     }
 
     public String getRefactorName(String funcName,Word word) {
-        if (isLocal(funcName,word.getWord())) {
-            return word.getWord() + searchDefinedEntry(funcName,word).getLine();
-        } else {
-            assert isGlobal(word.getWord());
-            return word.getWord();
+        //生成中间代码时重命名
+        ArrayList<SymbolTableEntry> locals = funcToDecl.get(funcName);
+        for (int i = locals.size() - 1;i >= 0;i--) {
+            if (locals.get(i).getName().equals(word.getWord())) {
+                return word.getWord() + locals.get(i).getLine();
+            }
         }
+        return word.getWord();
     }
 
     public static int getOffset_gp() {
@@ -319,7 +321,7 @@ public class SymbolTable {
     public int getLocalSize(String func) {
         ArrayList<SymbolTableEntry> local = fullFunc.get(func);
         int size = 0;
-        for (int i = 0;i < local.size() - 1;i++) {
+        for (int i = 0;i < local.size();i++) {
             size += local.get(i).getSize();
         }
         return size + 4;
@@ -328,7 +330,7 @@ public class SymbolTable {
 
     public void refactorName(String func) {
         ArrayList<SymbolTableEntry> local = fullFunc.get(func);
-        for (int i = 0;i < local.size() - 1;i++) {
+        for (int i = 0;i < local.size();i++) {
             if (local.get(i).getDeclType() != DeclType.TEMP) {
                 local.get(i).refactorName();
             }

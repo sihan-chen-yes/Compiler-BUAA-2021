@@ -36,6 +36,10 @@ public abstract class Node {
         return word;
     }
 
+    public void refactor(String name) {
+        word.setWord(name);
+    }
+
     public void checkError() {
 
     }

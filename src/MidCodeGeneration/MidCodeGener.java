@@ -31,6 +31,7 @@ public class MidCodeGener {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        midCodeList.add(new MidCodeEntry(OpType.CALL,null,null,null,"main"));
     }
 
     public static ArrayList<MidCodeEntry> getMidCodeList() {

@@ -140,35 +140,37 @@ public class VarDef extends Node {
             setEntryDim(symbolTableEntry);
             symbolTable.insertLocal(symbolTableEntry,MidCodeGener.getFuncName());
             String Ident = getName() +  getLine();
-            if (getDim() == 0) {
-                String temp = InitVal.genMidCode();
-                MidCodeGener.addMidCodeEntry(new MidCodeEntry(OpType.ASSIGN,Ident,null,null,temp));
-            } else if (getDim() == 1) {
-                ArrayList<InitVal> initVals = InitVal.getInitVals();
-                for (int i = 0;i < initVals.size();i++) {
-                    String temp = initVals.get(i).genMidCode();
-                    MidCodeGener.addMidCodeEntry(
-                            new MidCodeEntry(
-                                    OpType.STORE_ARRAY_1D,
-                                    Ident,
-                                    Integer.toString(i),
-                                    null,
-                                    temp));
-                }
-            } else {
-                assert dim == 2;
-                ArrayList<InitVal> initVals2D = InitVal.getInitVals();
-                for (int i = 0;i < initVals2D.size();i++) {
-                    ArrayList<InitVal> initVals1D = initVals2D.get(i).getInitVals();
-                    for (int j = 0;j < initVals1D.size();j++) {
-                        String temp = initVals1D.get(j).genMidCode();
+            if (InitVal != null) {
+                if (getDim() == 0) {
+                    String temp = InitVal.genMidCode();
+                    MidCodeGener.addMidCodeEntry(new MidCodeEntry(OpType.ASSIGN,Ident,null,null,temp));
+                } else if (getDim() == 1) {
+                    ArrayList<InitVal> initVals = InitVal.getInitVals();
+                    for (int i = 0;i < initVals.size();i++) {
+                        String temp = initVals.get(i).genMidCode();
                         MidCodeGener.addMidCodeEntry(
                                 new MidCodeEntry(
-                                        OpType.STORE_ARRAY_2D,
+                                        OpType.STORE_ARRAY_1D,
                                         Ident,
                                         Integer.toString(i),
-                                        Integer.toString(j),
+                                        null,
                                         temp));
+                    }
+                } else {
+                    assert dim == 2;
+                    ArrayList<InitVal> initVals2D = InitVal.getInitVals();
+                    for (int i = 0;i < initVals2D.size();i++) {
+                        ArrayList<InitVal> initVals1D = initVals2D.get(i).getInitVals();
+                        for (int j = 0;j < initVals1D.size();j++) {
+                            String temp = initVals1D.get(j).genMidCode();
+                            MidCodeGener.addMidCodeEntry(
+                                    new MidCodeEntry(
+                                            OpType.STORE_ARRAY_2D,
+                                            Ident,
+                                            Integer.toString(i),
+                                            Integer.toString(j),
+                                            temp));
+                        }
                     }
                 }
             }
