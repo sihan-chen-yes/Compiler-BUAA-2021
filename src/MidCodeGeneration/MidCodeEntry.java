@@ -193,7 +193,7 @@ public class MidCodeEntry {
     }
 
     public String load(String name) {
-        //Todo
+        //Todo 分配其他reg
         String tarCode;
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
@@ -209,7 +209,7 @@ public class MidCodeEntry {
     }
 
     public String store(String name) {
-        //Todo
+        //Todo 分配其他reg
         String tarCode;
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
@@ -225,7 +225,7 @@ public class MidCodeEntry {
     }
 
     public String load1D(String name,int i) {
-        //Todo
+        //Todo 分配其他reg
         //可能是全局或者局部 加载到t0 后续优化reg
         String tarCode;
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
