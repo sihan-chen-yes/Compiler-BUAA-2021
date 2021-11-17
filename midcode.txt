@@ -1,0 +1,69 @@
+########################################GLOBAL START########################################
+GLOBAL_DECLARE r
+########################################GLOBAL END##########################################
+########################################ASCIIZ START########################################
+########################################ASCIIZ END##########################################
+########################################FUNC START##########################################
+FUNC_DECLARE min
+SLT a2 b2 T_0
+BEQZ T_0 label_1
+LABEL_GEN label_0
+RET_VALUE a2
+########################################FUNC END############################################
+GOTO label_2
+LABEL_GEN label_1
+RET_VALUE b2
+########################################FUNC END############################################
+LABEL_GEN label_2
+RET_VALUE a2
+########################################FUNC END############################################
+########################################FUNC START##########################################
+FUNC_DECLARE scan
+ASSIGN tmp12 0
+GETINT T_1
+ASSIGN tmp12 T_1
+ADD tmp12 0 T_2
+RET_VALUE T_2
+########################################FUNC END############################################
+########################################FUNC START##########################################
+FUNC_DECLARE main
+PREPARE min
+PREPARE min
+PUSH_PARAM r 0 min
+PREPARE scan
+CALL scan
+FIN_CALL scan
+STORE_RET T_3
+PUSH_PARAM T_3 1 min
+CALL min
+FIN_CALL min
+STORE_RET T_4
+PUSH_PARAM T_4 0 min
+PREPARE min
+PREPARE scan
+CALL scan
+FIN_CALL scan
+STORE_RET T_5
+PUSH_PARAM T_5 0 min
+PREPARE min
+PUSH_PARAM r 0 min
+PREPARE scan
+CALL scan
+FIN_CALL scan
+STORE_RET T_6
+PUSH_PARAM T_6 1 min
+CALL min
+FIN_CALL min
+STORE_RET T_7
+PUSH_PARAM T_7 1 min
+CALL min
+FIN_CALL min
+STORE_RET T_8
+PUSH_PARAM T_8 1 min
+CALL min
+FIN_CALL min
+STORE_RET T_9
+ASSIGN b17 T_9
+PRINT_INT b17
+EXIT
+########################################FUNC END############################################

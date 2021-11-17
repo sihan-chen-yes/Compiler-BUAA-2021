@@ -21,6 +21,8 @@ public class MidCodeGener {
     private static int temp_num = 0;
     private static int str_num = 0;
     private static int label_num = 0;
+    private static int stack_size = 0;
+    //距离直接调用函数的stack大小
 
     private String globalStart = "########################################GLOBAL START########################################\n";
     private String globalEnd = "########################################GLOBAL END##########################################\n";
@@ -33,7 +35,6 @@ public class MidCodeGener {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        midCodeList.add(new MidCodeEntry(OpType.CALL,null,null,null,"main"));
     }
 
     public static ArrayList<MidCodeEntry> getMidCodeList() {
@@ -124,5 +125,17 @@ public class MidCodeGener {
 
     public static String genLabel() {
         return String.format("label_%d",label_num++);
+    }
+
+    public static int getStack_size() {
+        return stack_size;
+    }
+
+    public static void addStack_size(int size) {
+        MidCodeGener.stack_size += size;
+    }
+
+    public static void subStack_size(int size) {
+        MidCodeGener.stack_size -= size;
     }
 }

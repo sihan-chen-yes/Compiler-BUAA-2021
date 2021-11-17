@@ -16,8 +16,14 @@ public class LVal extends Node {
     private ArrayList<Exp> exps = new ArrayList<>();
     private DataType identType;
     private DataType dataType;
+    //编译时 下标
+    private int length1D;
+    private int length2D;
+
+    //运行时 下标
     private int i;
     private int j;
+
 
 
     public LVal(Word word, int pos) {
@@ -85,10 +91,10 @@ public class LVal extends Node {
 
     public void setIndex() {
         if (identType == DataType.INT_ARRAY_1D) {
-            i = exps.get(0).getValue();
+            length1D = exps.get(0).getValue();
         } else if (identType == DataType.INT_ARRAY_2D) {
-            i = exps.get(0).getValue();
-            j = exps.get(1).getValue();
+            length1D = exps.get(0).getValue();
+            length2D = exps.get(1).getValue();
         }
     }
 
@@ -96,14 +102,22 @@ public class LVal extends Node {
         return identType;
     }
 
-    public int getI() {
-        i = exps.get(0).getValue();
-        return i;
+    public int getLength1D() {
+        length1D = exps.get(0).getValue();
+        return length1D;
     }
 
-    public int getJ() {
-        j = exps.get(1).getValue();
-        return j;
+    public int getLength2D() {
+        length2D = exps.get(1).getValue();
+        return length2D;
+    }
+
+    public String getI() {
+        return exps.get(0).genMidCode();
+    }
+
+    public String getJ() {
+        return exps.get(1).genMidCode();
     }
 
     public void setDataType() {
@@ -128,6 +142,7 @@ public class LVal extends Node {
             }
         }
     }
+
 
     @Override
     public String genMidCode() {
@@ -160,7 +175,7 @@ public class LVal extends Node {
                             new MidCodeEntry(
                                     OpType.LOAD_ARRAY_1D,
                                     Ident,
-                                    Integer.toString(getI()),
+                                    getI(),
                                     null,
                                     temp));
                     return temp;
@@ -171,7 +186,7 @@ public class LVal extends Node {
                             new MidCodeEntry(
                                     OpType.LOAD_ARRDESS,
                                     Ident,
-                                    Integer.toString(getI()),
+                                    getI(),
                                     null,
                                     temp
                             )
@@ -185,8 +200,8 @@ public class LVal extends Node {
                         new MidCodeEntry(
                                 OpType.LOAD_ARRAY_2D,
                                 Ident,
-                                Integer.toString(getI()),
-                                Integer.toString(getJ()),
+                                getI(),
+                                getJ(),
                                 temp));
                 return temp;
             }

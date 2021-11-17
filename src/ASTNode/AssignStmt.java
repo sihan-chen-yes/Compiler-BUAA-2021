@@ -59,7 +59,7 @@ public class AssignStmt extends Node {
                     new MidCodeEntry (
                             OpType.STORE_ARRAY_1D,
                             MidCodeGener.getSymbolTable().getRefactorName(MidCodeGener.getFuncName(), lval.getWord()),
-                            Integer.toString(lval.getI()),
+                            Integer.toString(lval.getLength1D()),
                             null,
                             exp.genMidCode()
                     )
@@ -70,8 +70,8 @@ public class AssignStmt extends Node {
                     new MidCodeEntry (
                             OpType.STORE_ARRAY_2D,
                             MidCodeGener.getSymbolTable().getRefactorName(MidCodeGener.getFuncName(), lval.getWord()),
-                            Integer.toString(lval.getI()),
-                            Integer.toString(lval.getJ()),
+                            Integer.toString(lval.getLength1D()),
+                            Integer.toString(lval.getLength2D()),
                             exp.genMidCode()
                     )
             );

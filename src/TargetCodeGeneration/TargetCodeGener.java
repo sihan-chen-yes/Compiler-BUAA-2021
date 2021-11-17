@@ -39,6 +39,10 @@ public class TargetCodeGener {
             genGlobal();
             genStr();
             writer.write(text);
+            writer.write(String.format("subiu $sp,$sp,%d",MidCodeGener.getSymbolTable().getLocalSize("main") - 4));
+            writer.write("\n");
+            writer.write("j main");
+            writer.write("\n");
             Iterator iterator = midCodeList.iterator();
             while (iterator.hasNext()) {
                 MidCodeEntry midCodeEntry = (MidCodeEntry) iterator.next();

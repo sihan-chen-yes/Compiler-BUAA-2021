@@ -55,9 +55,9 @@ public class UnaryExp extends Node {
             if (((LVal) unary).getBrackNum() == 0) {
                 value = symbolTableEntry.getValue();
             } else if (((LVal) unary).getBrackNum() == 1) {
-                value = symbolTableEntry.getValue1D(((LVal) unary).getI());
+                value = symbolTableEntry.getValue1D(((LVal) unary).getLength1D());
             } else {
-                value = symbolTableEntry.getValue2D(((LVal) unary).getI(),((LVal) unary).getJ());
+                value = symbolTableEntry.getValue2D(((LVal) unary).getLength1D(),((LVal) unary).getLength2D());
             }
         }
         for (int i = 0;i < calTypes.size();i++) {

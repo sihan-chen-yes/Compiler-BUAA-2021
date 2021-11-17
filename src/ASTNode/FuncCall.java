@@ -1,12 +1,14 @@
 package ASTNode;
 
 import Enum.DataType;
+import Enum.ErrorType;
+import Enum.OpType;
 import GrammarAnalysis.ErrorAnalysis;
 import GrammarAnalysis.SymbolTable;
 import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 import WordAnalysis.Word;
-import Enum.*;
+
 import java.util.ArrayList;
 
 public class FuncCall extends Node {
@@ -73,10 +75,16 @@ public class FuncCall extends Node {
         } else {
             funcRParams = FuncRParams.getFuncRParams();
         }
-        int i = 0;
-        for (FuncRParam funcRParam:funcRParams) {
+        int cnt = 0;
+        for (int i = funcRParams.size() - 1;i >= 0;i--) {
             MidCodeGener.addMidCodeEntry(
-                    new MidCodeEntry(OpType.PUSH_PARAM,funcRParam.genMidCode(),Integer.toString(i++),null,getName()));
+                    new MidCodeEntry(
+                            OpType.PUSH_PARAM,
+                            funcRParams.get(i).genMidCode(),
+                            Integer.toString(cnt++),null,
+                            getName()
+                    )
+            );
         }
         MidCodeGener.addMidCodeEntry(new MidCodeEntry(OpType.CALL,null,null,null,getName()));
         //拉栈 跳转
