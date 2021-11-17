@@ -84,6 +84,28 @@ public class MidCodeEntry {
             midCode = String.format("MOD %s %s %s", r1,r2,dst);
         } else if (opType == OpType.NEG) {
             midCode = String.format("NEG %s %s",r1,dst);
+        } else if (opType == OpType.SLT) {
+            midCode = String.format("SLT %s %s %s",r1,r2,dst);
+        } else if (opType == OpType.SGT) {
+            midCode = String.format("SGT %s %s %s",r1,r2,dst);
+        } else if (opType == OpType.SLE) {
+            midCode = String.format("SLE %s %s %s",r1,r2,dst);
+        } else if (opType == OpType.SGE) {
+            midCode = String.format("SGE %s %s %s",r1,r2,dst);
+        } else if (opType == OpType.SNE) {
+            midCode = String.format("SNE %s %s %s",r1,r2,dst);
+        } else if (opType == OpType.SEQ) {
+            midCode = String.format("SEQ %s %s %s",r1,r2,dst);
+        } else if (opType == OpType.NOT) {
+            midCode = String.format("NOT %s %s",r1,dst);
+        } else if (opType == OpType.LABEL_GEN) {
+            midCode = String.format("LABEL_GEN %s",dst);
+        } else if (opType == OpType.BEQZ) {
+            midCode = String.format("BEQZ %s %s",r1,dst);
+        } else if (opType == OpType.BNEZ) {
+            midCode = String.format("BNEZ %s %s",r1,dst);
+        } else if (opType == OpType.GOTO) {
+            midCode = String.format("GOTO %s",dst);
         }
         return midCode;
         //Todo 其他中间代码
@@ -145,6 +167,29 @@ public class MidCodeEntry {
             tarCode += genMod();
         } else if (opType == OpType.NEG) {
             tarCode += genNeg();
+        } else if (opType == OpType.SLT) {
+            tarCode += genSlt();
+        } else if (opType == OpType.SGT) {
+            tarCode += genSgt();
+        } else if (opType == OpType.SLE) {
+            tarCode += genSle();
+        } else if (opType == OpType.SGE) {
+            tarCode += genSge();
+        } else if (opType == OpType.SEQ) {
+            tarCode += genSeq();
+        } else if (opType == OpType.SNE) {
+            tarCode += genSne();
+        } else if (opType == OpType.NOT) {
+            tarCode += genNot();
+        } else if (opType == OpType.LABEL_GEN) {
+            tarCode += genLabel();
+        } else if (opType == OpType.BEQZ) {
+            tarCode += genBeqz();
+        } else if (opType == OpType.BNEZ) {
+            tarCode += genBnez();
+        } else {
+            assert opType == OpType.GOTO;
+            tarCode += genGoto();
         }
         tarCode += end;
         return tarCode;
@@ -679,5 +724,176 @@ public class MidCodeEntry {
         tarCode += store(dst);
         return tarCode;
     }
-    //Todo  其他目标代码
+
+    public String genSlt() {
+        String tarCode;
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+            tarCode = String.format("li $t0,%s",r1);
+        } else {
+            tarCode = load(r1);
+        }
+        tarCode += "\n";
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
+            tarCode += String.format("li $t1,%s",r2);
+        } else {
+            tarCode += loadSec(r2);
+        }
+        tarCode += "\n";
+        tarCode += String.format("slt $t0,$t0,$t1");
+        tarCode += "\n";
+        tarCode += store(dst);
+        return tarCode;
+    }
+
+    public String genSgt() {
+        String tarCode;
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+            tarCode = String.format("li $t0,%s",r1);
+        } else {
+            tarCode = load(r1);
+        }
+        tarCode += "\n";
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
+            tarCode += String.format("li $t1,%s",r2);
+        } else {
+            tarCode += loadSec(r2);
+        }
+        tarCode += "\n";
+        tarCode += String.format("sgt $t0,$t0,$t1");
+        tarCode += "\n";
+        tarCode += store(dst);
+        return tarCode;
+    }
+
+    public String genSge() {
+        String tarCode;
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+            tarCode = String.format("li $t0,%s",r1);
+        } else {
+            tarCode = load(r1);
+        }
+        tarCode += "\n";
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
+            tarCode += String.format("li $t1,%s",r2);
+        } else {
+            tarCode += loadSec(r2);
+        }
+        tarCode += "\n";
+        tarCode += String.format("slt $t0,$t0,$t1");
+        tarCode += "\n";
+        //取反
+        tarCode += String.format("seq $t0,$t0,$0");
+        tarCode += "\n";
+        tarCode += store(dst);
+        return tarCode;
+    }
+
+    public String genSle() {
+        String tarCode;
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+            tarCode = String.format("li $t0,%s",r1);
+        } else {
+            tarCode = load(r1);
+        }
+        tarCode += "\n";
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
+            tarCode += String.format("li $t1,%s",r2);
+        } else {
+            tarCode += loadSec(r2);
+        }
+        tarCode += "\n";
+        tarCode += String.format("sgt $t0,$t0,$t1");
+        tarCode += "\n";
+        //取反
+        tarCode += String.format("seq $t0,$t0,$0");
+        tarCode += "\n";
+        tarCode += store(dst);
+        return tarCode;
+    }
+
+    public String genSne() {
+        String tarCode;
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+            tarCode = String.format("li $t0,%s",r1);
+        } else {
+            tarCode = load(r1);
+        }
+        tarCode += "\n";
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
+            tarCode += String.format("li $t1,%s",r2);
+        } else {
+            tarCode += loadSec(r2);
+        }
+        tarCode += "\n";
+        tarCode += String.format("sne $t0,$t0,$t1");
+        tarCode += "\n";
+        tarCode += store(dst);
+        return tarCode;
+    }
+
+    public String genSeq() {
+        String tarCode;
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+            tarCode = String.format("li $t0,%s",r1);
+        } else {
+            tarCode = load(r1);
+        }
+        tarCode += "\n";
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
+            tarCode += String.format("li $t1,%s",r2);
+        } else {
+            tarCode += loadSec(r2);
+        }
+        tarCode += "\n";
+        tarCode += String.format("seq $t0,$t0,$t1");
+        tarCode += "\n";
+        tarCode += store(dst);
+        return tarCode;
+    }
+
+    public String genNot() {
+        String tarCode;
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+            tarCode = String.format("li $t0,%s",r1);
+        } else {
+            tarCode = load(r1);
+        }
+        tarCode += "\n";
+        tarCode += String.format("seq $t0,$t0,$0");
+        tarCode += "\n";
+        tarCode += store(dst);
+        return tarCode;
+    }
+
+    public String genLabel() {
+        return String.format("%s:",dst);
+    }
+
+    public String genBeqz() {
+        String tarCode;
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+            tarCode = String.format("li $t0,%s",r1);
+        } else {
+            tarCode = load(r1);
+        }
+        tarCode += "\n";
+        tarCode += String.format("beqz $t0,%s",dst);
+        return tarCode;
+    }
+
+    public String genBnez() {
+        String tarCode;
+        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+            tarCode = String.format("li $t0,%s",r1);
+        } else {
+            tarCode = load(r1);
+        }
+        tarCode += "\n";
+        tarCode += String.format("bnez $t0,%s",dst);
+        return tarCode;
+    }
+
+    public String genGoto() {
+        return String.format("j %s",dst);
+    }
 }

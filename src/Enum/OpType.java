@@ -41,6 +41,7 @@ public enum OpType {
     NOT,
 
     LABEL_GEN,
-    BNE,
+    BEQZ,
+    BNEZ,
     GOTO
 }

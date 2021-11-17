@@ -63,6 +63,7 @@ public class AddExp extends Node {
 
     @Override
     public String genMidCode() {
+        //Todo 之后要做公共子表达式优化 T要用不同的下标
         String temp1 = MulExps.get(0).genMidCode();
         for (int i = 1;i < MulExps.size();i++) {
             String temp2 = MulExps.get(i).genMidCode();

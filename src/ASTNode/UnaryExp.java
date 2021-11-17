@@ -83,15 +83,18 @@ public class UnaryExp extends Node {
 
     @Override
     public String genMidCode() {
-        //Todo
-        int cnt = 0;
+        int cntSub = 0;
+        int cntNot = 0;
         for (CalType calType:calTypes) {
             if (calType == CalType.sub) {
-                cnt++;
+                cntSub++;
+            } else if (calType == CalType.not) {
+                cntNot++;
             }
         }
+        //计算是否需要取反
         String temp = unary.genMidCode();
-        if (cnt % 2 != 0) {
+        if (cntSub % 2 != 0) {
             String dst = MidCodeGener.genTemp();
             MidCodeGener.addMidCodeEntry(
                     new MidCodeEntry(
@@ -102,7 +105,20 @@ public class UnaryExp extends Node {
                             dst
                     )
             );
-            return dst;
+            temp = dst;
+        }
+        if (cntNot % 2 != 0) {
+            String dst = MidCodeGener.genTemp();
+            MidCodeGener.addMidCodeEntry(
+                    new MidCodeEntry(
+                            OpType.NOT,
+                            temp,
+                            null,
+                            null,
+                            dst
+                    )
+            );
+            temp = dst;
         }
         return temp;
     }

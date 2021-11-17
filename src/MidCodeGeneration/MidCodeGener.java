@@ -20,6 +20,8 @@ public class MidCodeGener {
 
     private static int temp_num = 0;
     private static int str_num = 0;
+    private static int label_num = 0;
+
     private String globalStart = "########################################GLOBAL START########################################\n";
     private String globalEnd = "########################################GLOBAL END##########################################\n";
     private String asciizStart = "########################################ASCIIZ START########################################\n";
@@ -118,5 +120,9 @@ public class MidCodeGener {
         String str = "str_" + Integer.toString(str_num++);
         strList.add(new Str(content,str));
         return str;
+    }
+
+    public static String genLabel() {
+        return String.format("label_%d",label_num++);
     }
 }

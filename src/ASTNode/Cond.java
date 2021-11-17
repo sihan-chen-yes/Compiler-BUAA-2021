@@ -16,4 +16,10 @@ public class Cond extends Node {
     public void checkError() {
         LOrExp.checkError();
     }
+
+    @Override
+    public String genMidCode() {
+        LOrExp.genMidCode();
+        return super.genMidCode();
+    }
 }
