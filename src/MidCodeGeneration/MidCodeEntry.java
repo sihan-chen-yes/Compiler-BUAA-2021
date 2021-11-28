@@ -144,7 +144,7 @@ public class MidCodeEntry {
         } else if (opType == OpType.RET_VALUE) {
             tarCode = String.format("#############RET_VALUE %s#############\n", dst) + genRetValue() + funcEnd;
         } else if (opType == OpType.RET_VOID) {
-            tarCode = String.format("#############RET_VOID %s#############\n", dst) + genRetVoid() + funcEnd;
+            tarCode = String.format("#############RET_VOID#############\n") + genRetVoid() + funcEnd;
         } else if (opType == OpType.EXIT) {
             tarCode = String.format("#############EXIT#############\n") + genExit() + funcEnd;
         } else if (opType == OpType.GETINT) {
@@ -220,6 +220,7 @@ public class MidCodeEntry {
         int size = symbolTable.getLocalSize(dst);
         //要调用的函数体的大小
         int arg_offset = size - (Integer.parseInt(r2) + 1) * 4;
+        //压入参数的位置
         if (symbolTable.isNumber(func,r1)) {
             //是常数
             tarCode = String.format("li $t0,%s",r1);
@@ -229,7 +230,7 @@ public class MidCodeEntry {
             //是局部变量
             if (symbolTable.isLocal(func,r1)) {
                 int offset = symbolTable.searchOffset_sp(func,r1);
-                offset += MidCodeGener.getStack_size();
+                //相对于当前sp的offset
                 tarCode = String.format("lw $t0,%d($sp)",offset);
                 tarCode += "\n";
                 tarCode += String.format("sw $t0,%d($sp)",arg_offset);
@@ -258,13 +259,13 @@ public class MidCodeEntry {
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
         int offset = symbolTable.searchOffset_sp(func,dst);
-        offset += MidCodeGener.getStack_size();
         String tarCode = String.format("sw $v0,%d($sp)",offset);
         //Todo 寄存器分配
         return tarCode;
     }
 
     public String load(String name) {
+        //将四元式中的Ident或者常数load到t0
         //Todo 分配其他reg
         String tarCode;
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
@@ -285,6 +286,7 @@ public class MidCodeEntry {
     }
 
     public String store(String name) {
+        //将t0存到对应的Ident中
         //Todo 分配其他reg
         String tarCode;
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
@@ -301,7 +303,7 @@ public class MidCodeEntry {
     }
 
     public String calOffset1D(String i) {
-        // i is T 算出绝对地址 t1
+        // i is T 算出绝对地址 存到t0
         String tarCode;
         tarCode = loadSec(i);
         tarCode += "\n";
@@ -312,7 +314,7 @@ public class MidCodeEntry {
     }
 
     public String calOffset2D(String i, String j, int length2D) {
-        //i j is T t1 t2
+        //i j is T t1 t2 算出绝对地址放到t0
         String tarCode;
         tarCode = loadSec(i);
         tarCode += "\n";
@@ -325,6 +327,23 @@ public class MidCodeEntry {
         tarCode += loadThird(j);
         tarCode += "\n";
         tarCode += String.format("addu $t1,$t1,$t2");
+        tarCode += "\n";
+        tarCode += String.format("sll $t1,$t1,2");
+        tarCode += "\n";
+        tarCode += String.format("addu $t0,$t0,$t1");
+        return tarCode;
+    }
+
+    public String calOffsetAddr(String i,int length2D) {
+        String tarCode;
+        tarCode = loadSec(i);
+        //$t1
+        tarCode += "\n";
+        tarCode += String.format("li $t2,%d",length2D);
+        tarCode += "\n";
+        tarCode += String.format("mult $t1,$t2");
+        tarCode += "\n";
+        tarCode += String.format("mflo $t1");
         tarCode += "\n";
         tarCode += String.format("sll $t1,$t1,2");
         tarCode += "\n";
@@ -346,56 +365,22 @@ public class MidCodeEntry {
                 tarCode += calOffset1D(i);
                 tarCode += "\n";
                 tarCode += String.format("lw $t0,0($t0)");
-//                if (symbolTable.isNumber(func,i)) {
-//                    int offset_addr = Integer.parseInt(i) * 4;
-//                    tarCode += String.format("lw $t0,%d($t0)",offset_addr);
-//                } else {
-//                    tarCode += calOffset1D(i);
-//                    tarCode += "\n";
-//                    tarCode += String.format("addu $t0,$t0,$t1");
-//                    tarCode += "\n";
-//                    tarCode += String.format("lw $t0,0($t0)");
-//                }
             } else {
-                int offset = symbolTable.searchOffset_sp(func,name);
-                tarCode = String.format("addiu $t0,$sp,%d",offset);
+                int offset_sp = symbolTable.searchOffset_sp(func,name);
+                tarCode = String.format("addiu $t0,$sp,%d",offset_sp);
                 tarCode += "\n";
                 tarCode += calOffset1D(i);
                 tarCode += "\n";
                 tarCode += String.format("lw $t0,0($t0)");
-//                if (symbolTable.isNumber(func,i)) {
-//                    offset += Integer.parseInt(i) * 4;
-//                    tarCode = String.format("lw $t0,%d($sp)",offset);
-//                } else {
-//                    tarCode = calOffset1D(i);
-//                    tarCode += "\n";
-//                    tarCode += String.format("addiu $t1,$t1,%d",offset);
-//                    tarCode += "\n";
-//                    tarCode += String.format("addu $t1,$t1,$sp");
-//                    tarCode += "\n";
-//                    tarCode += String.format("lw $t0,0($t1)");
-//                }
             }
         } else {
             assert symbolTable.isGlobal(name);
-            int offset = symbolTable.searchOffset_gp(name);
-            tarCode = String.format("addiu $t0,$gp,%d",offset);
+            int offset_gp = symbolTable.searchOffset_gp(name);
+            tarCode = String.format("addiu $t0,$gp,%d",offset_gp);
             tarCode += "\n";
             tarCode += calOffset1D(i);
             tarCode += "\n";
             tarCode += String.format("lw $t0,0($t0)");
-//            if (symbolTable.isNumber(func,i)) {
-//                offset += Integer.parseInt(i) * 4;
-//                tarCode = String.format("lw $t0,%d($gp)",offset);
-//            } else {
-//                tarCode = calOffset1D(i);
-//                tarCode += "\n";
-//                tarCode += String.format("addiu $t1,$t1,%d",offset);
-//                tarCode += "\n";
-//                tarCode += String.format("addu $t1,$t1,$gp");
-//                tarCode += "\n";
-//                tarCode += String.format("lw $t0,0($t1)");
-//            }
         }
         return tarCode;
     }
@@ -405,36 +390,32 @@ public class MidCodeEntry {
         String tarCode;
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
-        int length2D = symbolTable.search_local(func,name).getLength2D();
+        int length2D;
         if (symbolTable.isLocal(func,name)) {
+            length2D = symbolTable.search_local(func,name).getLength2D();
             if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
                 tarCode = load(name);
                 tarCode += "\n";
                 tarCode += calOffset2D(i,j,length2D);
                 tarCode += "\n";
                 tarCode += String.format("lw $t0,0($t0)");
-//                int offset = (i * length2D + j) * 4;
-//                tarCode += String.format("lw $t0,%d($t0)",offset);
             } else {
-                int offset = symbolTable.searchOffset_sp(func,name);
-                tarCode = String.format("addiu $t0,$sp,%d",offset);
+                int offset_sp = symbolTable.searchOffset_sp(func,name);
+                tarCode = String.format("addiu $t0,$sp,%d",offset_sp);
                 tarCode += "\n";
                 tarCode += calOffset2D(i,j,length2D);
                 tarCode += "\n";
                 tarCode += String.format("lw $t0,0($t0)");
-//                offset += (i * length2D + j) * 4;
-//                tarCode = String.format("lw $t0,%d($sp)",offset);
             }
         } else {
             assert symbolTable.isGlobal(name);
-            int offset = symbolTable.searchOffset_gp(name);
-            tarCode = String.format("addiu $t0,$gp,%d",offset);
+            length2D = symbolTable.search_global(name).getLength2D();
+            int offset_gp = symbolTable.searchOffset_gp(name);
+            tarCode = String.format("addiu $t0,$gp,%d",offset_gp);
             tarCode += "\n";
             tarCode += calOffset2D(i,j,length2D);
             tarCode += "\n";
             tarCode += String.format("lw $t0,0($t0)");
-//            offset += (i * length2D + j) * 4;
-//            tarCode = String.format("lw $t0,%d($gp)",offset);
         }
         return tarCode;
     }
@@ -449,66 +430,33 @@ public class MidCodeEntry {
             if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
                 //参数（存的是地址）
                 tarCode = String.format("move $t3,$t0");
+                //$t0此时已经用了
                 tarCode += "\n";
                 tarCode += load(name);
                 tarCode += "\n";
                 tarCode += calOffset1D(i);
                 tarCode += "\n";
                 tarCode += String.format("sw $t3,0($t0)");
-//                if (symbolTable.isNumber(func,i)) {
-//                    int offset_addr = Integer.parseInt(i) * 4;
-//                    tarCode += String.format("sw $t0,%d($t0)",offset_addr);
-//                } else {
-//                    tarCode += calOffset1D(i);
-//                    tarCode += "\n";
-//                    tarCode += String.format("addu $t0,$t0,$t1");
-//                    tarCode += "\n";
-//                    tarCode += String.format("sw $t0,0($t0)");
-//                }
             } else {
-                int offset = symbolTable.searchOffset_sp(func,name);
+                int offset_sp = symbolTable.searchOffset_sp(func,name);
                 tarCode = String.format("move $t3,$t0");
                 tarCode += "\n";
-                tarCode += String.format("addiu $t0,$sp,%d",offset);
+                tarCode += String.format("addiu $t0,$sp,%d",offset_sp);
                 tarCode += "\n";
                 tarCode += calOffset1D(i);
                 tarCode += "\n";
                 tarCode += String.format("sw $t3,0($t0)");
-//                if (symbolTable.isNumber(func,i)) {
-//                    offset += Integer.parseInt(i) * 4;
-//                    tarCode = String.format("sw $t0,%d($sp)",offset);
-//                } else {
-//                    tarCode = calOffset1D(i);
-//                    tarCode += "\n";
-//                    tarCode += String.format("addiu $t1,$t1,%d",offset);
-//                    tarCode += "\n";
-//                    tarCode += String.format("addu $t1,$t1,$sp");
-//                    tarCode += "\n";
-//                    tarCode += String.format("sw $t0,0($t1)");
-//                }
             }
         } else {
             assert symbolTable.isGlobal(name);
-            int offset = symbolTable.searchOffset_gp(name);
+            int offset_gp = symbolTable.searchOffset_gp(name);
             tarCode = String.format("move $t3,$t0");
             tarCode += "\n";
-            tarCode += String.format("addiu $t0,$gp,%d",offset);
+            tarCode += String.format("addiu $t0,$gp,%d",offset_gp);
             tarCode += "\n";
             tarCode += calOffset1D(i);
             tarCode += "\n";
-            tarCode += String.format("sw $t0,0($t0)");
-//            if (symbolTable.isNumber(func,i)) {
-//                offset += Integer.parseInt(i) * 4;
-//                tarCode = String.format("sw $t0,%d($gp)",offset);
-//            } else {
-//                tarCode = calOffset1D(i);
-//                tarCode += "\n";
-//                tarCode += String.format("addiu $t1,$t1,%d",offset);
-//                tarCode += "\n";
-//                tarCode += String.format("addu $t1,$t1,$gp");
-//                tarCode += "\n";
-//                tarCode += String.format("sw $t0,0($t1)");
-//            }
+            tarCode += String.format("sw $t3,0($t0)");
         }
         return tarCode;
     }
@@ -519,8 +467,9 @@ public class MidCodeEntry {
         String tarCode;
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
-        int length2D = symbolTable.search_local(func,name).getLength2D();
+        int length2D;
         if (symbolTable.isLocal(func,name)) {
+            length2D = symbolTable.search_local(func,name).getLength2D();
             if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
                 tarCode = String.format("move $t3,$t0");
                 tarCode += "\n";
@@ -529,32 +478,28 @@ public class MidCodeEntry {
                 tarCode += calOffset2D(i,j,length2D);
                 tarCode += "\n";
                 tarCode += String.format("sw $t3,0($t0)");
-//                int offset = (i * length2D + j) * 4;
-//                tarCode += String.format("sw $t0,%d($t0)",offset);
             } else {
-                int offset = symbolTable.searchOffset_sp(func,name);
+                int offset_sp = symbolTable.searchOffset_sp(func,name);
                 tarCode = String.format("move $t3,$t0");
                 tarCode += "\n";
-                tarCode += String.format("addiu $t0,$sp,%d",offset);
+                tarCode += String.format("addiu $t0,$sp,%d",offset_sp);
                 tarCode += "\n";
                 tarCode += calOffset2D(i,j,length2D);
                 tarCode += "\n";
                 tarCode += String.format("sw $t3,0($t0)");
-//                offset += (i * length2D + j) * 4;
-//                tarCode = String.format("sw $t0,%d($sp)",offset);
             }
         } else {
             assert symbolTable.isGlobal(name);
-            int offset = symbolTable.searchOffset_gp(name);
+            length2D = symbolTable.search_global(name).getLength2D();
+            int offset_gp = symbolTable.searchOffset_gp(name);
             tarCode = String.format("move $t3,$t0");
             tarCode += "\n";
-            tarCode += String.format("addiu $t0,$gp,%d",offset);
+            tarCode += String.format("addiu $t0,$gp,%d",offset_gp);
             tarCode += "\n";
             tarCode += calOffset2D(i,j,length2D);
             tarCode += "\n";
             tarCode += String.format("sw $t3,0($t0)");
-//            offset += (i * length2D + j) * 4;
-//            tarCode = String.format("sw $t0,%d($gp)",offset);
+
         }
         return tarCode;
     }
@@ -635,15 +580,16 @@ public class MidCodeEntry {
                     //参数中的地址 放在t0
                     tarCode += "\n";
                     int length2D = symbolTable.search_local(func,r1).getLength2D();
-                    int offset = 4 * (length2D * Integer.parseInt(r2));
-                    tarCode += String.format("addiu $t0,$t0,%d",offset);
+                    tarCode += calOffsetAddr(r2,length2D);
+                    //$t0就是地址
                     tarCode += "\n";
                     tarCode += store(dst);
                 } else {
                     int offset_sp = symbolTable.searchOffset_sp(func,r1);
-                    int length2D = symbolTable.search_local(func,r1).getLength2D();
-                    offset_sp += 4 * (length2D * Integer.parseInt(r2));
                     tarCode = String.format("addiu $t0,$sp,%d",offset_sp);
+                    int length2D = symbolTable.search_local(func,r1).getLength2D();
+                    tarCode += "\n";
+                    tarCode += calOffsetAddr(r2,length2D);
                     //算出地址
                     tarCode += "\n";
                     tarCode += store(dst);
@@ -651,9 +597,10 @@ public class MidCodeEntry {
             } else {
                 assert symbolTable.isGlobal(r1);
                 int offset_gp = symbolTable.searchOffset_gp(r1);
-                int length2D = symbolTable.search_local(func,dst).getLength2D();
-                offset_gp += 4 * (length2D * Integer.parseInt(r2));
                 tarCode = String.format("addiu $t0,$gp,%d",offset_gp);
+                int length2D = symbolTable.search_global(r1).getLength2D();
+                tarCode += "\n";
+                tarCode += calOffsetAddr(r2,length2D);
                 //算出地址
                 tarCode += "\n";
                 tarCode += store(dst);
@@ -742,7 +689,7 @@ public class MidCodeEntry {
         tarCode = String.format("sw $ra,0($sp)");
         tarCode += "\n";
         tarCode += String.format("subiu $sp,$sp,%d",size);
-        MidCodeGener.addStack_size(size);
+        MidCodeGener.getSymbolTable().addStack_size(size);
         //Todo save s t a
         return tarCode;
     }
@@ -760,7 +707,7 @@ public class MidCodeEntry {
         tarCode = String.format("addiu $sp,$sp,%d",size);
         tarCode += "\n";
         tarCode += String.format("lw $ra,0($sp)");
-        MidCodeGener.subStack_size(size);
+        MidCodeGener.getSymbolTable().subStack_size(size);
         return tarCode;
     }
 

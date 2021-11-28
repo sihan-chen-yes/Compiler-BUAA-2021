@@ -78,7 +78,7 @@ public class ConstDef extends Node {
     }
 
     public int getLength1D() {
-        assert constExps.size() == 1;
+        assert constExps.size() == 1 || constExps.size() == 2;
         return constExps.get(0).getValue();
     }
 

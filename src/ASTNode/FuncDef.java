@@ -40,10 +40,6 @@ public class FuncDef extends Node {
         return funcFParams.getFuncFParams();
     }
 
-    public Node getBlock() {
-        return block;
-    }
-
     public DataType getFuncType() {
         return funcType.getDataType();
     }
@@ -84,17 +80,25 @@ public class FuncDef extends Node {
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         SymbolTableEntry symbolTableEntry = new SymbolTableEntry(getWord(),DeclType.FUNC,getDataType(),FParams);
         symbolTable.insertGlobal(symbolTableEntry);
-        for (int i = FParams.size() - 1;i >= 0;i--) {
-            symbolTableEntry = new SymbolTableEntry(FParams.get(i).getWord(),
-                    DeclType.PARAM,FParams.get(i).getDataType(),MidCodeGener.getLayer());
+        for (FuncFParam funcFParam:FParams) {
+            symbolTableEntry = new SymbolTableEntry(funcFParam.getWord(),
+                    DeclType.PARAM,funcFParam.getDataType(),MidCodeGener.getLayer());
             symbolTableEntry.setSize();
-            if (FParams.get(i).getDataType() == DataType.INT_ARRAY_2D) {
-                symbolTableEntry.setParamLength2D(FParams.get(i).getLength2D());
+            if (funcFParam.getDataType() == DataType.INT_ARRAY_2D) {
+                symbolTableEntry.setParamLength2D(funcFParam.getLength2D());
             }
             symbolTable.insertLocal(symbolTableEntry,MidCodeGener.getFuncName());
         }
         MidCodeGener.addMidCodeEntry(new MidCodeEntry(OpType.FUNC_DECLARE,null,null,null,getName()));
         block.genMidCode();
+        if (getFuncType() == DataType.VOID) {
+            MidCodeGener.addMidCodeEntry(
+                    new MidCodeEntry(
+                            OpType.RET_VOID,
+                            null,null,null,null
+                    )
+            );
+        }
         MidCodeGener.getSymbolTable().setLocalAddr(MidCodeGener.getFuncName());
         MidCodeGener.getSymbolTable().refactorName(MidCodeGener.getFuncName());
         return super.genMidCode();

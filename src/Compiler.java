@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 public class Compiler {
     public static void main(java.lang.String[] args) {
+        boolean debug = true;
         File readFile = new File("testfile.txt");
         File outputFile = new File("output.txt");
         File errorFile = new File("error.txt");
@@ -35,6 +36,9 @@ public class Compiler {
             TargetCodeGener targetCodeGener = new TargetCodeGener(targetCodeFile);
             targetCodeGener.saveTargetCode();
             System.out.println("genTargetCode OK\n");
+        }
+        if (debug) {
+            MidCodeGener.getSymbolTable().saveSymbleTable();
         }
     }
 }

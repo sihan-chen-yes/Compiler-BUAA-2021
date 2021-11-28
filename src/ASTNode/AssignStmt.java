@@ -28,10 +28,6 @@ public class AssignStmt extends Node {
         return lval;
     }
 
-    public Exp getExp() {
-        return exp;
-    }
-
     @Override
     public void checkError() {
         lval.checkError();
@@ -59,19 +55,19 @@ public class AssignStmt extends Node {
                     new MidCodeEntry (
                             OpType.STORE_ARRAY_1D,
                             MidCodeGener.getSymbolTable().getRefactorName(MidCodeGener.getFuncName(), lval.getWord()),
-                            Integer.toString(lval.getLength1D()),
+                            lval.getI(),
                             null,
                             exp.genMidCode()
                     )
             );
         } else {
-            assert lval.getDataType() == DataType.INT_ARRAY_2D;
+            assert lval.getIdentType() == DataType.INT_ARRAY_2D;
             MidCodeGener.addMidCodeEntry(
                     new MidCodeEntry (
                             OpType.STORE_ARRAY_2D,
                             MidCodeGener.getSymbolTable().getRefactorName(MidCodeGener.getFuncName(), lval.getWord()),
-                            Integer.toString(lval.getLength1D()),
-                            Integer.toString(lval.getLength2D()),
+                            lval.getI(),
+                            lval.getJ(),
                             exp.genMidCode()
                     )
             );

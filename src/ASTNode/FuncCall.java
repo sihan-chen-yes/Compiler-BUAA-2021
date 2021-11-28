@@ -24,10 +24,6 @@ public class FuncCall extends Node {
         this.FuncRParams = (FuncRParams) node;
     }
 
-    public FuncRParams getFuncRParams() {
-        return FuncRParams;
-    }
-
     public DataType getDataType() {
         return ErrorAnalysis.getSymbolTable().queryFuncReturn(getName());
     }
@@ -76,11 +72,11 @@ public class FuncCall extends Node {
             funcRParams = FuncRParams.getFuncRParams();
         }
         int cnt = 0;
-        for (int i = funcRParams.size() - 1;i >= 0;i--) {
+        for (FuncRParam funcRParam:funcRParams) {
             MidCodeGener.addMidCodeEntry(
                     new MidCodeEntry(
                             OpType.PUSH_PARAM,
-                            funcRParams.get(i).genMidCode(),
+                            funcRParam.genMidCode(),
                             Integer.toString(cnt++),null,
                             getName()
                     )

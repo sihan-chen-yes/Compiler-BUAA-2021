@@ -607,7 +607,7 @@ public class GrammarAnalysis {
     }
 
     public Node PrintStmt() {
-        assert getWordClass().equals("PRTINTFTK");
+        assert getWordClass().equals("PRINTFTK");
         PrintStmt node = new PrintStmt(word,pos - 1);
         getWord();
         if (getWordClass().equals("LPARENT")) {
@@ -688,7 +688,7 @@ public class GrammarAnalysis {
     }
 
     public Node LVal() {
-        assert getWordClass().equals("IDENFR");
+//        assert getWordClass().equals("IDENFR"); 假读影响
         LVal node = new LVal(word,pos - 1);
         if (getWordClass().equals("IDENFR")) {
             getWord();

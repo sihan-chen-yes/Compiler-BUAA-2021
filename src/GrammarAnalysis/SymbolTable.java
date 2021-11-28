@@ -3,11 +3,16 @@ package GrammarAnalysis;
 import ASTNode.FuncFParam;
 import Enum.DataType;
 import Enum.DeclType;
+import MidCodeGeneration.MidCodeGener;
 import WordAnalysis.Word;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+
 public class SymbolTable {
     private ArrayList<SymbolTableEntry> global = new ArrayList<>();
     private HashMap<String,ArrayList<SymbolTableEntry>> funcToDecl = new HashMap<>();
@@ -16,6 +21,8 @@ public class SymbolTable {
     //没有remove过的full符号表
     private static int offset_gp = -0x8000;
     private static int offset_sp = 4;
+    private FileWriter writer;
+    private int stack_size = 0;
 
 //错误处理！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
 
@@ -221,7 +228,6 @@ public class SymbolTable {
                 symbolTableEntry = global.get(i);
             }
         }
-        assert symbolTableEntry != null;
         return symbolTableEntry;
     }
 
@@ -239,7 +245,6 @@ public class SymbolTable {
                 return symbolTableEntry;
             }
         }
-        assert symbolTableEntry != null;
         return symbolTableEntry;
     }
 
@@ -252,7 +257,8 @@ public class SymbolTable {
     }
 
     public int searchOffset_sp(String func,String name) {
-        return search_local(func,name).getOffset_sp();
+        //相对于当前sp的offset
+        return search_local(func,name).getOffset_sp() + stack_size;
     }
 
     public int searchOffset_gp(String name) {
@@ -344,5 +350,93 @@ public class SymbolTable {
         fullFunc.get(funcName).add(symbolTableEntry);
     }
 
+    public void saveSymbleTable() {
+        try {
+            this.writer = new FileWriter("symbleTable.txt");
+            Iterator iterator = global.iterator();
+            writer.write("####################Global#####################\n");
+            while (iterator.hasNext()) {
+                SymbolTableEntry symbolTableEntry = (SymbolTableEntry) iterator.next();
+                if (symbolTableEntry.getDeclType() != DeclType.FUNC) {
+                    writer.write(genValueContent(symbolTableEntry,true));
+                    writer.write("\n");
+                }
+            }
+            writer.write("####################Lobal#####################\n");
+            iterator = fullFunc.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, ArrayList> entry = (Map.Entry<String,ArrayList>)iterator.next();
+                ArrayList<SymbolTableEntry> locals = entry.getValue();
+                String content = String.format("%s:%d\n",entry.getKey(),
+                        MidCodeGener.getSymbolTable().getLocalSize(entry.getKey()));
+                writer.write(content);
+                for (SymbolTableEntry symbolTableEntry:locals) {
+                    content = genValueContent(symbolTableEntry,false);
+                    content += "\n";
+                    writer.write(content);
+                }
+            }
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    public void addStack_size(int size) {
+        stack_size += size;
+    }
+
+    public void subStack_size(int size) {
+        stack_size -= size;
+    }
+
+    public String genValueContent(SymbolTableEntry symbolTableEntry,boolean isGlobal) {
+        String content;
+        if (isGlobal) {
+            content = String.format("name:%s,declType:%s,dataType:%s,offset_gp:%d",
+                    symbolTableEntry.getName(),
+                    symbolTableEntry.getDeclType().toString(),
+                    symbolTableEntry.getDataType().toString(),
+                    symbolTableEntry.getOffset_gp());
+            content += "\n";
+            if (symbolTableEntry.getDataType() == DataType.INT) {
+                content += String.format("value:%d",symbolTableEntry.getValue());
+            } else if (symbolTableEntry.getDataType() == DataType.INT_ARRAY_1D) {
+                content += String.format("values1D:{");
+                ArrayList<Integer> values1D = symbolTableEntry.getValues1D();
+                content += String.format("%d",values1D.get(0));
+                for (int i = 1;i < values1D.size();i++) {
+                    content += String.format(",%d",values1D.get(i));
+                }
+                content += String.format("}");
+            } else if (symbolTableEntry.getDataType() == DataType.INT_ARRAY_2D) {
+                content += String.format("values2D:{");
+                ArrayList<ArrayList<Integer>> values2D = symbolTableEntry.getValues2D();
+                for (int i = 0;i < values2D.size();i++) {
+                    ArrayList<Integer> values1D = values2D.get(i);
+                    for (int j = 0;j < values1D.size();j++) {
+                        if (j == 0) {
+                            content += String.format("%d",values1D.get(j));
+                        } else {
+                            content += String.format(",%d",values1D.get(j));
+                        }
+                    }
+                    if (i != values2D.size() - 1) {
+                        content += ",";
+                    }
+                }
+                content += "}";
+            }
+        } else {
+            content = String.format("name:%s,declType:%s,dataType:%s,offset_sp:%d,size:%d",
+                    symbolTableEntry.getName(),
+                    symbolTableEntry.getDeclType().toString(),
+                    symbolTableEntry.getDataType().toString(),
+                    symbolTableEntry.getOffset_sp(),
+                    symbolTableEntry.getSize()
+            );
+        }
+        return content;
+    }
 }

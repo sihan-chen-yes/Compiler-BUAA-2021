@@ -15,7 +15,9 @@ import java.util.ArrayList;
 public class LVal extends Node {
     private ArrayList<Exp> exps = new ArrayList<>();
     private DataType identType;
+    //Ident的类型
     private DataType dataType;
+    //取下标后的类型
     //编译时 下标
     private int length1D;
     private int length2D;

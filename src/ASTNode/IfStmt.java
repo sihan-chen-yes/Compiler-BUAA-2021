@@ -45,10 +45,6 @@ public class IfStmt extends Node {
         return label2;
     }
 
-    public String getLabel3() {
-        return label3;
-    }
-
     @Override
     public String genMidCode() {
         label1 = MidCodeGener.genLabel();

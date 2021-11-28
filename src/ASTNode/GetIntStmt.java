@@ -4,7 +4,7 @@ import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 
 public class GetIntStmt extends Node {
-    private Node LVal;
+    private LVal lval;
 
     public GetIntStmt(int pos) {
         super(pos);
@@ -13,15 +13,15 @@ public class GetIntStmt extends Node {
     @Override
     public void link(Node node) {
         super.link(node);
-        LVal = node;
+        lval = (LVal) node;
     }
 
-    public Node getLVal() {
-        return LVal;
+    public LVal getLVal() {
+        return lval;
     }
 
     public void checkError() {
-        LVal.checkError();
+        lval.checkError();
     }
 
     @Override
@@ -35,14 +35,37 @@ public class GetIntStmt extends Node {
                         null,
                         temp)
         );
-        MidCodeGener.addMidCodeEntry(
-                new MidCodeEntry(
-                        OpType.ASSIGN,
-                        MidCodeGener.getSymbolTable().getRefactorName(MidCodeGener.getFuncName(), getLVal().getWord()),
-                        null,null,
-                        temp
-                )
-        );
+        assert lval.getDataType() == DataType.INT;
+        if (lval.getIdentType() == DataType.INT) {
+            MidCodeGener.addMidCodeEntry(
+                    new MidCodeEntry(OpType.ASSIGN,
+                            MidCodeGener.getSymbolTable().getRefactorName(MidCodeGener.getFuncName(), lval.getWord()),
+                            null,
+                            null,
+                            temp)
+            );
+        } else if (lval.getIdentType() == DataType.INT_ARRAY_1D) {
+            MidCodeGener.addMidCodeEntry(
+                    new MidCodeEntry (
+                            OpType.STORE_ARRAY_1D,
+                            MidCodeGener.getSymbolTable().getRefactorName(MidCodeGener.getFuncName(), lval.getWord()),
+                            lval.getI(),
+                            null,
+                            temp
+                    )
+            );
+        } else {
+            assert lval.getIdentType() == DataType.INT_ARRAY_2D;
+            MidCodeGener.addMidCodeEntry(
+                    new MidCodeEntry (
+                            OpType.STORE_ARRAY_2D,
+                            MidCodeGener.getSymbolTable().getRefactorName(MidCodeGener.getFuncName(), lval.getWord()),
+                            lval.getI(),
+                            lval.getJ(),
+                            temp
+                    )
+            );
+        }
         return super.genMidCode();
     }
 }
