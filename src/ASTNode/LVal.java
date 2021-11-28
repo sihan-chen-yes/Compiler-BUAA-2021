@@ -18,6 +18,7 @@ public class LVal extends Node {
     //Ident的类型
     private DataType dataType;
     //取下标后的类型
+
     //编译时 下标
     private int length1D;
     private int length2D;
@@ -47,6 +48,7 @@ public class LVal extends Node {
     }
 
     public void checkError() {
+        //checkError之后 Ident的dataType即可确定
         SymbolTable symbolTable = ErrorAnalysis.getSymbolTable();
         int layer = ErrorAnalysis.getLayer();
         if (layer == 0) {
@@ -149,6 +151,8 @@ public class LVal extends Node {
     @Override
     public String genMidCode() {
         setDataType();
+        //每次都需要看一下 当前这个Ident + []表示什么dataType
+
         if (getFather() instanceof UnaryExp) {
             //只有在右边时产生MidCode
             String Ident = MidCodeGener.getSymbolTable().getRefactorName(MidCodeGener.getFuncName(),getWord());

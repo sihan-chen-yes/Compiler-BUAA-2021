@@ -23,9 +23,6 @@ public class SymbolTableEntry {
     private int length1D;
     private int length2D;
     private int size;
-    private int dim = -1;
-
-    private ArrayList<Integer> paramsDim = new ArrayList<>();
 
     private int layer = 0;
 

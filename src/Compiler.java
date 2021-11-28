@@ -19,12 +19,18 @@ public class Compiler {
         File targetCodeFile = new File("mips.txt");
         WordAnalysis wordAnalysis = new WordAnalysis(readFile);
         ArrayList<Word> wordList = wordAnalysis.getWordList();
+        //词法分析
         ErrorAnalysis errorAnalysis = new ErrorAnalysis(errorFile);
+
         GrammarAnalysis grammarAnalysis = new GrammarAnalysis(wordList,outputFile,errorAnalysis);
         grammarAnalysis.recursionDown();
 //        grammarAnalysis.saveGrammarAnalysis();
+        //语法分析
+
         CompUnit root = (CompUnit) grammarAnalysis.getASTroot();
         root.checkError();
+        //错误处理
+
         if (errorAnalysis.findErrors()) {
             errorAnalysis.saveErrorAnalysis();
             System.out.println("find errors!");
@@ -32,13 +38,17 @@ public class Compiler {
             MidCodeGener midCodeGener = new MidCodeGener(midCodeFile);
             root.genMidCode();
             System.out.println("genMidcode OK\n");
+            //中间代码生成
             midCodeGener.saveMidCode();
+
             TargetCodeGener targetCodeGener = new TargetCodeGener(targetCodeFile);
             targetCodeGener.saveTargetCode();
             System.out.println("genTargetCode OK\n");
+            //目标代码生成
         }
         if (debug) {
             MidCodeGener.getSymbolTable().saveSymbleTable();
+            //打印符号表
         }
     }
 }

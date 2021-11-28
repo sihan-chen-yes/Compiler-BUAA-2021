@@ -21,10 +21,6 @@ public class AddExp extends Node {
         MulExps.add((MulExp) node);
     }
 
-    public ArrayList<MulExp> getMulExps() {
-        return MulExps;
-    }
-
     public void checkError() {
         for (Node mulExp:MulExps) {
             mulExp.checkError();

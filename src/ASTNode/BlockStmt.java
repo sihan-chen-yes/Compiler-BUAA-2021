@@ -13,10 +13,6 @@ public class BlockStmt extends Node {
         block = node;
     }
 
-    public Node getBlock() {
-        return block;
-    }
-
     public void checkError() {
         block.checkError();
     }

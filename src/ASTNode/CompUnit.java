@@ -24,18 +24,6 @@ public class CompUnit extends Node {
         }
     }
 
-    public ArrayList<Node> getDecls() {
-        return Decls;
-    }
-
-    public ArrayList<Node> getFuncDefs() {
-        return FuncDefs;
-    }
-
-    public Node getMainFuncDef() {
-        return MainFuncDef;
-    }
-
     public void checkError() {
         for (Node decl:Decls) {
             decl.checkError();

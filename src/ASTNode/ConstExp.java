@@ -1,6 +1,5 @@
 package ASTNode;
 
-
 public class ConstExp extends Node {
     private AddExp AddExp;
 

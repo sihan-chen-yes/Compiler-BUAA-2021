@@ -51,10 +51,6 @@ public class Error implements Comparable {
         }
     }
 
-    public void print() {
-        System.out.println("Line" + line + " : " + msg + " " + errorCode);
-    }
-
     public int getLine() {
         return line;
     }

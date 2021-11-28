@@ -18,11 +18,6 @@ public class Block extends Node {
         blockItems.add(node);
     }
 
-    public ArrayList<Node> getBlockItems() {
-        return blockItems;
-    }
-
-
     public void checkError() {
         ErrorAnalysis.addLayer();
         for (Node item:blockItems) {

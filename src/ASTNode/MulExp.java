@@ -20,10 +20,6 @@ public class MulExp extends Node {
         UnaryExps.add((UnaryExp) node);
     }
 
-    public ArrayList<UnaryExp> getUnaryExps() {
-        return UnaryExps;
-    }
-
     public void checkError() {
         for (Node node:UnaryExps) {
             node.checkError();

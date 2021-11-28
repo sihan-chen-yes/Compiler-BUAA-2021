@@ -24,7 +24,8 @@ public class SymbolTable {
     private FileWriter writer;
     private int stack_size = 0;
 
-//错误处理！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+
+//错误处理##################
 
     public boolean insertGlobal(SymbolTableEntry symbolTableEntry) {
         if (queryGlobalDefined(symbolTableEntry)) {
@@ -98,7 +99,7 @@ public class SymbolTable {
 
     public boolean queryLocalReDefined(String name, String funcName, int layer) {
         //局部变量是否重复声明
-        //和参数重名
+        //检查和参数是否重名
         if (layer == 1) {
             ArrayList<FuncFParam> funcFParams = queryFuncFParam(funcName);
             for (FuncFParam funcFParam:funcFParams) {

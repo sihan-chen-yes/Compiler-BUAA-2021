@@ -50,6 +50,7 @@ public class PrintStmt extends Node {
 
     public boolean illegalFormatString() {
         //转义字符只有\n 一旦出现%必然是%d
+        //只有\n %d 32:'' 33:! 40~126
         String formatString = formatWord.getWord();
         for (int i = 1;i < formatString.length() - 1;i++) {
             int ASCII = formatString.charAt(i);
