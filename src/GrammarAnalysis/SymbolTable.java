@@ -191,7 +191,7 @@ public class SymbolTable {
     }
 
     public boolean isConst(String funcName, String Ident) {
-        //错误检查时使用
+        //错误处理时使用
         assert funcToDecl.containsKey(funcName);
         for (int i = funcToDecl.get(funcName).size() - 1;i >= 0;i--) {
             if (funcToDecl.get(funcName).get(i).getName().equals(Ident)) {
@@ -406,6 +406,19 @@ public class SymbolTable {
             }
         }
         return false;
+    }
+
+    public SymbolTableEntry getConstant(String func,String name) {
+        //只可能是a T 1
+        SymbolTableEntry symbolTableEntry = search_local(func,name);
+        if (symbolTableEntry != null && symbolTableEntry.getDeclType() == DeclType.CONST) {
+            return symbolTableEntry;
+        }
+        symbolTableEntry = search_global(name);
+        if (symbolTableEntry != null && symbolTableEntry.getDeclType() == DeclType.CONST) {
+            return symbolTableEntry;
+        }
+        return null;
     }
 
     public String genValueContent(SymbolTableEntry symbolTableEntry,boolean isGlobal) {

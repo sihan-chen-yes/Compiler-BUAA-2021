@@ -13,7 +13,11 @@ import java.util.ArrayList;
 public class Compiler {
     public static void main(java.lang.String[] args) {
         boolean debug = false;
-//        debug = true;
+        debug = true;
+        //本地debug模式
+        boolean op = true;
+        op = false;
+        //是否开启优化
 
         File readFile = new File("testfile.txt");
         File outputFile = new File("output.txt");
@@ -40,24 +44,30 @@ public class Compiler {
         } else {
             MidCodeGener midCodeGener = new MidCodeGener(midCodeFile,debug);
             root.genMidCode();
-            System.out.println("genMidcode OK\n");
-            if (debug) {
-                midCodeGener.saveMidCode();
-            }
             //中间代码生成
-            Optimizer optimizer = new Optimizer();
-            optimizer.optimize();
-            midCodeGener.saveOpMidCode();
-            System.out.println("optimize midcode OK\n");
-
-            TargetCodeGener targetCodeGener = new TargetCodeGener(targetCodeFile,debug);
-            if (debug) {
+            if (!op) {
+                midCodeGener.saveMidCode();
+                System.out.println("genMidcode OK\n");
+                TargetCodeGener targetCodeGener = new TargetCodeGener(targetCodeFile,debug);
                 targetCodeGener.saveTargetCode();
+                System.out.println("genTargetCode OK\n");
+            } else {
+                if (debug) {
+                    midCodeGener.saveMidCode();
+                }
+                System.out.println("genMidcode OK\n");
+                Optimizer optimizer = new Optimizer();
+                optimizer.optimize();
+                midCodeGener.saveOpMidCode();
+                System.out.println("optimize midcode OK\n");
+                TargetCodeGener targetCodeGener = new TargetCodeGener(targetCodeFile,debug);
+                if (debug) {
+                    targetCodeGener.saveTargetCode();
+                }
+                System.out.println("genTargetCode OK\n");
+                targetCodeGener.saveOpTarCode();
+                System.out.println("optimize tarcode OK\n");
             }
-            System.out.println("genTargetCode OK\n");
-            //目标代码生成
-            targetCodeGener.saveOpTarCode();
-            System.out.println("optimize tarcode OK\n");
         }
         if (debug) {
             MidCodeGener.getSymbolTable().saveSymbleTable();

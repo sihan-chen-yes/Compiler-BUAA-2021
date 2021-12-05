@@ -11,6 +11,8 @@ import MidCodeGeneration.MidCodeGener;
 import WordAnalysis.Word;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LVal extends Node {
     private ArrayList<Exp> exps = new ArrayList<>();
@@ -152,14 +154,18 @@ public class LVal extends Node {
     public String genMidCode() {
         setDataType();
         //每次都需要看一下 当前这个Ident + []表示什么dataType
-
+        SymbolTableEntry symbolTableEntry = MidCodeGener.getSymbolTable().
+                getConstant(MidCodeGener.getFuncName(),getName());
         if (getFather() instanceof UnaryExp) {
-            //只有在右边时产生MidCode
             String Ident = MidCodeGener.getSymbolTable().getRefactorName(MidCodeGener.getFuncName(),getWord());
             //全局变量或者局部变量 refactor能够确定
             refactor(Ident);
             if (exps.isEmpty()) {
                 if (dataType == DataType.INT) {
+                    if (symbolTableEntry != null) {
+                        int value = symbolTableEntry.getValue();
+                        return Integer.toString(value);
+                    }
                     return Ident;
                 } else {
                     String temp = MidCodeGener.genTemp();//是一个地址
@@ -176,14 +182,21 @@ public class LVal extends Node {
                 }
             } else if (exps.size() == 1) {
                 if (dataType == DataType.INT) {
-                    String temp = MidCodeGener.genTemp();
-                    MidCodeGener.addMidCodeEntry(
-                            new MidCodeEntry(
-                                    OpType.LOAD_ARRAY_1D,
-                                    Ident,
-                                    getI(),
-                                    null,
-                                    temp));
+                    String temp;
+                    String i = getI();
+                    if (symbolTableEntry != null && isNumber(i)) {
+                        int value = symbolTableEntry.getValue1D(Integer.parseInt(i));
+                        temp = Integer.toString(value);
+                    } else {
+                        temp = MidCodeGener.genTemp();
+                        MidCodeGener.addMidCodeEntry(
+                                new MidCodeEntry(
+                                        OpType.LOAD_ARRAY_1D,
+                                        Ident,
+                                        i,
+                                        null,
+                                        temp));
+                    }
                     return temp;
                 } else {
                     assert dataType == DataType.INT_ARRAY_1D && identType == DataType.INT_ARRAY_2D;
@@ -201,17 +214,34 @@ public class LVal extends Node {
                 }
             } else {
                 assert exps.size() == 2 && dataType == DataType.INT;
-                String temp = MidCodeGener.genTemp();
-                MidCodeGener.addMidCodeEntry(
-                        new MidCodeEntry(
-                                OpType.LOAD_ARRAY_2D,
-                                Ident,
-                                getI(),
-                                getJ(),
-                                temp));
+                String temp;
+                String i = getI();
+                String j = getJ();
+                if (symbolTableEntry != null && isNumber(i) && isNumber(j)) {
+                    int val = symbolTableEntry.getValue2D(Integer.parseInt(i),Integer.parseInt(j));
+                    temp = Integer.toString(val);
+                } else {
+                    temp = MidCodeGener.genTemp();
+                    MidCodeGener.addMidCodeEntry(
+                            new MidCodeEntry(
+                                    OpType.LOAD_ARRAY_2D,
+                                    Ident,
+                                    i,
+                                    j,
+                                    temp));
+                }
                 return temp;
             }
         }
         return super.genMidCode();
+    }
+
+    public boolean isNumber(String name) {
+        Pattern pattern = Pattern.compile("^(-)?\\d+");
+        Matcher matcher = pattern.matcher(name);
+        if (matcher.matches()) {
+            return true;
+        }
+        return false;
     }
 }

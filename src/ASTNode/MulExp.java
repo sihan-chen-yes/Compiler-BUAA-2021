@@ -5,6 +5,8 @@ import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MulExp extends Node {
     private ArrayList<UnaryExp> UnaryExps = new ArrayList<>();
@@ -67,8 +69,7 @@ public class MulExp extends Node {
         for (int i = 1;i < UnaryExps.size();i++) {
             String temp2 = UnaryExps.get(i).genMidCode();
             CalType calType = calTypes.get(i - 1);
-            String temp3 = MidCodeGener.genTemp();
-            OpType op = null;
+            OpType op;
             if (calType == CalType.mul) {
                 op = OpType.MULT;
             } else if (calType == CalType.div) {
@@ -76,15 +77,55 @@ public class MulExp extends Node {
             } else {
                 op = OpType.MOD;
             }
-            MidCodeGener.addMidCodeEntry(new MidCodeEntry(
-                    op,
-                    temp1,
-                    temp2,
-                    null,
-                    temp3
-            ));
+            String temp3;
+            if (isNumber(temp1) && isNumber(temp2)) {
+                int value1 = Integer.parseInt(temp1);
+                int value2 = Integer.parseInt(temp2);
+                int value3;
+                if (op == OpType.MULT) {
+                    value3 = value1 * value2;
+                } else if (op == OpType.DIV) {
+                    value3 = value1 / value2;
+                } else {
+                    value3 = value1 % value2;
+                }
+                temp3 = Integer.toString(value3);
+            } else if (isNumber(temp1) && (Integer.parseInt(temp1) == 1 || Integer.parseInt(temp1) == -1)) {
+                int value1 = Integer.parseInt(temp1);
+                if (value1 == 1) {
+                    temp3 = temp2;
+                } else {
+                    assert value1 == -1;
+                    
+                }
+            } else if (isNumber(temp2) && (Integer.parseInt(temp1) == 1 || Integer.parseInt(temp1) == -1)) {
+                int value2 = Integer.parseInt(temp2);
+                if (value2 == 1) {
+                    temp3 = temp1;
+                } else {
+                    assert value2 == -1;
+                }
+            } else {
+                temp3 = MidCodeGener.genTemp();
+                MidCodeGener.addMidCodeEntry(new MidCodeEntry(
+                        op,
+                        temp1,
+                        temp2,
+                        null,
+                        temp3
+                ));
+            }
             temp1 = temp3;
         }
         return temp1;
+    }
+
+    public boolean isNumber(String name) {
+        Pattern pattern = Pattern.compile("^(-)?\\d+");
+        Matcher matcher = pattern.matcher(name);
+        if (matcher.matches()) {
+            return true;
+        }
+        return false;
     }
 }

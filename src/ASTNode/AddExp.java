@@ -7,6 +7,9 @@ import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class AddExp extends Node {
     private ArrayList<MulExp> MulExps = new ArrayList<>();
     private ArrayList<CalType> calTypes = new ArrayList<>();
@@ -64,23 +67,44 @@ public class AddExp extends Node {
         for (int i = 1;i < MulExps.size();i++) {
             String temp2 = MulExps.get(i).genMidCode();
             CalType calType = calTypes.get(i - 1);
-            String temp3 = MidCodeGener.genTemp();
             OpType op = null;
             if (calType == CalType.add) {
                 op = OpType.ADD;
             } else if (calType == CalType.sub) {
                 op = OpType.SUB;
             }
-            MidCodeGener.addMidCodeEntry(
-                    new MidCodeEntry(
-                    op,
-                    temp1,
-                    temp2,
-                    null,
-                    temp3
-                    ));
+            String temp3;
+            if (isNumber(temp1) && isNumber(temp2)) {
+                int value1 = Integer.parseInt(temp1);
+                int value2 = Integer.parseInt(temp2);
+                int value3;
+                if (op == OpType.ADD) {
+                    value3 = value1 + value2;
+                } else {
+                    value3 = value1 - value2;
+                }
+                temp3 = Integer.toString(value3);
+            } else {
+                temp3 = MidCodeGener.genTemp();
+                MidCodeGener.addMidCodeEntry(new MidCodeEntry(
+                        op,
+                        temp1,
+                        temp2,
+                        null,
+                        temp3
+                ));
+            }
             temp1 = temp3;
         }
         return temp1;
+    }
+
+    public boolean isNumber(String name) {
+        Pattern pattern = Pattern.compile("^(-)?\\d+");
+        Matcher matcher = pattern.matcher(name);
+        if (matcher.matches()) {
+            return true;
+        }
+        return false;
     }
 }

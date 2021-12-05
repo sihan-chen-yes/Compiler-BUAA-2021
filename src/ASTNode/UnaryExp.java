@@ -1,11 +1,15 @@
 package ASTNode;
 
+import Enum.CalType;
+import Enum.DataType;
 import Enum.*;
 import GrammarAnalysis.SymbolTableEntry;
 import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class UnaryExp extends Node {
     private Node unary;
@@ -94,32 +98,56 @@ public class UnaryExp extends Node {
         }
         //计算是否需要取反
         String temp = unary.genMidCode();
-        if (cntSub % 2 != 0) {
-            String dst = MidCodeGener.genTemp();
-            MidCodeGener.addMidCodeEntry(
-                    new MidCodeEntry(
-                            OpType.NEG,
-                            temp,
-                            null,
-                            null,
-                            dst
-                    )
-            );
-            temp = dst;
-        }
-        if (cntNot % 2 != 0) {
-            String dst = MidCodeGener.genTemp();
-            MidCodeGener.addMidCodeEntry(
-                    new MidCodeEntry(
-                            OpType.NOT,
-                            temp,
-                            null,
-                            null,
-                            dst
-                    )
-            );
-            temp = dst;
+        if (isNumber(temp)) {
+            int value = Integer.valueOf(temp);
+            if (cntSub % 2 != 0) {
+                value = -value;
+            }
+            if (cntNot % 2 != 0) {
+                if (value != 0) {
+                    value = 0;
+                } else {
+                    value = 1;
+                }
+            }
+            temp = Integer.toString(value);
+        } else {
+            if (cntSub % 2 != 0) {
+                String dst = MidCodeGener.genTemp();
+                MidCodeGener.addMidCodeEntry(
+                        new MidCodeEntry(
+                                OpType.NEG,
+                                temp,
+                                null,
+                                null,
+                                dst
+                        )
+                );
+                temp = dst;
+            }
+            if (cntNot % 2 != 0) {
+                String dst = MidCodeGener.genTemp();
+                MidCodeGener.addMidCodeEntry(
+                        new MidCodeEntry(
+                                OpType.NOT,
+                                temp,
+                                null,
+                                null,
+                                dst
+                        )
+                );
+                temp = dst;
+            }
         }
         return temp;
+    }
+
+    public boolean isNumber(String name) {
+        Pattern pattern = Pattern.compile("^(-)?\\d+");
+        Matcher matcher = pattern.matcher(name);
+        if (matcher.matches()) {
+            return true;
+        }
+        return false;
     }
 }
