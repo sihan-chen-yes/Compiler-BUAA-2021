@@ -4,12 +4,12 @@ import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 
 public class IfStmt extends Node {
-    private Node Cond;
-    private String label1;
+    private Cond Cond;
+    private String label1 = null;
     private Node IfStmt = null;
-    private String label2;
+    private String label2 = null;
     private Node ElseStmt = null;
-    private String label3;
+    private String label3 = null;
 
     public IfStmt(int pos) {
         super(pos);
@@ -19,7 +19,7 @@ public class IfStmt extends Node {
     public void link(Node node) {
         super.link(node);
         if (node instanceof Cond) {
-            Cond = node;
+            Cond = (Cond) node;
         } else if (IfStmt == null) {
             IfStmt = node;
         } else {
@@ -47,16 +47,20 @@ public class IfStmt extends Node {
 
     @Override
     public String genMidCode() {
-        label1 = MidCodeGener.genLabel();
+        if (Cond.getLAndExpNum() > 1) {
+            label1 = MidCodeGener.genLabel();
+        }
         label2 = MidCodeGener.genLabel();
         Cond.genMidCode();
-        MidCodeGener.addMidCodeEntry(
-                new MidCodeEntry(
-                        OpType.LABEL_GEN,
-                        null,null,null,
-                        label1
-                )
-        );
+        if (Cond.getLAndExpNum() > 1) {
+            MidCodeGener.addMidCodeEntry(
+                    new MidCodeEntry(
+                            OpType.LABEL_GEN,
+                            null,null,null,
+                            label1
+                    )
+            );
+        }
         IfStmt.genMidCode();
         if (ElseStmt == null) {
             MidCodeGener.addMidCodeEntry(

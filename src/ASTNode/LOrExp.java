@@ -20,6 +20,10 @@ public class LOrExp extends Node {
         }
     }
 
+    public int getLAndExpNum() {
+        return LAndExps.size();
+    }
+
     public String genMidCode() {
         Node node = getFather().getFather();
         String notLastLabel;

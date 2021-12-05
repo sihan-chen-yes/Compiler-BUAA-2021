@@ -4,11 +4,11 @@ import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 
 public class WhileStmt extends Node {
-    private String label1;
-    private Node Cond;
-    private String label2;
+    private String label1 = null;
+    private Cond Cond;
+    private String label2 = null;
     private Node body;
-    private String label3;
+    private String label3 = null;
 
     public WhileStmt(int pos) {
         super(pos);
@@ -18,7 +18,7 @@ public class WhileStmt extends Node {
     public void link(Node node) {
         super.link(node);
         if (node instanceof Cond) {
-            Cond = node;
+            Cond = (Cond) node;
         } else {
             body = node;
         }
@@ -48,7 +48,9 @@ public class WhileStmt extends Node {
     @Override
     public String genMidCode() {
         label1 = MidCodeGener.genLabel();
-        label2 = MidCodeGener.genLabel();
+        if (Cond.getLAndExpNum() > 1) {
+            label2 = MidCodeGener.genLabel();
+        }
         label3 = MidCodeGener.genLabel();
         MidCodeGener.addMidCodeEntry(
                 new MidCodeEntry(
@@ -58,13 +60,15 @@ public class WhileStmt extends Node {
                 )
         );
         Cond.genMidCode();
-        MidCodeGener.addMidCodeEntry(
-                new MidCodeEntry(
-                        OpType.LABEL_GEN,
-                        null,null,null,
-                        label2
-                )
-        );
+        if (Cond.getLAndExpNum() > 1) {
+            MidCodeGener.addMidCodeEntry(
+                    new MidCodeEntry(
+                            OpType.LABEL_GEN,
+                            null,null,null,
+                            label2
+                    )
+            );
+        }
         body.genMidCode();
         MidCodeGener.addMidCodeEntry(
                 new MidCodeEntry(

@@ -2,6 +2,7 @@ import ASTNode.CompUnit;
 import GrammarAnalysis.ErrorAnalysis;
 import GrammarAnalysis.GrammarAnalysis;
 import MidCodeGeneration.MidCodeGener;
+import Optimizer.Optimizer;
 import TargetCodeGeneration.TargetCodeGener;
 import WordAnalysis.Word;
 import WordAnalysis.WordAnalysis;
@@ -11,7 +12,9 @@ import java.util.ArrayList;
 
 public class Compiler {
     public static void main(java.lang.String[] args) {
-        boolean debug = true;
+        boolean debug = false;
+//        debug = true;
+
         File readFile = new File("testfile.txt");
         File outputFile = new File("output.txt");
         File errorFile = new File("error.txt");
@@ -35,16 +38,26 @@ public class Compiler {
             errorAnalysis.saveErrorAnalysis();
             System.out.println("find errors!");
         } else {
-            MidCodeGener midCodeGener = new MidCodeGener(midCodeFile);
+            MidCodeGener midCodeGener = new MidCodeGener(midCodeFile,debug);
             root.genMidCode();
             System.out.println("genMidcode OK\n");
+            if (debug) {
+                midCodeGener.saveMidCode();
+            }
             //中间代码生成
-            midCodeGener.saveMidCode();
+            Optimizer optimizer = new Optimizer();
+            optimizer.optimize();
+            midCodeGener.saveOpMidCode();
+            System.out.println("optimize midcode OK\n");
 
-            TargetCodeGener targetCodeGener = new TargetCodeGener(targetCodeFile);
-            targetCodeGener.saveTargetCode();
+            TargetCodeGener targetCodeGener = new TargetCodeGener(targetCodeFile,debug);
+            if (debug) {
+                targetCodeGener.saveTargetCode();
+            }
             System.out.println("genTargetCode OK\n");
             //目标代码生成
+            targetCodeGener.saveOpTarCode();
+            System.out.println("optimize tarcode OK\n");
         }
         if (debug) {
             MidCodeGener.getSymbolTable().saveSymbleTable();

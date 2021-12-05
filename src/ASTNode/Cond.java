@@ -17,6 +17,10 @@ public class Cond extends Node {
         LOrExp.checkError();
     }
 
+    public int getLAndExpNum() {
+        return LOrExp.getLAndExpNum();
+    }
+
     @Override
     public String genMidCode() {
         LOrExp.genMidCode();

@@ -43,5 +43,9 @@ public enum OpType {
     LABEL_GEN,
     BEQZ,
     BNEZ,
-    GOTO
+    GOTO,
+
+
+
+    Operand,
 }

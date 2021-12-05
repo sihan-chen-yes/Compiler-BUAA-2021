@@ -12,6 +12,8 @@ public class MidCodeEntry {
     private String r3;
     private String dst;
 
+    private boolean isEntryPoint = false;
+
     private String funcStart = "########################################FUNC START##########################################\n";
     private String funcEnd = "\n########################################FUNC END############################################";
 
@@ -108,8 +110,7 @@ public class MidCodeEntry {
             midCode = String.format("GOTO %s",dst);
         }
         return midCode;
-        //Todo 其他中间代码
-}
+    }
 
     public String toTargetCode() {
         String start = String.format("#############") + toString() + String.format("#############\n");
@@ -193,7 +194,6 @@ public class MidCodeEntry {
         }
         tarCode += end;
         return tarCode;
-        //Todo 其他目标代码
     }
 
     public String genStoreGlobal() {
@@ -688,7 +688,7 @@ public class MidCodeEntry {
         int size = MidCodeGener.getSymbolTable().getLocalSize(dst);
         tarCode = String.format("sw $ra,0($sp)");
         tarCode += "\n";
-        tarCode += String.format("subiu $sp,$sp,%d",size);
+        tarCode += String.format("addiu $sp,$sp,-%d",size);
         MidCodeGener.getSymbolTable().addStack_size(size);
         //Todo save s t a
         return tarCode;
@@ -1048,5 +1048,47 @@ public class MidCodeEntry {
 
     public String genGoto() {
         return String.format("j %s",dst);
+    }
+
+    //优化#########################################################
+
+    public boolean isEntryPoint() {
+        return isEntryPoint;
+    }
+
+    public void setEntryPoint(boolean entryPoint) {
+        isEntryPoint = entryPoint;
+    }
+
+    public String getR1() {
+        return r1;
+    }
+
+    public void setR1(String r1) {
+        this.r1 = r1;
+    }
+
+    public void setR2(String r2) {
+        this.r2 = r2;
+    }
+
+    public void setR3(String r3) {
+        this.r3 = r3;
+    }
+
+    public void setDst(String dst) {
+        this.dst = dst;
+    }
+
+    public String getR2() {
+        return r2;
+    }
+
+    public String getR3() {
+        return r3;
+    }
+
+    public String getDst() {
+        return dst;
     }
 }

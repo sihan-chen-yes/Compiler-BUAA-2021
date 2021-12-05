@@ -392,6 +392,22 @@ public class SymbolTable {
         stack_size -= size;
     }
 
+    public boolean isArray(String func,String name) {
+        SymbolTableEntry symbolTableEntry;
+        symbolTableEntry = search_local(func,name);
+        if (symbolTableEntry != null) {
+            if (symbolTableEntry.getDataType() == DataType.INT_ARRAY_1D || symbolTableEntry.getDataType() == DataType.INT_ARRAY_2D) {
+                return true;
+            }
+        } else {
+            symbolTableEntry = search_global(name);
+            if (symbolTableEntry.getDataType() == DataType.INT_ARRAY_1D || symbolTableEntry.getDataType() == DataType.INT_ARRAY_2D) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public String genValueContent(SymbolTableEntry symbolTableEntry,boolean isGlobal) {
         String content;
         if (isGlobal) {
