@@ -29,8 +29,6 @@ public class LVal extends Node {
     private int i;
     private int j;
 
-
-
     public LVal(Word word, int pos) {
         super(word,pos);
     }
@@ -149,11 +147,10 @@ public class LVal extends Node {
         }
     }
 
-
     @Override
     public String genMidCode() {
         setDataType();
-        //每次都需要看一下 当前这个Ident + []表示什么dataType
+        //每次都需要看一下 当前这个Ident + []表示什么dataType 注意LVal的dataType check的时候没有set
         SymbolTableEntry symbolTableEntry = MidCodeGener.getSymbolTable().
                 getConstant(MidCodeGener.getFuncName(),getName());
         if (getFather() instanceof UnaryExp) {

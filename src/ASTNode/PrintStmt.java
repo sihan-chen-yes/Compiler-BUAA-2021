@@ -92,8 +92,9 @@ public class PrintStmt extends Node {
     }
 
     public void genPrintInt() {
+        String s = Exps.get(cnt).genMidCode();
         MidCodeGener.addMidCodeEntry(
-                new MidCodeEntry(OpType.PRINT_INT,null,null,null,Exps.get(cnt).genMidCode()));
+                new MidCodeEntry(OpType.PRINT_INT,null,null,null,s));
         cnt++;
     }
 }

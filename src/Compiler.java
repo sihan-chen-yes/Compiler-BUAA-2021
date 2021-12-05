@@ -11,12 +11,11 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class Compiler {
+    public static boolean op = true;
     public static void main(java.lang.String[] args) {
         boolean debug = false;
         debug = true;
         //本地debug模式
-        boolean op = true;
-        op = false;
         //是否开启优化
 
         File readFile = new File("testfile.txt");
@@ -73,5 +72,9 @@ public class Compiler {
             MidCodeGener.getSymbolTable().saveSymbleTable();
             //打印符号表
         }
+    }
+
+    public static boolean isOp() {
+        return op;
     }
 }

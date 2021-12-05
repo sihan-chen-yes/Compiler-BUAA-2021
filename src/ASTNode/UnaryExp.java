@@ -52,6 +52,7 @@ public class UnaryExp extends Node {
         } else if (unary instanceof Number){
             value = ((Number) unary).getValue();
         } else {
+            ((LVal) unary).setDataType();
             assert unary instanceof LVal && ((LVal) unary).getDataType() == DataType.INT;
             ((LVal) unary).setIndex();
             SymbolTableEntry symbolTableEntry = MidCodeGener.getSymbolTable().

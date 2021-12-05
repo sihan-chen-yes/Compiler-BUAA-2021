@@ -411,12 +411,20 @@ public class SymbolTable {
     public SymbolTableEntry getConstant(String func,String name) {
         //只可能是a T 1
         SymbolTableEntry symbolTableEntry = search_local(func,name);
-        if (symbolTableEntry != null && symbolTableEntry.getDeclType() == DeclType.CONST) {
-            return symbolTableEntry;
+        if (symbolTableEntry != null) {
+            if (symbolTableEntry.getDeclType() == DeclType.CONST) {
+                return symbolTableEntry;
+            } else {
+                return null;
+            }
         }
         symbolTableEntry = search_global(name);
-        if (symbolTableEntry != null && symbolTableEntry.getDeclType() == DeclType.CONST) {
-            return symbolTableEntry;
+        if (symbolTableEntry != null) {
+            if (symbolTableEntry.getDeclType() == DeclType.CONST) {
+                return symbolTableEntry;
+            } else {
+                return null;
+            }
         }
         return null;
     }

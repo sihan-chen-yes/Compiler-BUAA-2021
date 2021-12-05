@@ -4,7 +4,7 @@ import Enum.DataType;
 import java.util.ArrayList;
 
 public class ConstInitVal extends Node {
-    private DataType dataType;
+    private DataType dataType = null;
     private ConstExp constExp = null;
     private ArrayList<ConstInitVal> constInitVals = new ArrayList<>();
 

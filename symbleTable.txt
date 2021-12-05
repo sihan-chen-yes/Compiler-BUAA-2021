@@ -1,5 +1,7 @@
 ####################Global#####################
 ####################Lobal#####################
-main:12
-name:a2,declType:VAR,dataType:INT,offset_sp:8,size:4
-name:T_0,declType:TEMP,dataType:INT,offset_sp:4,size:4
+main:20
+name:a2,declType:VAR,dataType:INT,offset_sp:16,size:4
+name:b3,declType:VAR,dataType:INT,offset_sp:12,size:4
+name:@T_0,declType:TEMP,dataType:INT,offset_sp:8,size:4
+name:@T_1,declType:TEMP,dataType:INT,offset_sp:4,size:4

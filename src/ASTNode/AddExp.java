@@ -84,6 +84,10 @@ public class AddExp extends Node {
                     value3 = value1 - value2;
                 }
                 temp3 = Integer.toString(value3);
+            } else if (isNumber(temp1) && Integer.parseInt(temp1) == 0) {
+                temp3 = temp2;
+            } else if (isNumber(temp2) && Integer.parseInt(temp2) == 0) {
+                temp3 = temp1;
             } else {
                 temp3 = MidCodeGener.genTemp();
                 MidCodeGener.addMidCodeEntry(new MidCodeEntry(

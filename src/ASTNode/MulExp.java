@@ -90,21 +90,50 @@ public class MulExp extends Node {
                     value3 = value1 % value2;
                 }
                 temp3 = Integer.toString(value3);
-            } else if (isNumber(temp1) && (Integer.parseInt(temp1) == 1 || Integer.parseInt(temp1) == -1)) {
+            } else if (op != OpType.MOD && isNumber(temp1) && (Integer.parseInt(temp1) == 1 || Integer.parseInt(temp1) == -1)) {
+                //只有成* /
                 int value1 = Integer.parseInt(temp1);
                 if (value1 == 1) {
                     temp3 = temp2;
                 } else {
                     assert value1 == -1;
-                    
+                    temp3 = MidCodeGener.genTemp();
+                    MidCodeGener.addMidCodeEntry(new MidCodeEntry(
+                            OpType.NEG,
+                            temp2,
+                            null,
+                            null,
+                            temp3
+                    ));
                 }
-            } else if (isNumber(temp2) && (Integer.parseInt(temp1) == 1 || Integer.parseInt(temp1) == -1)) {
+            } else if (isNumber(temp2) && (Integer.parseInt(temp2) == 1 || Integer.parseInt(temp2) == -1)) {
                 int value2 = Integer.parseInt(temp2);
                 if (value2 == 1) {
-                    temp3 = temp1;
+                    if (op == OpType.MOD) {
+                        temp3 = "0";
+                    } else {
+                        temp3 = temp1;
+                    }
                 } else {
                     assert value2 == -1;
+                    if (op == OpType.MOD) {
+                        temp3 = "0";
+                    } else {
+                        temp3 = MidCodeGener.genTemp();
+                        MidCodeGener.addMidCodeEntry(new MidCodeEntry(
+                                OpType.NEG,
+                                temp1,
+                                null,
+                                null,
+                                temp3
+                        ));
+                    }
                 }
+            } else if (op == OpType.MULT && (isNumber(temp1) && Integer.parseInt(temp1) == 0 ||
+                    isNumber(temp2) && Integer.parseInt(temp2) == 0)) {
+                temp3 = "0";
+            } else if ((op == OpType.MOD || op == OpType.DIV) && isNumber(temp1) && Integer.parseInt(temp1) == 0) {
+                temp3 = "0";
             } else {
                 temp3 = MidCodeGener.genTemp();
                 MidCodeGener.addMidCodeEntry(new MidCodeEntry(

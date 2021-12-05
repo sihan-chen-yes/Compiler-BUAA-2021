@@ -158,6 +158,7 @@ public class ConstDef extends Node {
 
     public void setEntryInfo(SymbolTableEntry symbolTableEntry,boolean isGlobal) {
         if (dim == 0) {
+            int value = getValue();
             symbolTableEntry.setValue(getValue());
         } else if (dim == 1) {
             symbolTableEntry.setLength1D(getLength1D());

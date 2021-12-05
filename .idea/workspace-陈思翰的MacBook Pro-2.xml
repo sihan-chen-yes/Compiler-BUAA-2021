@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="5139c10c-b954-46fa-ac0c-c1141f68707b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/Enum/OpType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace-陈思翰的MacBook Pro.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace-陈思翰的MacBook Pro.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/error.txt" beforeDir="false" afterPath="$PROJECT_DIR$/error.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/AddExp.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/AddExp.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/AssignStmt.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/AssignStmt.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/Block.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/Block.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/BlockStmt.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/BlockStmt.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/BreakStmt.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/BreakStmt.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/CompUnit.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/CompUnit.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/Cond.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/Cond.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/ConstDecl.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/ConstDecl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/ConstDef.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/ConstDef.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/ConstExp.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/ConstExp.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/ConstInitVal.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/ConstInitVal.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/ContinueStmt.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/ContinueStmt.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/EqExp.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/EqExp.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/Exp.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/Exp.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/ExpStmt.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/ExpStmt.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/FuncCall.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/FuncCall.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/FuncDef.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/FuncDef.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/FuncFParam.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/FuncFParam.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/FuncRParam.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/FuncRParam.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/GetIntStmt.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/GetIntStmt.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/IfStmt.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/IfStmt.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/InitVal.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/InitVal.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/LAndExp.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/LAndExp.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/LOrExp.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/LOrExp.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/LVal.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/LVal.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/MainFuncDef.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/MainFuncDef.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/MulExp.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/MulExp.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/Node.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/Node.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/Number.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/Number.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/PrintStmt.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/PrintStmt.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/RelExp.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/RelExp.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/ReturnStmt.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/ReturnStmt.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/UnaryExp.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/UnaryExp.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/VarDecl.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/VarDecl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/VarDef.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/VarDef.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/ASTNode/WhileStmt.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/ASTNode/WhileStmt.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/Compiler.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/Compiler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/GrammarAnalysis/ErrorAnalysis.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/GrammarAnalysis/ErrorAnalysis.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/GrammarAnalysis/GrammarAnalysis.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/GrammarAnalysis/GrammarAnalysis.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/GrammarAnalysis/SymbolTable.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/GrammarAnalysis/SymbolTable.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/GrammarAnalysis/SymbolTableEntry.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/GrammarAnalysis/SymbolTableEntry.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/WordAnalysis/Word.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/WordAnalysis/Word.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/compiler/WordAnalysis/WordAnalysis.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/compiler/WordAnalysis/WordAnalysis.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/AddExp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/AddExp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/AssignStmt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/AssignStmt.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/Block.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/Block.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/BlockStmt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/BlockStmt.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/BreakStmt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/BreakStmt.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/CompUnit.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/CompUnit.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/Cond.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/Cond.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/ConstDecl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/ConstDecl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/ConstExp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/ConstExp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/ConstInitVal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/ConstInitVal.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/ContinueStmt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/ContinueStmt.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/EmptyStmt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/EmptyStmt.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/EqExp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/EqExp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/Exp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/Exp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/ExpStmt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/ExpStmt.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/FuncCall.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/FuncCall.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/FuncDef.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/FuncDef.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/FuncFParam.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/FuncFParam.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/FuncRParam.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/FuncRParam.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/GetIntStmt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/GetIntStmt.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/IfStmt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/IfStmt.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/InitVal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/InitVal.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/LAndExp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/LAndExp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/LOrExp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/LOrExp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/LVal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/LVal.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/MainFuncDef.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/MainFuncDef.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/MulExp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/MulExp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/Node.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/Node.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/Number.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/Number.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/PrintStmt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/PrintStmt.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/RelExp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/RelExp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/ReturnStmt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/ReturnStmt.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/UnaryExp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/UnaryExp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/VarDecl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/VarDecl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ASTNode/WhileStmt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ASTNode/WhileStmt.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Compiler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Compiler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GrammarAnalysis/GrammarAnalysis.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GrammarAnalysis/GrammarAnalysis.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GrammarAnalysis/SymbolTableEntry.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GrammarAnalysis/SymbolTableEntry.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/WordAnalysis/ReadEOFException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WordAnalysis/ReadEOFException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/WordAnalysis/Word.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WordAnalysis/Word.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/WordAnalysis/WordAnalysis.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WordAnalysis/WordAnalysis.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/testfile.txt" beforeDir="false" afterPath="$PROJECT_DIR$/testfile.txt" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CodeInsightWorkspaceSettings">
+    <option name="optimizeImportsOnTheFly" value="true" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+        <option value="Enum" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="ProjectId" id="1zXO2RjIaAcLIIFl8Nu98ksqvg8" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../try_code/try" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.0" />
+    <property name="restartRequiresConfirmation" value="false" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="Compiler" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="Compiler" />
+      <module name="compiler" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.Compiler" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="5139c10c-b954-46fa-ac0c-c1141f68707b" name="Changes" comment="" />
+      <created>1634290760832</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1634290760832</updated>
+      <workItem from="1634290761712" duration="7650000" />
+      <workItem from="1634352243212" duration="122000" />
+      <workItem from="1634363737214" duration="8698000" />
+      <workItem from="1634435399351" duration="32121000" />
+      <workItem from="1634545300721" duration="219000" />
+      <workItem from="1634545531833" duration="16447000" />
+      <workItem from="1634607717350" duration="12953000" />
+      <workItem from="1634631395379" duration="10309000" />
+      <workItem from="1634653585131" duration="4015000" />
+      <workItem from="1634712801707" duration="10184000" />
+      <workItem from="1634740796607" duration="5593000" />
+      <workItem from="1634805878850" duration="18010000" />
+      <workItem from="1634827106935" duration="5470000" />
+      <workItem from="1634833854296" duration="1225000" />
+      <workItem from="1634876686747" duration="43000" />
+      <workItem from="1634876784293" duration="77000" />
+      <workItem from="1634891014749" duration="197000" />
+      <workItem from="1634891244983" duration="2552000" />
+      <workItem from="1634893907815" duration="13271000" />
+      <workItem from="1634910689118" duration="1575000" />
+      <workItem from="1634915595882" duration="6962000" />
+      <workItem from="1634952303036" duration="8091000" />
+      <workItem from="1634960481458" duration="36000" />
+      <workItem from="1634961102963" duration="14323000" />
+      <workItem from="1634985053089" duration="10922000" />
+      <workItem from="1634996493124" duration="215000" />
+      <workItem from="1635007674544" duration="1511000" />
+      <workItem from="1635041423620" duration="6632000" />
+      <workItem from="1635048534076" duration="166000" />
+      <workItem from="1635050187599" duration="4380000" />
+      <workItem from="1635090800061" duration="137000" />
+      <workItem from="1635348386839" duration="2902000" />
+      <workItem from="1635394594387" duration="21000" />
+      <workItem from="1635425788979" duration="2129000" />
+      <workItem from="1636166627056" duration="6433000" />
+      <workItem from="1637549185843" duration="4000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="CUSTOM_BOOLEAN_PROPERTIES">
+                <map>
+                  <entry key="Show.Git.Branches" value="false" />
+                </map>
+              </option>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="start rebuild for errorAnalysis" />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="Application">
+        <watch expression="word" language="JAVA" />
+        <watch expression="this" />
+        <watch expression="wordList" language="JAVA" />
+        <watch expression="node" language="JAVA" />
+        <watch expression="EOF" language="JAVA" />
+        <watch expression="sym" language="JAVA" />
+      </configuration>
+    </watches-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/compiler$Compiler.ic" NAME="Compiler Coverage Results" MODIFIED="1634993158672" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+  </component>
+</project>

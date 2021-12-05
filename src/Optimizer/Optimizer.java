@@ -16,16 +16,14 @@ public class Optimizer {
 
     private int blockNum = 0;
 
-
-
     public Optimizer() {
         this.midCodeList = MidCodeGener.getMidCodeList();
     }
 
     public void optimize() {
         genBlock();
-        genDAG();
-        MidCodeGener.setMidCodeList(getOptimizedMidCode());
+//        genDAG();
+//        MidCodeGener.setMidCodeList(getOptimizedMidCode());
     }
 
     public void findEntry() {
