@@ -126,7 +126,7 @@ public class LVal extends Node {
 
     public void setDataType() {
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
-        SymbolTableEntry symbolTableEntry = symbolTable.searchDefinedEntry(MidCodeGener.getFuncName(),getWord());
+        SymbolTableEntry symbolTableEntry = symbolTable.searchDefinedEntry(MidCodeGener.getFuncName(),getName());
         identType = symbolTableEntry.getDataType();
         if (identType == DataType.INT) {
             dataType = DataType.INT;

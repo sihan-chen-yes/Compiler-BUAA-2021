@@ -56,7 +56,7 @@ public class UnaryExp extends Node {
             assert unary instanceof LVal && ((LVal) unary).getDataType() == DataType.INT;
             ((LVal) unary).setIndex();
             SymbolTableEntry symbolTableEntry = MidCodeGener.getSymbolTable().
-                    searchDefinedEntry(MidCodeGener.getFuncName(),unary.getWord());
+                    searchDefinedEntry(MidCodeGener.getFuncName(), unary.getName());
             if (((LVal) unary).getBrackNum() == 0) {
                 value = symbolTableEntry.getValue();
             } else if (((LVal) unary).getBrackNum() == 1) {
