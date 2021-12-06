@@ -1,83 +1,117 @@
 .data 0x10000000
 ########################################GLOBAL START########################################
-#############GLOBAL_DECLARE r#############
-r:.word 155
-
 ########################################GLOBAL END##########################################
 ########################################ASCIIZ START########################################
+str_0:.asciiz ", "
+str_1:.asciiz ", "
+str_2:.asciiz "\n"
 ########################################ASCIIZ END##########################################
 .text
-subiu $sp,$sp,32
+subiu $sp,$sp,172
 j main
 ########################################FUNC START##########################################
-#############FUNC_DECLARE min#############
-min:
+#############FUNC_DECLARE fib#############
+fib:
 
-#############SLT a2 b2 T_0#############
-lw $t0,8($sp)
-lw $t1,12($sp)
-slt $t0,$t0,$t1
-sw $t0,4($sp)
+#############SEQ i1 1 T_0#############
+lw $t0,32($sp)
+li $t1,1
+seq $t0,$t0,$t1
+sw $t0,28($sp)
 
 #############BEQZ T_0 label_1#############
-lw $t0,4($sp)
+lw $t0,28($sp)
 beqz $t0,label_1
 
 #############LABEL_GEN label_0#############
 label_0:
 
-#############RET_VALUE a2#############
-lw $t0,8($sp)
+#############RET_VALUE 1#############
+li $t0,1
 move $v0,$t0
 jr $ra
 ########################################FUNC END############################################
-
-#############GOTO label_2#############
-j label_2
 
 #############LABEL_GEN label_1#############
 label_1:
 
-#############RET_VALUE b2#############
-lw $t0,12($sp)
-move $v0,$t0
-jr $ra
-########################################FUNC END############################################
+#############SEQ i1 2 T_1#############
+lw $t0,32($sp)
+li $t1,2
+seq $t0,$t0,$t1
+sw $t0,24($sp)
+
+#############BEQZ T_1 label_3#############
+lw $t0,24($sp)
+beqz $t0,label_3
 
 #############LABEL_GEN label_2#############
 label_2:
 
-#############RET_VALUE a2#############
-lw $t0,8($sp)
+#############RET_VALUE 2#############
+li $t0,2
 move $v0,$t0
 jr $ra
 ########################################FUNC END############################################
 
-########################################FUNC START##########################################
-#############FUNC_DECLARE scan#############
-scan:
+#############LABEL_GEN label_3#############
+label_3:
 
-#############ASSIGN tmp12 0#############
-li $t0,0
-sw $t0,12($sp)
+#############PREPARE fib#############
+sw $ra,0($sp)
+subiu $sp,$sp,36
 
-#############GETINT T_1#############
-li $v0,5
-syscall
-move $t0,$v0
-sw $t0,8($sp)
+#############SUB i1 1 T_2#############
+lw $t0,68($sp)
+li $t1,1
+subu $t0,$t0,$t1
+sw $t0,56($sp)
 
-#############ASSIGN tmp12 T_1#############
-lw $t0,8($sp)
-sw $t0,12($sp)
+#############PUSH_PARAM T_2 0 fib#############
+lw $t0,56($sp)
+sw $t0,32($sp)
 
-#############ADD tmp12 0 T_2#############
-lw $t0,12($sp)
-li $t1,0
+#############CALL fib#############
+jal fib
+
+#############FIN_CALL fib#############
+addiu $sp,$sp,36
+lw $ra,0($sp)
+
+#############STORE_RET T_3#############
+sw $v0,16($sp)
+
+#############PREPARE fib#############
+sw $ra,0($sp)
+subiu $sp,$sp,36
+
+#############SUB i1 2 T_4#############
+lw $t0,68($sp)
+li $t1,2
+subu $t0,$t0,$t1
+sw $t0,48($sp)
+
+#############PUSH_PARAM T_4 0 fib#############
+lw $t0,48($sp)
+sw $t0,32($sp)
+
+#############CALL fib#############
+jal fib
+
+#############FIN_CALL fib#############
+addiu $sp,$sp,36
+lw $ra,0($sp)
+
+#############STORE_RET T_5#############
+sw $v0,8($sp)
+
+#############ADD T_3 T_5 T_6#############
+lw $t0,16($sp)
+lw $t1,8($sp)
 addu $t0,$t0,$t1
 sw $t0,4($sp)
 
-#############RET_VALUE T_2#############
+#############RET_VALUE T_6#############
 lw $t0,4($sp)
 move $v0,$t0
 jr $ra
@@ -87,144 +121,370 @@ jr $ra
 #############FUNC_DECLARE main#############
 main:
 
-#############PREPARE min#############
+#############ASSIGN i11 2#############
+li $t0,2
+sw $t0,172($sp)
+
+#############ASSIGN j11 5#############
+li $t0,5
+sw $t0,168($sp)
+
+#############GETINT T_7#############
+li $v0,5
+syscall
+move $t0,$v0
+sw $t0,164($sp)
+
+#############ASSIGN i11 T_7#############
+lw $t0,164($sp)
+sw $t0,172($sp)
+
+#############GETINT T_8#############
+li $v0,5
+syscall
+move $t0,$v0
+sw $t0,160($sp)
+
+#############ASSIGN j11 T_8#############
+lw $t0,160($sp)
+sw $t0,168($sp)
+
+#############STORE_ARRAY_1D a15 0 1#############
+li $t0,1
+move $t3,$t0
+addiu $t0,$sp,152
+li $t1,0
+sll $t1,$t1,2
+addu $t0,$t0,$t1
+sw $t3,0($t0)
+
+#############STORE_ARRAY_1D a15 1 2#############
+li $t0,2
+move $t3,$t0
+addiu $t0,$sp,152
+li $t1,1
+sll $t1,$t1,2
+addu $t0,$t0,$t1
+sw $t3,0($t0)
+
+#############MULT i11 j11 T_9#############
+lw $t0,172($sp)
+lw $t1,168($sp)
+mult $t0,$t1
+mflo $t0
+sw $t0,148($sp)
+
+#############NEG T_9 T_10#############
+lw $t0,148($sp)
+neg $t0,$t0
+sw $t0,144($sp)
+
+#############PREPARE fib#############
 sw $ra,0($sp)
-subiu $sp,$sp,16
+subiu $sp,$sp,36
 
-#############PREPARE min#############
-sw $ra,0($sp)
-subiu $sp,$sp,16
-
-#############PUSH_PARAM r 0 min#############
-lw $t0,-32768($gp)
-sw $t0,12($sp)
-
-#############PREPARE scan#############
-sw $ra,0($sp)
-subiu $sp,$sp,16
-
-#############CALL scan#############
-jal scan
-
-#############FIN_CALL scan#############
-addiu $sp,$sp,16
-lw $ra,0($sp)
-
-#############STORE_RET T_3#############
-sw $v0,60($sp)
-
-#############PUSH_PARAM T_3 1 min#############
-lw $t0,60($sp)
-sw $t0,8($sp)
-
-#############CALL min#############
-jal min
-
-#############FIN_CALL min#############
-addiu $sp,$sp,16
-lw $ra,0($sp)
-
-#############STORE_RET T_4#############
-sw $v0,40($sp)
-
-#############PUSH_PARAM T_4 0 min#############
-lw $t0,40($sp)
-sw $t0,12($sp)
-
-#############PREPARE min#############
-sw $ra,0($sp)
-subiu $sp,$sp,16
-
-#############PREPARE scan#############
-sw $ra,0($sp)
-subiu $sp,$sp,16
-
-#############CALL scan#############
-jal scan
-
-#############FIN_CALL scan#############
-addiu $sp,$sp,16
-lw $ra,0($sp)
-
-#############STORE_RET T_5#############
-sw $v0,52($sp)
-
-#############PUSH_PARAM T_5 0 min#############
-lw $t0,52($sp)
-sw $t0,12($sp)
-
-#############PREPARE min#############
-sw $ra,0($sp)
-subiu $sp,$sp,16
-
-#############PUSH_PARAM r 0 min#############
-lw $t0,-32768($gp)
-sw $t0,12($sp)
-
-#############PREPARE scan#############
-sw $ra,0($sp)
-subiu $sp,$sp,16
-
-#############CALL scan#############
-jal scan
-
-#############FIN_CALL scan#############
-addiu $sp,$sp,16
-lw $ra,0($sp)
-
-#############STORE_RET T_6#############
-sw $v0,64($sp)
-
-#############PUSH_PARAM T_6 1 min#############
-lw $t0,64($sp)
-sw $t0,8($sp)
-
-#############CALL min#############
-jal min
-
-#############FIN_CALL min#############
-addiu $sp,$sp,16
-lw $ra,0($sp)
-
-#############STORE_RET T_7#############
-sw $v0,44($sp)
-
-#############PUSH_PARAM T_7 1 min#############
-lw $t0,44($sp)
-sw $t0,8($sp)
-
-#############CALL min#############
-jal min
-
-#############FIN_CALL min#############
-addiu $sp,$sp,16
-lw $ra,0($sp)
-
-#############STORE_RET T_8#############
-sw $v0,24($sp)
-
-#############PUSH_PARAM T_8 1 min#############
-lw $t0,24($sp)
-sw $t0,8($sp)
-
-#############CALL min#############
-jal min
-
-#############FIN_CALL min#############
-addiu $sp,$sp,16
-lw $ra,0($sp)
-
-#############STORE_RET T_9#############
-sw $v0,4($sp)
-
-#############ASSIGN b17 T_9#############
-lw $t0,4($sp)
+#############PUSH_PARAM 4 0 fib#############
+li $t0,4
 sw $t0,32($sp)
 
-#############PRINT_INT b17#############
-lw $t0,32($sp)
+#############CALL fib#############
+jal fib
+
+#############FIN_CALL fib#############
+addiu $sp,$sp,36
+lw $ra,0($sp)
+
+#############STORE_RET T_11#############
+sw $v0,140($sp)
+
+#############MULT T_10 T_11 T_12#############
+lw $t0,144($sp)
+lw $t1,140($sp)
+mult $t0,$t1
+mflo $t0
+sw $t0,136($sp)
+
+#############ADD T_12 0 T_13#############
+lw $t0,136($sp)
+li $t1,0
+addu $t0,$t0,$t1
+sw $t0,132($sp)
+
+#############PREPARE fib#############
+sw $ra,0($sp)
+subiu $sp,$sp,36
+
+#############PUSH_PARAM 1 0 fib#############
+li $t0,1
+sw $t0,32($sp)
+
+#############CALL fib#############
+jal fib
+
+#############FIN_CALL fib#############
+addiu $sp,$sp,36
+lw $ra,0($sp)
+
+#############STORE_RET T_15#############
+sw $v0,124($sp)
+
+#############LOAD_ARRAY_1D a15 T_15 T_14#############
+addiu $t0,$sp,152
+lw $t1,124($sp)
+sll $t1,$t1,2
+addu $t0,$t0,$t1
+lw $t0,0($t0)
+sw $t0,128($sp)
+
+#############MULT T_14 1 T_16#############
+lw $t0,128($sp)
+li $t1,1
+mult $t0,$t1
+mflo $t0
+sw $t0,120($sp)
+
+#############ADD T_13 T_16 T_17#############
+lw $t0,132($sp)
+lw $t1,120($sp)
+addu $t0,$t0,$t1
+sw $t0,116($sp)
+
+li $t0,1
+li $t1,2
+div $t0,$t1
+mflo $t0
+sw $t0,112($sp)
+
+#############SUB T_17 T_18 T_19#############
+lw $t0,116($sp)
+lw $t1,112($sp)
+subu $t0,$t0,$t1
+sw $t0,108($sp)
+
+#############MULT T_19 5 T_20#############
+lw $t0,108($sp)
+li $t1,5
+mult $t0,$t1
+mflo $t0
+sw $t0,104($sp)
+
+#############ASSIGN i11 T_20#############
+lw $t0,104($sp)
+sw $t0,172($sp)
+
+#############MULT 7 5923 T_21#############
+li $t0,7
+li $t1,5923
+mult $t0,$t1
+mflo $t0
+sw $t0,100($sp)
+
+lw $t0,100($sp)
+li $t1,56
+div $t0,$t1
+mflo $t0
+sw $t0,96($sp)
+
+#############MULT T_22 56 T_23#############
+lw $t0,96($sp)
+li $t1,56
+mult $t0,$t1
+mflo $t0
+sw $t0,92($sp)
+
+#############PREPARE fib#############
+sw $ra,0($sp)
+subiu $sp,$sp,36
+
+#############PREPARE fib#############
+sw $ra,0($sp)
+subiu $sp,$sp,36
+
+#############PUSH_PARAM 6 0 fib#############
+li $t0,6
+sw $t0,32($sp)
+
+#############CALL fib#############
+jal fib
+
+#############FIN_CALL fib#############
+addiu $sp,$sp,36
+lw $ra,0($sp)
+
+#############STORE_RET T_24#############
+sw $v0,124($sp)
+
+#############PUSH_PARAM T_24 0 fib#############
+lw $t0,124($sp)
+sw $t0,32($sp)
+
+#############CALL fib#############
+jal fib
+
+#############FIN_CALL fib#############
+addiu $sp,$sp,36
+lw $ra,0($sp)
+
+#############STORE_RET T_25#############
+sw $v0,84($sp)
+
+#############SUB T_23 T_25 T_26#############
+lw $t0,92($sp)
+lw $t1,84($sp)
+subu $t0,$t0,$t1
+sw $t0,80($sp)
+
+#############ADD 1 2 T_27#############
+li $t0,1
+li $t1,2
+addu $t0,$t0,$t1
+sw $t0,76($sp)
+
+li $t0,89
+li $t1,2
+div $t0,$t1
+mflo $t0
+sw $t0,72($sp)
+
+#############MULT T_28 36 T_29#############
+lw $t0,72($sp)
+li $t1,36
+mult $t0,$t1
+mflo $t0
+sw $t0,68($sp)
+
+#############SUB T_29 53 T_30#############
+lw $t0,68($sp)
+li $t1,53
+subu $t0,$t0,$t1
+sw $t0,64($sp)
+
+lw $t0,64($sp)
+li $t1,1
+div $t0,$t1
+mflo $t0
+sw $t0,60($sp)
+
+#############MULT T_31 6 T_32#############
+lw $t0,60($sp)
+li $t1,6
+mult $t0,$t1
+mflo $t0
+sw $t0,56($sp)
+
+#############SUB T_27 T_32 T_33#############
+lw $t0,76($sp)
+lw $t1,56($sp)
+subu $t0,$t0,$t1
+sw $t0,52($sp)
+
+#############MULT 45 56 T_34#############
+li $t0,45
+li $t1,56
+mult $t0,$t1
+mflo $t0
+sw $t0,48($sp)
+
+lw $t0,48($sp)
+li $t1,85
+div $t0,$t1
+mflo $t0
+sw $t0,44($sp)
+
+#############SUB T_35 56 T_36#############
+lw $t0,44($sp)
+li $t1,56
+subu $t0,$t0,$t1
+sw $t0,40($sp)
+
+#############MULT 35 56 T_37#############
+li $t0,35
+li $t1,56
+mult $t0,$t1
+mflo $t0
+sw $t0,36($sp)
+
+lw $t0,36($sp)
+li $t1,4
+div $t0,$t1
+mflo $t0
+sw $t0,32($sp)
+
+#############ADD T_36 T_38 T_39#############
+lw $t0,40($sp)
+lw $t1,32($sp)
+addu $t0,$t0,$t1
+sw $t0,28($sp)
+
+#############SUB T_39 9 T_40#############
+lw $t0,28($sp)
+li $t1,9
+subu $t0,$t0,$t1
+sw $t0,24($sp)
+
+#############MULT 2 T_40 T_41#############
+li $t0,2
+lw $t1,24($sp)
+mult $t0,$t1
+mflo $t0
+sw $t0,20($sp)
+
+#############SUB T_33 T_41 T_42#############
+lw $t0,52($sp)
+lw $t1,20($sp)
+subu $t0,$t0,$t1
+sw $t0,16($sp)
+
+#############ADD T_26 T_42 T_43#############
+lw $t0,80($sp)
+lw $t1,16($sp)
+addu $t0,$t0,$t1
+sw $t0,12($sp)
+
+#############ASSIGN j11 T_43#############
+lw $t0,12($sp)
+sw $t0,168($sp)
+
+#############NEG 5 T_44#############
+li $t0,5
+neg $t0,$t0
+sw $t0,4($sp)
+
+#############ASSIGN k18 T_44#############
+lw $t0,4($sp)
+sw $t0,8($sp)
+
+#############PRINT_INT i11#############
+lw $t0,172($sp)
 move $a0,$t0
 li $v0,1
+syscall
+
+#############PRINT_STRING str_0#############
+la $a0,str_0
+li $v0,4
+syscall
+
+#############PRINT_INT j11#############
+lw $t0,168($sp)
+move $a0,$t0
+li $v0,1
+syscall
+
+#############PRINT_STRING str_1#############
+la $a0,str_1
+li $v0,4
+syscall
+
+#############PRINT_INT k18#############
+lw $t0,8($sp)
+move $a0,$t0
+li $v0,1
+syscall
+
+#############PRINT_STRING str_2#############
+la $a0,str_2
+li $v0,4
 syscall
 
 #############EXIT#############

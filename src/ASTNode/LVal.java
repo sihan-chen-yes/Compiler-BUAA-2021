@@ -152,12 +152,10 @@ public class LVal extends Node {
     public String genMidCode() {
         setDataType();
         //每次都需要看一下 当前这个Ident + []表示什么dataType
-
         if (getFather() instanceof UnaryExp) {
             //只有在右边时产生MidCode
             String Ident = MidCodeGener.getSymbolTable().getRefactorName(MidCodeGener.getFuncName(),getWord());
             //全局变量或者局部变量 refactor能够确定
-            refactor(Ident);
             if (exps.isEmpty()) {
                 if (dataType == DataType.INT) {
                     return Ident;

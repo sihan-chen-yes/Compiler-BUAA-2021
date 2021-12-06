@@ -1,69 +1,109 @@
 ########################################GLOBAL START########################################
-GLOBAL_DECLARE r
 ########################################GLOBAL END##########################################
 ########################################ASCIIZ START########################################
+str_0:, 
+str_1:, 
+str_2:\n
 ########################################ASCIIZ END##########################################
 ########################################FUNC START##########################################
-FUNC_DECLARE min
-SLT a2 b2 T_0
+FUNC_DECLARE fib
+SEQ i1 1 T_0
 BEQZ T_0 label_1
 LABEL_GEN label_0
-RET_VALUE a2
+RET_VALUE 1
 ########################################FUNC END############################################
-GOTO label_2
 LABEL_GEN label_1
-RET_VALUE b2
-########################################FUNC END############################################
+SEQ i1 2 T_1
+BEQZ T_1 label_3
 LABEL_GEN label_2
-RET_VALUE a2
+RET_VALUE 2
 ########################################FUNC END############################################
-########################################FUNC START##########################################
-FUNC_DECLARE scan
-ASSIGN tmp12 0
-GETINT T_1
-ASSIGN tmp12 T_1
-ADD tmp12 0 T_2
-RET_VALUE T_2
+LABEL_GEN label_3
+PREPARE fib
+SUB i1 1 T_2
+PUSH_PARAM T_2 0 fib
+CALL fib
+FIN_CALL fib
+STORE_RET T_3
+PREPARE fib
+SUB i1 2 T_4
+PUSH_PARAM T_4 0 fib
+CALL fib
+FIN_CALL fib
+STORE_RET T_5
+ADD T_3 T_5 T_6
+RET_VALUE T_6
 ########################################FUNC END############################################
 ########################################FUNC START##########################################
 FUNC_DECLARE main
-PREPARE min
-PREPARE min
-PUSH_PARAM r 0 min
-PREPARE scan
-CALL scan
-FIN_CALL scan
-STORE_RET T_3
-PUSH_PARAM T_3 1 min
-CALL min
-FIN_CALL min
-STORE_RET T_4
-PUSH_PARAM T_4 0 min
-PREPARE min
-PREPARE scan
-CALL scan
-FIN_CALL scan
-STORE_RET T_5
-PUSH_PARAM T_5 0 min
-PREPARE min
-PUSH_PARAM r 0 min
-PREPARE scan
-CALL scan
-FIN_CALL scan
-STORE_RET T_6
-PUSH_PARAM T_6 1 min
-CALL min
-FIN_CALL min
-STORE_RET T_7
-PUSH_PARAM T_7 1 min
-CALL min
-FIN_CALL min
-STORE_RET T_8
-PUSH_PARAM T_8 1 min
-CALL min
-FIN_CALL min
-STORE_RET T_9
-ASSIGN b17 T_9
-PRINT_INT b17
+ASSIGN i11 2
+ASSIGN j11 5
+GETINT T_7
+ASSIGN i11 T_7
+GETINT T_8
+ASSIGN j11 T_8
+STORE_ARRAY_1D a15 0 1
+STORE_ARRAY_1D a15 1 2
+MULT i11 j11 T_9
+NEG T_9 T_10
+PREPARE fib
+PUSH_PARAM 4 0 fib
+CALL fib
+FIN_CALL fib
+STORE_RET T_11
+MULT T_10 T_11 T_12
+ADD T_12 0 T_13
+PREPARE fib
+PUSH_PARAM 1 0 fib
+CALL fib
+FIN_CALL fib
+STORE_RET T_15
+LOAD_ARRAY_1D a15 T_15 T_14
+MULT T_14 1 T_16
+ADD T_13 T_16 T_17
+DIV 1 2 T_18
+SUB T_17 T_18 T_19
+MULT T_19 5 T_20
+ASSIGN i11 T_20
+MULT 7 5923 T_21
+DIV T_21 56 T_22
+MULT T_22 56 T_23
+PREPARE fib
+PREPARE fib
+PUSH_PARAM 6 0 fib
+CALL fib
+FIN_CALL fib
+STORE_RET T_24
+PUSH_PARAM T_24 0 fib
+CALL fib
+FIN_CALL fib
+STORE_RET T_25
+SUB T_23 T_25 T_26
+ADD 1 2 T_27
+DIV 89 2 T_28
+MULT T_28 36 T_29
+SUB T_29 53 T_30
+DIV T_30 1 T_31
+MULT T_31 6 T_32
+SUB T_27 T_32 T_33
+MULT 45 56 T_34
+DIV T_34 85 T_35
+SUB T_35 56 T_36
+MULT 35 56 T_37
+DIV T_37 4 T_38
+ADD T_36 T_38 T_39
+SUB T_39 9 T_40
+MULT 2 T_40 T_41
+SUB T_33 T_41 T_42
+ADD T_26 T_42 T_43
+ASSIGN j11 T_43
+NEG 5 T_44
+ASSIGN k18 T_44
+PRINT_INT i11
+PRINT_STRING str_0
+PRINT_INT j11
+PRINT_STRING str_1
+PRINT_INT k18
+PRINT_STRING str_2
 EXIT
 ########################################FUNC END############################################
