@@ -6,9 +6,9 @@
 FUNC_DECLARE main
 ASSIGN a2 1
 ASSIGN b3 4
+LABEL_GEN label_0
 SLE a2 b3 @T_0
 BEQZ @T_0 label_1
-LABEL_GEN label_0
 ADD a2 1 @T_1
 ASSIGN a2 @T_1
 GOTO label_0
