@@ -2,6 +2,7 @@ package ASTNode;
 import Enum.*;
 import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
+import Optimizer.Optimizer;
 
 public class WhileStmt extends Node {
     private String label1 = null;
@@ -47,20 +48,49 @@ public class WhileStmt extends Node {
 
     @Override
     public String genMidCode() {
-        label1 = MidCodeGener.genLabel();
-        if (Cond.getLAndExpNum() > 1) {
+        if (!Optimizer.isOp()) {
+            label1 = MidCodeGener.genLabel();
+            if (Cond.getLAndExpNum() > 1) {
+                //如果只有一个And块不用产生label2
+                label2 = MidCodeGener.genLabel();
+            }
+            label3 = MidCodeGener.genLabel();
+            MidCodeGener.addMidCodeEntry(
+                    new MidCodeEntry(
+                            OpType.LABEL_GEN,
+                            null,null,null,
+                            label1
+                    )
+            );
+            Cond.genMidCode(false);
+            if (Cond.getLAndExpNum() > 1) {
+                MidCodeGener.addMidCodeEntry(
+                        new MidCodeEntry(
+                                OpType.LABEL_GEN,
+                                null,null,null,
+                                label2
+                        )
+                );
+            }
+            body.genMidCode();
+            MidCodeGener.addMidCodeEntry(
+                    new MidCodeEntry(
+                            OpType.GOTO,
+                            null,null,null,
+                            label1
+                    )
+            );
+            MidCodeGener.addMidCodeEntry(
+                    new MidCodeEntry(
+                            OpType.LABEL_GEN,
+                            null,null,null,
+                            label3
+                    )
+            );
+        } else {
             label2 = MidCodeGener.genLabel();
-        }
-        label3 = MidCodeGener.genLabel();
-        MidCodeGener.addMidCodeEntry(
-                new MidCodeEntry(
-                        OpType.LABEL_GEN,
-                        null,null,null,
-                        label1
-                )
-        );
-        Cond.genMidCode();
-        if (Cond.getLAndExpNum() > 1) {
+            label3 = MidCodeGener.genLabel();
+            Cond.genMidCode(false);
             MidCodeGener.addMidCodeEntry(
                     new MidCodeEntry(
                             OpType.LABEL_GEN,
@@ -68,22 +98,16 @@ public class WhileStmt extends Node {
                             label2
                     )
             );
+            body.genMidCode();
+            Cond.genMidCode(true);
+            MidCodeGener.addMidCodeEntry(
+                    new MidCodeEntry(
+                            OpType.LABEL_GEN,
+                            null,null,null,
+                            label3
+                    )
+            );
         }
-        body.genMidCode();
-        MidCodeGener.addMidCodeEntry(
-                new MidCodeEntry(
-                        OpType.GOTO,
-                        null,null,null,
-                        label1
-                )
-        );
-        MidCodeGener.addMidCodeEntry(
-                new MidCodeEntry(
-                        OpType.LABEL_GEN,
-                        null,null,null,
-                        label3
-                )
-        );
         return super.genMidCode();
     }
 }

@@ -266,20 +266,20 @@ public class SymbolTable {
         return search_global(name).getOffset_gp();
     }
 
-    public SymbolTableEntry searchDefinedEntry(String func, Word word) {
+    public SymbolTableEntry searchDefinedEntry(String func, String name) {
         //编译时利用符号表求值
         SymbolTableEntry symbolTableEntry = null;
         if (func != null) {
             ArrayList<SymbolTableEntry> local = funcToDecl.get(func);
             for (int i = local.size() - 1;i >= 0;i--) {
-                if (local.get(i).getName().equals(word.getWord())) {
+                if (local.get(i).getName().equals(name)) {
                     symbolTableEntry = local.get(i);
                     return symbolTableEntry;
                 }
             }
         }
         for (int i = global.size() - 1;i >= 0;i--) {
-            if (global.get(i).getName().equals(word.getWord()) && global.get(i).getDeclType() != DeclType.FUNC) {
+            if (global.get(i).getName().equals(name) && global.get(i).getDeclType() != DeclType.FUNC) {
                 symbolTableEntry = global.get(i);
             }
         }
@@ -410,20 +410,26 @@ public class SymbolTable {
 
     public SymbolTableEntry getConstant(String func,String name) {
         //只可能是a T 1
-        SymbolTableEntry symbolTableEntry = search_local(func,name);
-        if (symbolTableEntry != null) {
-            if (symbolTableEntry.getDeclType() == DeclType.CONST) {
-                return symbolTableEntry;
-            } else {
-                return null;
+        SymbolTableEntry symbolTableEntry;
+        ArrayList<SymbolTableEntry> local = funcToDecl.get(func);
+        for (int i = local.size() - 1;i >= 0;i--) {
+            if (local.get(i).getName().equals(name)) {
+                symbolTableEntry = local.get(i);
+                if (symbolTableEntry.getDeclType() == DeclType.CONST) {
+                    return symbolTableEntry;
+                } else {
+                    return null;
+                }
             }
         }
-        symbolTableEntry = search_global(name);
-        if (symbolTableEntry != null) {
-            if (symbolTableEntry.getDeclType() == DeclType.CONST) {
-                return symbolTableEntry;
-            } else {
-                return null;
+        for (int i = global.size() - 1;i >= 0;i--) {
+            if (global.get(i).getName().equals(name) && global.get(i).getDeclType() != DeclType.FUNC) {
+                symbolTableEntry = global.get(i);
+                if (symbolTableEntry.getDeclType() == DeclType.CONST) {
+                    return symbolTableEntry;
+                } else {
+                    return null;
+                }
             }
         }
         return null;

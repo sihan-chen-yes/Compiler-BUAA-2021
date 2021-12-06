@@ -25,10 +25,6 @@ public class LVal extends Node {
     private int length1D;
     private int length2D;
 
-    //运行时 下标
-    private int i;
-    private int j;
-
     public LVal(Word word, int pos) {
         super(word,pos);
     }
@@ -126,7 +122,7 @@ public class LVal extends Node {
 
     public void setDataType() {
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
-        SymbolTableEntry symbolTableEntry = symbolTable.searchDefinedEntry(MidCodeGener.getFuncName(),getWord());
+        SymbolTableEntry symbolTableEntry = symbolTable.searchDefinedEntry(MidCodeGener.getFuncName(),getName());
         identType = symbolTableEntry.getDataType();
         if (identType == DataType.INT) {
             dataType = DataType.INT;
@@ -157,6 +153,7 @@ public class LVal extends Node {
             String Ident = MidCodeGener.getSymbolTable().getRefactorName(MidCodeGener.getFuncName(),getWord());
             //全局变量或者局部变量 refactor能够确定
             refactor(Ident);
+            //Todo 为什么要更名！
             if (exps.isEmpty()) {
                 if (dataType == DataType.INT) {
                     if (symbolTableEntry != null) {

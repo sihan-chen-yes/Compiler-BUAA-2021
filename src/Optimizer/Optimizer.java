@@ -16,8 +16,18 @@ public class Optimizer {
 
     private int blockNum = 0;
 
+    private static boolean isOp = false;
     public Optimizer() {
         this.midCodeList = MidCodeGener.getMidCodeList();
+        isOp = true;
+    }
+
+    public static boolean isOp() {
+        return isOp;
+    }
+
+    public static void setOp(boolean isOp) {
+        Optimizer.isOp = isOp;
     }
 
     public void optimize() {

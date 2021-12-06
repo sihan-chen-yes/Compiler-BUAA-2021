@@ -11,11 +11,20 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class Compiler {
-    public static boolean op = true;
+//    private static boolean op = true;
+    private static boolean op = false;
+
+    public static boolean isOp() {
+        return op;
+    }
+
     public static void main(java.lang.String[] args) {
         boolean debug = false;
         debug = true;
         //本地debug模式
+        if (op) {
+            Optimizer.setOp(true);
+        }
         //是否开启优化
 
         File readFile = new File("testfile.txt");
@@ -74,7 +83,4 @@ public class Compiler {
         }
     }
 
-    public static boolean isOp() {
-        return op;
-    }
 }

@@ -2,6 +2,7 @@ package ASTNode;
 import Enum.*;
 import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
+import Optimizer.Optimizer;
 
 import java.util.ArrayList;
 
@@ -24,21 +25,56 @@ public class LAndExp extends Node {
         }
     }
 
-    public String genMidCode(boolean isLast,String label) {
+    public boolean isWhileCond() {
+        LOrExp node = (LOrExp) getFather();
+        return node.isWhileCond();
+    }
+
+    public String genMidCode(boolean isLast,String label,boolean again) {
         if (isLast) {
-            //是And块中的最后一块
-            for (int i = 0;i < EqExps.size();i++) {
-                String temp = EqExps.get(i).genMidCode();
-                //有一个!Cond直接结束
-                MidCodeGener.addMidCodeEntry(
-                        new MidCodeEntry(
-                            OpType.BEQZ,
-                                temp,
-                                null,
-                                null,
-                                label
-                        )
-                );
+            //是最后一块 And块
+            if (Optimizer.isOp() && isWhileCond() && again) {
+                for (int i = 0;i < EqExps.size();i++) {
+                    String temp = EqExps.get(i).genMidCode();
+                    //是最后一个C
+                    if (i == EqExps.size() - 1) {
+                        LOrExp node = (LOrExp) getFather();
+                        String label2 = node.getLabel2();
+                        MidCodeGener.addMidCodeEntry(
+                                new MidCodeEntry(
+                                        OpType.BNEZ,
+                                        temp,
+                                        null,
+                                        null,
+                                        label2
+                                )
+                        );
+                    } else {
+                        MidCodeGener.addMidCodeEntry(
+                                new MidCodeEntry(
+                                        OpType.BEQZ,
+                                        temp,
+                                        null,
+                                        null,
+                                        label
+                                )
+                        );
+                    }
+                }
+            } else {
+                for (int i = 0;i < EqExps.size();i++) {
+                    String temp = EqExps.get(i).genMidCode();
+                    //有一个!Cond直接结束
+                    MidCodeGener.addMidCodeEntry(
+                            new MidCodeEntry(
+                                    OpType.BEQZ,
+                                    temp,
+                                    null,
+                                    null,
+                                    label
+                            )
+                    );
+                }
             }
         } else {
             //不是And块中的最后一块
