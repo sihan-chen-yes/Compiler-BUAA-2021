@@ -1,0 +1,22 @@
+########################################GLOBAL START########################################
+GLOBAL_DECLARE a1
+GLOBAL_DECLARE a2
+GLOBAL_DECLARE a3
+GLOBAL_DECLARE b1
+GLOBAL_DECLARE b2
+GLOBAL_DECLARE b3
+########################################GLOBAL END##########################################
+########################################ASCIIZ START########################################
+str_0:19231204
+str_1:\n
+str_2:Continue is error!\n
+str_3:Break is error!And < is error!\n
+str_4:+ is correct!\n
+str_5:+ is error!\n
+str_6:Break is error!\n
+str_7:Continue is error!\n
+str_8:a1+b1 is 
+str_9:\n
+str_10:a2+b2 is 
+str_11:\n
+########################################ASCIIZ END##########################################

@@ -1,0 +1,38 @@
+.data 0x10000000
+########################################GLOBAL START########################################
+#############GLOBAL_DECLARE a1#############
+a1:.word 1
+
+#############GLOBAL_DECLARE a2#############
+a2:.word 3
+
+#############GLOBAL_DECLARE a3#############
+a3:.word 8
+
+#############GLOBAL_DECLARE b1#############
+b1:.word 2
+
+#############GLOBAL_DECLARE b2#############
+b2:.word -5
+
+#############GLOBAL_DECLARE b3#############
+b3:.word 6
+
+########################################GLOBAL END##########################################
+########################################ASCIIZ START########################################
+str_0:.asciiz "19231204"
+str_1:.asciiz "\n"
+str_2:.asciiz "Continue is error!\n"
+str_3:.asciiz "Break is error!And < is error!\n"
+str_4:.asciiz "+ is correct!\n"
+str_5:.asciiz "+ is error!\n"
+str_6:.asciiz "Break is error!\n"
+str_7:.asciiz "Continue is error!\n"
+str_8:.asciiz "a1+b1 is "
+str_9:.asciiz "\n"
+str_10:.asciiz "a2+b2 is "
+str_11:.asciiz "\n"
+########################################ASCIIZ END##########################################
+.text
+addiu $sp,$sp,-40
+j main

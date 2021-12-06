@@ -89,8 +89,16 @@ public class WhileStmt extends Node {
             );
         } else {
             //优化 删去GOTO 和label1
+            label1 = MidCodeGener.genLabel();
             label2 = MidCodeGener.genLabel();
             label3 = MidCodeGener.genLabel();
+            MidCodeGener.addMidCodeEntry(
+                    new MidCodeEntry(
+                            OpType.LABEL_GEN,
+                            null,null,null,
+                            label1
+                    )
+            );
             Cond.genMidCode();
             MidCodeGener.addMidCodeEntry(
                     new MidCodeEntry(

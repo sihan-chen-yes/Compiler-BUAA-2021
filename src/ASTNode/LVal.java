@@ -152,8 +152,6 @@ public class LVal extends Node {
         if (getFather() instanceof UnaryExp) {
             String Ident = MidCodeGener.getSymbolTable().getRefactorName(MidCodeGener.getFuncName(),getWord());
             //全局变量或者局部变量 refactor能够确定
-            refactor(Ident);
-            //Todo 为什么要更名！
             if (exps.isEmpty()) {
                 if (dataType == DataType.INT) {
                     if (symbolTableEntry != null) {
