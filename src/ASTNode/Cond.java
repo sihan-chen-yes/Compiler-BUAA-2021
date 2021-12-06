@@ -21,8 +21,8 @@ public class Cond extends Node {
         return LOrExp.getLAndExpNum();
     }
 
-    public String genMidCode(boolean again) {
-        LOrExp.genMidCode(again);
+    public String genMidCode() {
+        LOrExp.genMidCode();
         return super.genMidCode();
     }
 }

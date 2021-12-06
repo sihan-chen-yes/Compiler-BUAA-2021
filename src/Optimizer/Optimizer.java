@@ -19,7 +19,6 @@ public class Optimizer {
     private static boolean isOp = false;
     public Optimizer() {
         this.midCodeList = MidCodeGener.getMidCodeList();
-        isOp = true;
     }
 
     public static boolean isOp() {

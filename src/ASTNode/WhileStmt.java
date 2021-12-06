@@ -62,7 +62,7 @@ public class WhileStmt extends Node {
                             label1
                     )
             );
-            Cond.genMidCode(false);
+            Cond.genMidCode();
             if (Cond.getLAndExpNum() > 1) {
                 MidCodeGener.addMidCodeEntry(
                         new MidCodeEntry(
@@ -88,9 +88,10 @@ public class WhileStmt extends Node {
                     )
             );
         } else {
+            //优化 删去GOTO 和label1
             label2 = MidCodeGener.genLabel();
             label3 = MidCodeGener.genLabel();
-            Cond.genMidCode(false);
+            Cond.genMidCode();
             MidCodeGener.addMidCodeEntry(
                     new MidCodeEntry(
                             OpType.LABEL_GEN,
@@ -99,7 +100,7 @@ public class WhileStmt extends Node {
                     )
             );
             body.genMidCode();
-            Cond.genMidCode(true);
+            Cond.genMidCode();
             MidCodeGener.addMidCodeEntry(
                     new MidCodeEntry(
                             OpType.LABEL_GEN,

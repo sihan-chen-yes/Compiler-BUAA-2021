@@ -1,5 +1,5 @@
 package ASTNode;
-import Enum.*;
+import Enum.OpType;
 import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 import Optimizer.Optimizer;
@@ -25,28 +25,37 @@ public class LAndExp extends Node {
         }
     }
 
-    public boolean isWhileCond() {
-        LOrExp node = (LOrExp) getFather();
-        return node.isWhileCond();
-    }
-
-    public String genMidCode(boolean isLast,String label,boolean again) {
+    public String genMidCode(boolean isLast,String label,String opLabel) {
+        //opLabel 只在优化时有用
         if (isLast) {
             //是最后一块 And块
-            if (Optimizer.isOp() && isWhileCond() && again) {
+            if (opLabel == null) {
+                for (int i = 0;i < EqExps.size();i++) {
+                    String temp = EqExps.get(i).genMidCode();
+                    //有一个!Cond直接结束
+                    MidCodeGener.addMidCodeEntry(
+                            new MidCodeEntry(
+                                    OpType.BEQZ,
+                                    temp,
+                                    null,
+                                    null,
+                                    label
+                            )
+                    );
+                }
+            } else {
+                assert Optimizer.isOp();
                 for (int i = 0;i < EqExps.size();i++) {
                     String temp = EqExps.get(i).genMidCode();
                     //是最后一个C
                     if (i == EqExps.size() - 1) {
-                        LOrExp node = (LOrExp) getFather();
-                        String label2 = node.getLabel2();
                         MidCodeGener.addMidCodeEntry(
                                 new MidCodeEntry(
                                         OpType.BNEZ,
                                         temp,
                                         null,
                                         null,
-                                        label2
+                                        opLabel
                                 )
                         );
                     } else {
@@ -60,20 +69,6 @@ public class LAndExp extends Node {
                                 )
                         );
                     }
-                }
-            } else {
-                for (int i = 0;i < EqExps.size();i++) {
-                    String temp = EqExps.get(i).genMidCode();
-                    //有一个!Cond直接结束
-                    MidCodeGener.addMidCodeEntry(
-                            new MidCodeEntry(
-                                    OpType.BEQZ,
-                                    temp,
-                                    null,
-                                    null,
-                                    label
-                            )
-                    );
                 }
             }
         } else {

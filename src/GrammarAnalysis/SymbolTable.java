@@ -408,31 +408,37 @@ public class SymbolTable {
         return false;
     }
 
-    public SymbolTableEntry getConstant(String func,String name) {
-        //只可能是a T 1
-        SymbolTableEntry symbolTableEntry;
-        ArrayList<SymbolTableEntry> local = funcToDecl.get(func);
-        for (int i = local.size() - 1;i >= 0;i--) {
-            if (local.get(i).getName().equals(name)) {
-                symbolTableEntry = local.get(i);
-                if (symbolTableEntry.getDeclType() == DeclType.CONST) {
+    public SymbolTableEntry searchUnRefactor(String func,String name) {
+        SymbolTableEntry symbolTableEntry = null;
+        if (func != null) {
+            ArrayList<SymbolTableEntry> local = funcToDecl.get(func);
+            for (int i = local.size() - 1;i >= 0;i--) {
+                if (local.get(i).getName().equals(name)) {
+                    symbolTableEntry = local.get(i);
                     return symbolTableEntry;
-                } else {
-                    return null;
                 }
             }
         }
         for (int i = global.size() - 1;i >= 0;i--) {
             if (global.get(i).getName().equals(name) && global.get(i).getDeclType() != DeclType.FUNC) {
                 symbolTableEntry = global.get(i);
-                if (symbolTableEntry.getDeclType() == DeclType.CONST) {
-                    return symbolTableEntry;
-                } else {
-                    return null;
-                }
             }
         }
-        return null;
+        return symbolTableEntry;
+    }
+
+    public SymbolTableEntry getConstant(String func,String name) {
+        //只可能是a T 1
+        SymbolTableEntry symbolTableEntry = searchUnRefactor(func,name);
+        if (symbolTableEntry != null) {
+            if (symbolTableEntry.getDeclType() == DeclType.CONST) {
+                return symbolTableEntry;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     public String genValueContent(SymbolTableEntry symbolTableEntry,boolean isGlobal) {

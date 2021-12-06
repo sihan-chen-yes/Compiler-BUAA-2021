@@ -11,8 +11,8 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class Compiler {
-//    private static boolean op = true;
-    private static boolean op = false;
+    private static boolean op = true;
+//    private static boolean op = false;
 
     public static boolean isOp() {
         return op;
