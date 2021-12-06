@@ -17,6 +17,8 @@ public class Optimizer {
     private int blockNum = 0;
 
     private static boolean isOp = false;
+    private static boolean isDebug = false;
+
     public Optimizer() {
         this.midCodeList = MidCodeGener.getMidCodeList();
     }
@@ -25,14 +27,24 @@ public class Optimizer {
         return isOp;
     }
 
+    public static boolean isDebug() {
+        return isDebug;
+    }
+
+    public static void setDebug(boolean isDebug) {
+        Optimizer.isDebug = isDebug;
+    }
+
     public static void setOp(boolean isOp) {
         Optimizer.isOp = isOp;
     }
 
+
+
     public void optimize() {
         genBlock();
-//        genDAG();
-//        MidCodeGener.setMidCodeList(getOptimizedMidCode());
+        genDAG();
+        MidCodeGener.setMidCodeList(getOptimizedMidCode());
     }
 
     public void findEntry() {

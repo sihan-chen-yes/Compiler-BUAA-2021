@@ -2,6 +2,7 @@ package MidCodeGeneration;
 
 import Enum.OpType;
 import GrammarAnalysis.SymbolTable;
+import Optimizer.Optimizer;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -31,19 +32,16 @@ public class MidCodeGener {
     private String asciizStart = "########################################ASCIIZ START########################################\n";
     private String asciizEnd = "########################################ASCIIZ END##########################################\n";
 
-
     private static ArrayList<MidCodeEntry> opMidCodeList = new ArrayList<>();
 
-    public MidCodeGener(File midcodeFile,boolean debug) {
+    public MidCodeGener(File midcodeFile,File opMidCodeFile) {
         try {
             this.writer = new FileWriter(midcodeFile);
-            File file;
-            if (debug) {
-                file = new File("opmidcode.txt");
+            if (Optimizer.isDebug()) {
+                this.opWriter = new FileWriter(opMidCodeFile);
             } else {
-                file = midcodeFile;
+                this.opWriter = new FileWriter(midcodeFile);
             }
-            this.opWriter = new FileWriter(file);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -62,6 +60,14 @@ public class MidCodeGener {
     }
 
     public void saveMidCode() {
+        save(writer,midCodeList);
+    }
+
+    public void saveOpMidCode() {
+        save(opWriter,opMidCodeList);
+    }
+
+    public void save(FileWriter writer,ArrayList<MidCodeEntry> midCodeList) {
         try {
             writer.write(globalStart);
             Iterator iterator = global.iterator();
@@ -84,34 +90,6 @@ public class MidCodeGener {
             }
             writer.flush();
             writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void saveOpMidCode() {
-        try {
-            opWriter.write(globalStart);
-            Iterator iterator = global.iterator();
-            while (iterator.hasNext()) {
-                MidCodeEntry midCodeEntry = (MidCodeEntry) iterator.next();
-                opWriter.write(midCodeEntry.toString() + "\n");
-            }
-            opWriter.write(globalEnd);
-            opWriter.write(asciizStart);
-            iterator = strList.iterator();
-            while (iterator.hasNext()) {
-                Str str = (Str) iterator.next();
-                opWriter.write(str.toString() + "\n");
-            }
-            opWriter.write(asciizEnd);
-            iterator = opMidCodeList.iterator();
-            while (iterator.hasNext()) {
-                MidCodeEntry midCodeEntry = (MidCodeEntry) iterator.next();
-                opWriter.write(midCodeEntry.toString() + "\n");
-            }
-            opWriter.flush();
-            opWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

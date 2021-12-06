@@ -3,6 +3,7 @@ package TargetCodeGeneration;
 import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 import MidCodeGeneration.Str;
+import Optimizer.Optimizer;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -25,26 +26,32 @@ public class TargetCodeGener {
     private String data = ".data 0x10000000\n";
     private String text = ".text\n";
 
-    public TargetCodeGener(File targetcodeFile,boolean debug) {
+    public TargetCodeGener(File targetcodeFile,File opTargetCodeFile) {
         global = MidCodeGener.getGlobal();
         strList = MidCodeGener.getStrList();
         midCodeList = MidCodeGener.getMidCodeList();
         opMideCodeList = MidCodeGener.getOpMidCodeList();
         try {
             this.writer = new FileWriter(targetcodeFile);
-            File file;
-            if (debug) {
-                file = new File("opmips.txt");
+            if (Optimizer.isDebug()) {
+                this.opWriter = new FileWriter(opTargetCodeFile);
             } else {
-                file = targetcodeFile;
+                this.opWriter = new FileWriter(targetcodeFile);
             }
-            this.opWriter = new FileWriter(file);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void saveTargetCode() {
+        save(writer,midCodeList);
+    }
+
+    public void saveOpTarCode() {
+        save(opWriter,opMideCodeList);
+    }
+
+    public void save(FileWriter writer,ArrayList<MidCodeEntry> midCodeList) {
         try {
             genGlobal(writer);
             genStr(writer);
@@ -56,23 +63,6 @@ public class TargetCodeGener {
             }
             writer.flush();
             writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void saveOpTarCode() {
-        try {
-            genGlobal(opWriter);
-            genStr(opWriter);
-            genHead(opWriter);
-            Iterator iterator = opMideCodeList.iterator();
-            while (iterator.hasNext()) {
-                MidCodeEntry midCodeEntry = (MidCodeEntry) iterator.next();
-                opWriter.write(midCodeEntry.toTargetCode() + "\n");
-            }
-            opWriter.flush();
-            opWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
