@@ -1,5 +1,6 @@
 package Optimizer;
 
+import Enum.OpType;
 import MidCodeGeneration.MidCodeEntry;
 
 import java.util.ArrayList;
@@ -24,14 +25,22 @@ public class FuncBlock {
         return basicBlocks;
     }
 
-    public BasicBlock getHeadBlock() {
+    public HeadBlock getHeadBlock() {
         return headBlock;
+    }
+
+    public EndBlock getEndBlock() {
+        return endBlock;
     }
 
     public void genDAG() {
         for (BasicBlock basicBlock:basicBlocks) {
             basicBlock.genDAG();
         }
+    }
+
+    public String getFunc() {
+        return func;
     }
 
     @Override
@@ -47,6 +56,10 @@ public class FuncBlock {
         ArrayList<MidCodeEntry> optimizedMidCode = new ArrayList<>();
         optimizedMidCode.add(headBlock.getMidCodeEntry());
         for(BasicBlock basicBlock:basicBlocks) {
+            ArrayList<String> labels = new ArrayList<>();
+            for (String label:labels) {
+                optimizedMidCode.add(new MidCodeEntry(OpType.LABEL_GEN,null,null,null,label));
+            }
             optimizedMidCode.addAll(basicBlock.getOptimizedMidCode());
         }
         return optimizedMidCode;

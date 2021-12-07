@@ -7,69 +7,37 @@ GLOBAL_DECLARE b2
 GLOBAL_DECLARE b3
 ########################################GLOBAL END##########################################
 ########################################ASCIIZ START########################################
-str_0:19231204
+str_0:a1+b1 is 
 str_1:\n
-str_2:Continue is error!\n
-str_3:Break is error!And < is error!\n
-str_4:+ is correct!\n
-str_5:+ is error!\n
-str_6:Break is error!\n
-str_7:Continue is error!\n
-str_8:a1+b1 is 
-str_9:\n
-str_10:a2+b2 is 
-str_11:\n
+str_2:a2+b2 is 
+str_3:\n
 ########################################ASCIIZ END##########################################
 ########################################FUNC START##########################################
 FUNC_DECLARE main
-PRINT_STRING str_0
-PRINT_STRING str_1
-ASSIGN n7 10
+
+ASSIGN n5 0  0
+
 LABEL_GEN label_0
-BEQZ n7 label_2
+BEQZ 1 label_2   1
+
 LABEL_GEN label_1
-SUB n7 1 @T_0
-ASSIGN n7 @T_0
-SLT n7 b3 @T_1
-BEQZ @T_1 label_3
-GOTO label_0
-PRINT_STRING str_2
 LABEL_GEN label_3
-SLT n7 1 @T_2
-BEQZ @T_2 label_4
-GOTO label_2
-PRINT_STRING str_3
+BEQZ 1 label_5
+
 LABEL_GEN label_4
-SEQ n7 3 @T_3
-BEQZ @T_3 label_5
-PRINT_STRING str_4
-GOTO label_6
+BNEZ 1 label_4
+
 LABEL_GEN label_5
-PRINT_STRING str_5
-LABEL_GEN label_6
-SEQ n7 b1 @T_4
-BEQZ @T_4 label_7
-GOTO label_2
-LABEL_GEN label_7
-BNEZ n7 label_1
+BNEZ 1 label_1
+
 LABEL_GEN label_2
-SNE n7 b1 @T_5
-BEQZ @T_5 label_8
-SEQ n7 0 @T_6
-BEQZ @T_6 label_9
-PRINT_STRING str_6
-GOTO label_10
-LABEL_GEN label_9
-PRINT_STRING str_7
-LABEL_GEN label_10
-LABEL_GEN label_8
-PRINT_STRING str_8
-ADD 1 b1 @T_7
-PRINT_INT @T_7
-PRINT_STRING str_9
-PRINT_STRING str_10
-ADD 3 b2 @T_8
-PRINT_INT @T_8
-PRINT_STRING str_11
+PRINT_STRING str_0
+ADD 1 b1 @T_0
+PRINT_INT @T_0
+PRINT_STRING str_1
+PRINT_STRING str_2
+ADD 3 b2 @T_1
+PRINT_INT @T_1
+PRINT_STRING str_3
 EXIT
 ########################################FUNC END############################################

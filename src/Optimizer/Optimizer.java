@@ -5,6 +5,7 @@ import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Optimizer {
     private ArrayList<MidCodeEntry> midCodeList;
@@ -13,6 +14,7 @@ public class Optimizer {
     private ArrayList<FuncBlock> funcBlocks = new ArrayList<>();
     private FuncBlock curFuncBlock = null;
     private BasicBlock curBasicBlock = null;
+    private HashMap<String, HashMap<String,Integer>> funcToLabel = new HashMap<>();
 
     private int blockNum = 0;
 
@@ -43,14 +45,22 @@ public class Optimizer {
 
     public void optimize() {
         genBlock();
-        genDAG();
-        MidCodeGener.setMidCodeList(getOptimizedMidCode());
+        print();
+//        genDAG();
+//        MidCodeGener.setMidCodeList(getOptimizedMidCode());
+    }
+
+    public void print() {
+        for (FuncBlock funcBlock:funcBlocks) {
+            System.out.println(funcBlock.toString());
+        }
     }
 
     public void findEntry() {
         for (int i = 0;i < midCodeList.size();i++) {
             MidCodeEntry midCodeEntry = midCodeList.get(i);
-            if (midCodeEntry.getOpType() == OpType.LABEL_GEN) {
+            if (midCodeEntry.getOpType() == OpType.LABEL_GEN &&
+                    (i - 1 < 0 || i - 1 >= 0 && midCodeList.get(i - 1).getOpType() != OpType.LABEL_GEN)) {
                 midCodeEntry.setEntryPoint(true);
             } else if ((midCodeEntry.getOpType() == OpType.BEQZ
                     || midCodeEntry.getOpType() == OpType.BNEZ
@@ -77,21 +87,61 @@ public class Optimizer {
                 }
             } else if (midCodeEntry.isEntryPoint()) {
                 curBasicBlock = new BasicBlock();
-                curBasicBlock.setNum(blockNum++);
+                curBasicBlock.setBlockNum(blockNum++);
                 curFuncBlock.addBasicBlock(curBasicBlock);
-                curBasicBlock.addMideCodeEntry(midCodeEntry);
+                if (midCodeEntry.getOpType() != OpType.LABEL_GEN) {
+                    curBasicBlock.addMideCodeEntry(midCodeEntry);
+                } else {
+                    curBasicBlock.addLabel(midCodeEntry.getDst());
+                    if (!funcToLabel.containsKey(curBasicBlock.getFunc())) {
+                        funcToLabel.put(curBasicBlock.getFunc(),new HashMap<>());
+                    }
+                    funcToLabel.get(curBasicBlock.getFunc()).put(midCodeEntry.getDst(),curBasicBlock.getBlockNum());
+                }
             } else {
                 curBasicBlock.addMideCodeEntry(midCodeEntry);
             }
         }
+        setRel();
     }
 
-    public void genDAG() {
+    public void setRel() {
         for (FuncBlock funcBlock:funcBlocks) {
-            funcBlock.genDAG();
+            HashMap<String, Integer> labelToNum = funcToLabel.get(funcBlock.getFunc());
+            HeadBlock headBlock = funcBlock.getHeadBlock();
+            EndBlock endBlock = funcBlock.getEndBlock();
+            ArrayList<BasicBlock> basicBlocks = funcBlock.getBasicBlocks();
+            headBlock.link(basicBlocks.get(0));
+            for (int i = 0;i < basicBlocks.size();i++) {
+                //每次连尾部
+                MidCodeEntry midCodeEntry = basicBlocks.get(i).getLastMidCodeEntry();
+                OpType opType = midCodeEntry.getOpType();
+                if (opType == OpType.GOTO) {
+                    String label = midCodeEntry.getDst();
+                    BasicBlock basicBlock = basicBlocks.get(labelToNum.get(label));
+                    basicBlocks.get(i).link(basicBlock);
+                } else if (opType == OpType.BNEZ || opType == OpType.BEQZ) {
+                    assert i + 1 < basicBlocks.size();
+                    String label = midCodeEntry.getDst();
+                    BasicBlock basicBlock = basicBlocks.get(labelToNum.get(label));
+                    basicBlocks.get(i).link(basicBlock);
+                    basicBlocks.get(i).link(basicBlocks.get(i + 1));
+                } else if (opType == OpType.EXIT || opType == OpType.RET_VOID || opType == OpType.RET_VALUE) {
+                    basicBlocks.get(i).link(endBlock);
+                } else {
+                    assert i + 1 < basicBlocks.size();
+                    basicBlocks.get(i).link(basicBlocks.get(i + 1));
+                }
+            }
         }
-        getOptimizedMidCode();
     }
+
+//    public void genDAG() {
+//        for (FuncBlock funcBlock:funcBlocks) {
+//            funcBlock.genDAG();
+//        }
+//        getOptimizedMidCode();
+//    }
 
     public ArrayList<MidCodeEntry> getOptimizedMidCode() {
         if (optimizedMidCode == null) {
@@ -101,5 +151,19 @@ public class Optimizer {
             }
         }
         return optimizedMidCode;
+    }
+
+    public void genDataFlow() {
+        genReachDef();
+        genDefUse();
+
+    }
+
+    public void genReachDef() {
+
+    }
+
+    public void genDefUse() {
+
     }
 }

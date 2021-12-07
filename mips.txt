@@ -20,29 +20,71 @@ b3:.word 6
 
 ########################################GLOBAL END##########################################
 ########################################ASCIIZ START########################################
-str_0:.asciiz "19231204"
+str_0:.asciiz "a1+b1 is "
 str_1:.asciiz "\n"
-str_2:.asciiz "Continue is error!\n"
-str_3:.asciiz "Break is error!And < is error!\n"
-str_4:.asciiz "+ is correct!\n"
-str_5:.asciiz "+ is error!\n"
-str_6:.asciiz "Break is error!\n"
-str_7:.asciiz "Continue is error!\n"
-str_8:.asciiz "a1+b1 is "
-str_9:.asciiz "\n"
-str_10:.asciiz "a2+b2 is "
-str_11:.asciiz "\n"
+str_2:.asciiz "a2+b2 is "
+str_3:.asciiz "\n"
 ########################################ASCIIZ END##########################################
 .text
-addiu $sp,$sp,-40
+addiu $sp,$sp,-12
 j main
 ########################################FUNC START##########################################
 #############FUNC_DECLARE main#############
 main:
 
+#############ASSIGN n5 0#############
+li $t0,0
+sw $t0,12($sp)
+
+#############LABEL_GEN label_0#############
+label_0:
+
+#############BEQZ 1 label_2#############
+li $t0,1
+beqz $t0,label_2
+
+#############LABEL_GEN label_1#############
+label_1:
+
+#############LABEL_GEN label_3#############
+label_3:
+
+#############BEQZ 1 label_5#############
+li $t0,1
+beqz $t0,label_5
+
+#############LABEL_GEN label_4#############
+label_4:
+
+#############BNEZ 1 label_4#############
+li $t0,1
+bnez $t0,label_4
+
+#############LABEL_GEN label_5#############
+label_5:
+
+#############BNEZ 1 label_1#############
+li $t0,1
+bnez $t0,label_1
+
+#############LABEL_GEN label_2#############
+label_2:
+
 #############PRINT_STRING str_0#############
 la $a0,str_0
 li $v0,4
+syscall
+
+#############ADD 1 b1 @T_0#############
+li $t0,1
+lw $t1,-32756($gp)
+addu $t0,$t0,$t1
+sw $t0,8($sp)
+
+#############PRINT_INT @T_0#############
+lw $t0,8($sp)
+move $a0,$t0
+li $v0,1
 syscall
 
 #############PRINT_STRING str_1#############
@@ -50,207 +92,25 @@ la $a0,str_1
 li $v0,4
 syscall
 
-#############ASSIGN n7 10#############
-li $t0,10
-sw $t0,40($sp)
-
-#############LABEL_GEN label_0#############
-label_0:
-
-#############BEQZ n7 label_2#############
-lw $t0,40($sp)
-beqz $t0,label_2
-
-#############LABEL_GEN label_1#############
-label_1:
-
-#############SUB n7 1 @T_0#############
-lw $t0,40($sp)
-li $t1,1
-subu $t0,$t0,$t1
-sw $t0,36($sp)
-
-#############ASSIGN n7 @T_0#############
-lw $t0,36($sp)
-sw $t0,40($sp)
-
-#############SLT @T_0 b3 @T_1#############
-lw $t0,36($sp)
-lw $t1,-32748($gp)
-slt $t0,$t0,$t1
-sw $t0,32($sp)
-
-#############BEQZ @T_1 label_3#############
-lw $t0,32($sp)
-beqz $t0,label_3
-
-#############GOTO label_0#############
-j label_0
-
 #############PRINT_STRING str_2#############
 la $a0,str_2
 li $v0,4
 syscall
 
-#############LABEL_GEN label_3#############
-label_3:
-
-#############SLT n7 1 @T_2#############
-lw $t0,40($sp)
-li $t1,1
-slt $t0,$t0,$t1
-sw $t0,28($sp)
-
-#############BEQZ @T_2 label_4#############
-lw $t0,28($sp)
-beqz $t0,label_4
-
-#############GOTO label_2#############
-j label_2
-
-#############PRINT_STRING str_3#############
-la $a0,str_3
-li $v0,4
-syscall
-
-#############LABEL_GEN label_4#############
-label_4:
-
-#############SEQ n7 3 @T_3#############
-lw $t0,40($sp)
-li $t1,3
-seq $t0,$t0,$t1
-sw $t0,24($sp)
-
-#############BEQZ @T_3 label_5#############
-lw $t0,24($sp)
-beqz $t0,label_5
-
-#############PRINT_STRING str_4#############
-la $a0,str_4
-li $v0,4
-syscall
-
-#############GOTO label_6#############
-j label_6
-
-#############LABEL_GEN label_5#############
-label_5:
-
-#############PRINT_STRING str_5#############
-la $a0,str_5
-li $v0,4
-syscall
-
-#############LABEL_GEN label_6#############
-label_6:
-
-#############SEQ n7 b1 @T_4#############
-lw $t0,40($sp)
-lw $t1,-32756($gp)
-seq $t0,$t0,$t1
-sw $t0,20($sp)
-
-#############BEQZ @T_4 label_7#############
-lw $t0,20($sp)
-beqz $t0,label_7
-
-#############GOTO label_2#############
-j label_2
-
-#############LABEL_GEN label_7#############
-label_7:
-
-#############BNEZ n7 label_1#############
-lw $t0,40($sp)
-bnez $t0,label_1
-
-#############LABEL_GEN label_2#############
-label_2:
-
-#############SNE n7 b1 @T_5#############
-lw $t0,40($sp)
-lw $t1,-32756($gp)
-sne $t0,$t0,$t1
-sw $t0,16($sp)
-
-#############BEQZ @T_5 label_8#############
-lw $t0,16($sp)
-beqz $t0,label_8
-
-#############SEQ n7 0 @T_6#############
-lw $t0,40($sp)
-li $t1,0
-seq $t0,$t0,$t1
-sw $t0,12($sp)
-
-#############BEQZ @T_6 label_9#############
-lw $t0,12($sp)
-beqz $t0,label_9
-
-#############PRINT_STRING str_6#############
-la $a0,str_6
-li $v0,4
-syscall
-
-#############GOTO label_10#############
-j label_10
-
-#############LABEL_GEN label_9#############
-label_9:
-
-#############PRINT_STRING str_7#############
-la $a0,str_7
-li $v0,4
-syscall
-
-#############LABEL_GEN label_10#############
-label_10:
-
-#############LABEL_GEN label_8#############
-label_8:
-
-#############PRINT_STRING str_8#############
-la $a0,str_8
-li $v0,4
-syscall
-
-#############ADD 1 b1 @T_7#############
-li $t0,1
-lw $t1,-32756($gp)
-addu $t0,$t0,$t1
-sw $t0,8($sp)
-
-#############PRINT_INT @T_7#############
-lw $t0,8($sp)
-move $a0,$t0
-li $v0,1
-syscall
-
-#############PRINT_STRING str_9#############
-la $a0,str_9
-li $v0,4
-syscall
-
-#############PRINT_STRING str_10#############
-la $a0,str_10
-li $v0,4
-syscall
-
-#############ADD 3 b2 @T_8#############
+#############ADD 3 b2 @T_1#############
 li $t0,3
 lw $t1,-32752($gp)
 addu $t0,$t0,$t1
 sw $t0,4($sp)
 
-#############PRINT_INT @T_8#############
+#############PRINT_INT @T_1#############
 lw $t0,4($sp)
 move $a0,$t0
 li $v0,1
 syscall
 
-#############PRINT_STRING str_11#############
-la $a0,str_11
+#############PRINT_STRING str_3#############
+la $a0,str_3
 li $v0,4
 syscall
 
