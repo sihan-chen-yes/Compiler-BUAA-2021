@@ -26,5 +26,5 @@ str_2:.asciiz "a2+b2 is "
 str_3:.asciiz "\n"
 ########################################ASCIIZ END##########################################
 .text
-addiu $sp,$sp,-12
+addiu $sp,$sp,-20
 j main

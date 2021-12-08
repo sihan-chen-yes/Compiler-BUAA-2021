@@ -1,9 +1,16 @@
 package MidCodeGeneration;
-import Enum.*;
+
+import Enum.DeclType;
+import Enum.OpType;
 import GrammarAnalysis.SymbolTable;
 import GrammarAnalysis.SymbolTableEntry;
+import Optimizer.BasicBlock;
+import Optimizer.DefPoint;
+import Optimizer.FuncBlock;
+import Optimizer.Optimizer;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class MidCodeEntry {
     private OpType opType;
@@ -16,6 +23,11 @@ public class MidCodeEntry {
 
     private String funcStart = "########################################FUNC START##########################################\n";
     private String funcEnd = "\n########################################FUNC END############################################";
+    private BasicBlock fatherBlock;
+
+    private DefPoint gen;
+    private HashSet<DefPoint> kill = new HashSet<>();
+
 
     public MidCodeEntry(OpType opType, String r1, String r2,String r3, String dst) {
         this.opType = opType;
@@ -212,7 +224,6 @@ public class MidCodeEntry {
     }
 
     public String loadParam() {
-        //Todo 分配其他reg
         String tarCode;
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
@@ -227,13 +238,18 @@ public class MidCodeEntry {
             tarCode += "\n";
             tarCode += String.format("sw $t0,%d($sp)",arg_offset);
         } else {
-            //是局部变量
+            //不是常数
             if (symbolTable.isLocal(func,r1)) {
                 int offset = symbolTable.searchOffset_sp(func,r1);
                 //相对于当前sp的offset
-                tarCode = String.format("lw $t0,%d($sp)",offset);
-                tarCode += "\n";
-                tarCode += String.format("sw $t0,%d($sp)",arg_offset);
+                if (!Optimizer.isOp() || (Optimizer.isOp() && !fatherBlock.hasSReg(r1))) {
+                    //没有放在寄存器中
+                    tarCode = String.format("lw $t0,%d($sp)",offset);
+                    tarCode += "\n";
+                    tarCode += String.format("sw $t0,%d($sp)",arg_offset);
+                } else {
+                    tarCode = String.format("sw %s,%d($sp)",fatherBlock.querySReg(r1),arg_offset);
+                }
             } else {
                 assert symbolTable.isGlobal(r1);
                 int offset = symbolTable.searchOffset_gp(r1);
@@ -249,13 +265,12 @@ public class MidCodeEntry {
         //只可能是常数或者局部变量 或者全局变量
         String tarCode;
         tarCode = loadParam();
-        //Todo 寄存器分配
         assert tarCode != null;
         return tarCode;
     }
 
     public String genStoreRet() {
-        //默认返回值在v0
+        //默认返回值在v0 默认将v0放在t reg中
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
         int offset = symbolTable.searchOffset_sp(func,dst);
@@ -1051,6 +1066,8 @@ public class MidCodeEntry {
     }
 
     //优化#########################################################
+    //#########################################################
+    //#########################################################
 
     public boolean isEntryPoint() {
         return isEntryPoint;
@@ -1090,5 +1107,38 @@ public class MidCodeEntry {
 
     public String getDst() {
         return dst;
+    }
+
+    public void genGenKill(FuncBlock funcBlock) {
+        for (BasicBlock basicBlock: funcBlock.getBasicBlocks()) {
+            ArrayList<MidCodeEntry> midCodeEntries = basicBlock.getMidCodeList();
+            for (int i = 0;i < midCodeEntries.size();i++) {
+                MidCodeEntry midCodeEntry = midCodeEntries.get(i);
+                if (this.equals(midCodeEntry)) {
+                    gen = new DefPoint(r1,basicBlock.getBlockNum(),i);
+                } else if (midCodeEntry.getOpType() == OpType.ASSIGN && r1.equals(midCodeEntry.getR1())) {
+                    DefPoint defPoint = new DefPoint(r1,basicBlock.getBlockNum(),i);
+                    kill.add(defPoint);
+                }
+            }
+        }
+    }
+
+    public HashSet<DefPoint> getKill() {
+        return kill;
+    }
+
+    public DefPoint getGen() {
+        return gen;
+    }
+
+    public void setFatherBlock(BasicBlock basicBlock) {
+        fatherBlock = basicBlock;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        return false;
     }
 }

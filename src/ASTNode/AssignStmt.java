@@ -1,8 +1,10 @@
 package ASTNode;
 
+import Enum.DataType;
+import Enum.ErrorType;
+import Enum.OpType;
 import GrammarAnalysis.ErrorAnalysis;
 import GrammarAnalysis.SymbolTable;
-import Enum.*;
 import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 

@@ -1,43 +1,28 @@
 ########################################GLOBAL START########################################
-GLOBAL_DECLARE a1
-GLOBAL_DECLARE a2
-GLOBAL_DECLARE a3
-GLOBAL_DECLARE b1
-GLOBAL_DECLARE b2
-GLOBAL_DECLARE b3
 ########################################GLOBAL END##########################################
 ########################################ASCIIZ START########################################
-str_0:a1+b1 is 
-str_1:\n
-str_2:a2+b2 is 
-str_3:\n
 ########################################ASCIIZ END##########################################
 ########################################FUNC START##########################################
+FUNC_DECLARE r
+RET_VALUE 1
+########################################FUNC END############################################
+########################################FUNC START##########################################
 FUNC_DECLARE main
-
-ASSIGN n5 0  0
-
+ASSIGN a5 -3
+ASSIGN b5 1
+SGT a5 0 @T_0
+BEQZ @T_0 label_0
+ASSIGN b5 1
+ASSIGN c5 1
+GOTO label_1
 LABEL_GEN label_0
-BEQZ 1 label_2   1
-
+ASSIGN b5 1
 LABEL_GEN label_1
-LABEL_GEN label_3
-BEQZ 1 label_5
-
-LABEL_GEN label_4
-BNEZ 1 label_4
-
-LABEL_GEN label_5
-BNEZ 1 label_1
-
-LABEL_GEN label_2
-PRINT_STRING str_0
-ADD 1 b1 @T_0
-PRINT_INT @T_0
-PRINT_STRING str_1
-PRINT_STRING str_2
-ADD 3 b2 @T_1
-PRINT_INT @T_1
-PRINT_STRING str_3
+PRINT_INT b5
+PREPARE r
+CALL r
+FIN_CALL r
+STORE_RET @T_1
+ASSIGN a5 @T_1
 EXIT
 ########################################FUNC END############################################

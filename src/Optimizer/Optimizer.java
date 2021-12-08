@@ -6,6 +6,7 @@ import MidCodeGeneration.MidCodeGener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class Optimizer {
     private ArrayList<MidCodeEntry> midCodeList;
@@ -45,9 +46,27 @@ public class Optimizer {
 
     public void optimize() {
         genBlock();
+        prune();
         print();
+        genDataFlow();
 //        genDAG();
 //        MidCodeGener.setMidCodeList(getOptimizedMidCode());
+    }
+
+    public void prune() {
+        for (FuncBlock funcBlock:funcBlocks) {
+            ArrayList<BasicBlock> basicBlocks = funcBlock.getBasicBlocks();
+            Iterator<BasicBlock> iterator = basicBlocks.iterator();
+            while (iterator.hasNext()) {
+                BasicBlock basicBlock = iterator.next();
+                if (basicBlock.getPreBlocks().size() == 0) {
+                    iterator.remove();
+                }
+            }
+            for (int i = 0;i < basicBlocks.size();i++) {
+                basicBlocks.get(i).setBlockNum(i);
+            }
+        }
     }
 
     public void print() {
@@ -80,6 +99,7 @@ public class Optimizer {
             MidCodeEntry midCodeEntry = midCodeList.get(i);
             if (midCodeEntry.getOpType() == OpType.FUNC_DECLARE) {
                 curFuncBlock = new FuncBlock(midCodeEntry);
+                blockNum = 0;
                 funcBlocks.add(curFuncBlock);
                 //创建新的func块
                 if (i + 1 < midCodeList.size() && midCodeList.get(i + 1).getOpType() != OpType.FUNC_DECLARE) {
@@ -143,27 +163,39 @@ public class Optimizer {
 //        getOptimizedMidCode();
 //    }
 
-    public ArrayList<MidCodeEntry> getOptimizedMidCode() {
-        if (optimizedMidCode == null) {
-            optimizedMidCode = new ArrayList<>();
-            for (FuncBlock funcBlock:funcBlocks) {
-                optimizedMidCode.addAll(funcBlock.getOptimizedMidCode());
-            }
-        }
-        return optimizedMidCode;
-    }
+//    public ArrayList<MidCodeEntry> getOptimizedMidCode() {
+//        if (optimizedMidCode == null) {
+//            optimizedMidCode = new ArrayList<>();
+//            for (FuncBlock funcBlock:funcBlocks) {
+//                optimizedMidCode.addAll(funcBlock.getOptimizedMidCode());
+//            }
+//        }
+//        return optimizedMidCode;
+//    }
 
     public void genDataFlow() {
-        genReachDef();
+//        genReachDef();
         genDefUse();
-
+        allocSRegs();
+        System.out.println("genDF OK");
     }
 
     public void genReachDef() {
-
+        for (FuncBlock funcBlock:funcBlocks) {
+            funcBlock.genReachDef();
+        }
     }
 
     public void genDefUse() {
-
+        for (FuncBlock funcBlock:funcBlocks) {
+            funcBlock.genDefUse();
+        }
     }
+
+    public void allocSRegs() {
+        for (FuncBlock funcBlock:funcBlocks) {
+            funcBlock.allocSRegs();
+        }
+    }
+
 }

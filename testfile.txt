@@ -1,14 +1,18 @@
-const int a1 = 1, a2 = +3, a3 = 8;
-int b1 = 0 + 2, b2 = -5, b3 = +6;
-
+int r() {
+    return 1;
+    }
 int main() {
-    int n = 0;
-	while (1) {
-	    while(1) {
+    	int a,b,c;
+    	a=-3;
+        b=1;
+    	if (a>0) {
+    		b=1;c = 1;
+    	}
+    	else {
+    		b=1;
+    	}
+    	printf("%d",b);
+    	a = r();
+    	return 1;
 
-	    }
-	}
-	printf("a1+b1 is %d\n", a1 + b1);
-	printf("a2+b2 is %d\n", a2 + b2);
-	return 0;
 }
