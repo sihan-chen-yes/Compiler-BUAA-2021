@@ -3,29 +3,35 @@
 ########################################ASCIIZ START########################################
 ########################################ASCIIZ END##########################################
 ########################################FUNC START##########################################
+FUNC_DECLARE t
+LOAD_ARRAY_1D a1 0 @T_0
+RET_VALUE @T_0
+########################################FUNC END############################################
+########################################FUNC START##########################################
 FUNC_DECLARE main
-ASSIGN a2 -3
-ASSIGN b2 1
-SGT a2 0 @T_0
-BEQZ @T_0 label_0
-ASSIGN b2 1
-ASSIGN c2 1
-ASSIGN d2 1
-ASSIGN e2 1
-ASSIGN r2 1
-ASSIGN t2 1
-ASSIGN y2 1
-ASSIGN u2 1
-ASSIGN i2 1
-ASSIGN o2 1
-ASSIGN p2 1
+ASSIGN a5 -3
+ASSIGN b5 1
+STORE_ARRAY_1D z8 0 1
+STORE_ARRAY_1D z8 1 2
+PREPARE t
+LOAD_ADDRESS z8 @T_1
+PUSH_PARAM @T_1 0 t
+CALL t
+FIN_CALL t
+STORE_RET @T_2
+STORE_ARRAY_1D z8 0 a5
+LOAD_ARRAY_1D z8 0 @T_3
+ASSIGN a5 @T_3
+SGT a5 0 @T_4
+BEQZ @T_4 label_0
+ASSIGN b5 1
 GOTO label_1
 LABEL_GEN label_0
-ASSIGN a2 1
+ASSIGN a5 1
 LABEL_GEN label_1
-PRINT_INT b2
+PRINT_INT b5
 EXIT
 ########################################FUNC END############################################
-ASSIGN x13 1
+ASSIGN x20 1
 EXIT
 ########################################FUNC END############################################

@@ -9,8 +9,7 @@ import Optimizer.DefPoint;
 import Optimizer.FuncBlock;
 import Optimizer.Optimizer;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 
 public class MidCodeEntry {
     private OpType opType;
@@ -167,31 +166,31 @@ public class MidCodeEntry {
         } else if (opType == OpType.FIN_CALL) {
             genFinCall();
         } else if (opType == OpType.ADD) {
-            genAdd();
+            genDoubleOperand();
         } else if (opType == OpType.SUB) {
-            genSub();
+            genDoubleOperand();
         } else if (opType == OpType.MULT) {
-            genMult();
+            genDoubleOperand();
         } else if (opType == OpType.DIV) {
-            genDiv();
+            genDoubleOperand();
         } else if (opType == OpType.MOD) {
-            genMod();
+            genDoubleOperand();
         } else if (opType == OpType.NEG) {
-            genNeg();
+            genSingleOperand();
         } else if (opType == OpType.SLT) {
-            genSlt();
+            genDoubleOperand();
         } else if (opType == OpType.SGT) {
-            genSgt();
+            genDoubleOperand();
         } else if (opType == OpType.SLE) {
-            genSle();
+            genDoubleOperand();
         } else if (opType == OpType.SGE) {
-            genSge();
+            genDoubleOperand();
         } else if (opType == OpType.SEQ) {
-            genSeq();
+            genDoubleOperand();
         } else if (opType == OpType.SNE) {
-            genSne();
+            genDoubleOperand();
         } else if (opType == OpType.NOT) {
-            genNot();
+            genSingleOperand();
         } else if (opType == OpType.LABEL_GEN) {
             genLabel();
         } else if (opType == OpType.BEQZ) {
@@ -261,12 +260,12 @@ public class MidCodeEntry {
                 if (symbolTable.isLocal(func,r1)) {
                     int offset = symbolTable.searchOffset_sp(func,r1);
                     //相对于当前sp的offset
-                    if (!fatherBlock.hasSReg(r1)) {
+                    if (fatherBlock.hasSReg(r1)) {
+                        curCode += String.format("sw %s,%d($sp)",fatherBlock.querySReg(r1),arg_offset);
+                    } else {
                         curCode += String.format("lw $t0,%d($sp)",offset);
                         curCode += "\n";
                         curCode += String.format("sw $t0,%d($sp)",arg_offset);
-                    } else {
-                        curCode += String.format("sw %s,%d($sp)",fatherBlock.querySReg(r1),arg_offset);
                     }
                 } else {
                     assert symbolTable.isGlobal(r1);
@@ -282,7 +281,6 @@ public class MidCodeEntry {
     public void genPushParam() {
         //只可能是常数或者局部变量 或者全局变量
         loadParam();
-        assert curCode != null;
     }
 
     public void genStoreRet() {
@@ -295,7 +293,7 @@ public class MidCodeEntry {
     }
 
     public String load(String name) {
-        //将四元式中的Ident或者常数load到t0
+        //将四元式中的Ident或者常数load到t0 或者 其他s中
         //Todo 分配其他reg
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
@@ -321,10 +319,10 @@ public class MidCodeEntry {
             } else {
                 if (symbolTable.isLocal(func,name)) {
                     int offset = symbolTable.searchOffset_sp(func,name);
-                    if (!fatherBlock.hasSReg(name)) {
-                        curCode += String.format("lw $t0,%d($sp)",offset);
-                    } else {
+                    if (fatherBlock.hasSReg(name)) {
                         reg = fatherBlock.querySReg(name);
+                    } else {
+                        curCode += String.format("lw $t0,%d($sp)",offset);
                     }
                     //Todo tReg
                 } else {
@@ -337,84 +335,146 @@ public class MidCodeEntry {
         return reg;
     }
 
-    public void store(String name) {
+    public void store(String name,String regVal) {
         //将t0存到对应的Ident中
         //Todo 分配其他reg
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
-        if (symbolTable.isLocal(func,name)) {
-            int offset = symbolTable.searchOffset_sp(func,name);
-            curCode += String.format("sw $t0,%d($sp)",offset);
+        if (!Optimizer.isOp()) {
+            if (symbolTable.isLocal(func,name)) {
+                int offset = symbolTable.searchOffset_sp(func,name);
+                curCode += String.format("sw $t0,%d($sp)",offset);
+            } else {
+                assert symbolTable.isGlobal(name);
+                int offset = symbolTable.searchOffset_gp(name);
+                curCode += String.format("sw $t0,%d($gp)",offset);
+            }
         } else {
-            assert symbolTable.isGlobal(name);
-            int offset = symbolTable.searchOffset_gp(name);
-            curCode += String.format("sw $t0,%d($gp)",offset);
+            assert regVal != null;
+            if (symbolTable.isLocal(func,name)) {
+                int offset = symbolTable.searchOffset_sp(func,name);
+                curCode += String.format("sw %s,%d($sp)",regVal,offset);
+            } else {
+                assert symbolTable.isGlobal(name);
+                int offset = symbolTable.searchOffset_gp(name);
+                curCode += String.format("sw %s,%d($gp)",regVal,offset);
+            }
         }
     }
 
-    public void calOffset1D(String i) {
-        // t0 = t0 + t1 i is T 算出绝对地址 存到t0
-        loadSec(i);
-        curCode += "\n";
-        curCode += String.format("sll $t1,$t1,2");
-        curCode += "\n";
-        curCode += String.format("addu $t0,$t0,$t1");
+    public void calOffset1D(String i,String reg0) {
+        // t0 = t0 + t1 i is T 算出绝对地址 存到t0 或者其他s
+        if (!Optimizer.isOp()) {
+            loadSec(i);
+            curCode += "\n";
+            curCode += String.format("sll $t1,$t1,2");
+            curCode += "\n";
+            curCode += String.format("addu $t0,$t0,$t1");
+        } else {
+            assert reg0 != null;
+            String reg1;
+            reg1 = loadSec(i);
+            curCode += "\n";
+            curCode += String.format("sll %s,%s,2",reg1,reg1);
+            curCode += "\n";
+            curCode += String.format("addu %s,%s,%s",reg0,reg0,reg1);
+        }
     }
 
-    public void calOffset2D(String i, String j, int length2D) {
-        //i j is T t1 t2 算出绝对地址放到t0
+    public void calOffset2D(String i, String j, int length2D,String reg0) {
+        //i j is T t1 t2 算出绝对地址放到t0 或者其他s
         //t0 = t0 + (t1 * t2 + t2) * 4
-        loadSec(i);
-        curCode += "\n";
-        curCode += String.format("li $t2,%d",length2D);
-        curCode += "\n";
-        curCode += String.format("mult $t1,$t2");
-        curCode += "\n";
-        curCode += String.format("mflo $t1");
-        curCode += "\n";
-        loadThird(j);
-        curCode += "\n";
-        curCode += String.format("addu $t1,$t1,$t2");
-        curCode += "\n";
-        curCode += String.format("sll $t1,$t1,2");
-        curCode += "\n";
-        curCode += String.format("addu $t0,$t0,$t1");
+        String reg1,reg2;
+        if (!Optimizer.isOp()) {
+            loadSec(i);
+            curCode += "\n";
+            curCode += String.format("li $t2,%d",length2D);
+            curCode += "\n";
+            curCode += String.format("mult $t1,$t2");
+            curCode += "\n";
+            curCode += String.format("mflo $t1");
+            curCode += "\n";
+            loadThird(j);
+            curCode += "\n";
+            curCode += String.format("addu $t1,$t1,$t2");
+            curCode += "\n";
+            curCode += String.format("sll $t1,$t1,2");
+            curCode += "\n";
+            curCode += String.format("addu $t0,$t0,$t1");
+        } else {
+            assert reg0 != null;
+            reg1 = loadSec(i);
+            curCode += "\n";
+            //Todo t2 change
+            curCode += String.format("li $t2,%d",length2D);
+            curCode += "\n";
+            curCode += String.format("mult %s,$t2",reg1);
+            curCode += "\n";
+            curCode += String.format("mflo %s",reg1);
+            curCode += "\n";
+            reg2 = loadThird(j);
+            curCode += "\n";
+            curCode += String.format("addu %s,%s,%s",reg1,reg1,reg2);
+            curCode += "\n";
+            curCode += String.format("sll %s,%s,2",reg1,reg1);
+            curCode += "\n";
+            curCode += String.format("addu %s,%s,%s",reg0,reg0,reg1);
+        }
     }
 
-    public void calOffsetAddr(String i,int length2D) {
+    public void calOffsetAddr(String i,int length2D,String reg0) {
         //t0 = t0 + t1 * t2 *4
-        loadSec(i);
-        //$t1
-        curCode += "\n";
-        curCode += String.format("li $t2,%d",length2D);
-        curCode += "\n";
-        curCode += String.format("mult $t1,$t2");
-        curCode += "\n";
-        curCode += String.format("mflo $t1");
-        curCode += "\n";
-        curCode += String.format("sll $t1,$t1,2");
-        curCode += "\n";
-        curCode += String.format("addu $t0,$t0,$t1");
+        if (!Optimizer.isOp()) {
+            loadSec(i);
+            //$t1
+            curCode += "\n";
+            curCode += String.format("li $t2,%d",length2D);
+            curCode += "\n";
+            curCode += String.format("mult $t1,$t2");
+            curCode += "\n";
+            curCode += String.format("mflo $t1");
+            curCode += "\n";
+            curCode += String.format("sll $t1,$t1,2");
+            curCode += "\n";
+            curCode += String.format("addu $t0,$t0,$t1");
+        } else {
+            assert reg0 != null;
+            String reg1;
+            reg1 = loadSec(i);
+            //$t1
+            curCode += "\n";
+            //Todo t change
+            curCode += String.format("li $t2,%d",length2D);
+            curCode += "\n";
+            curCode += String.format("mult %s,$t2",reg1);
+            curCode += "\n";
+            curCode += String.format("mflo %s",reg1);
+            curCode += "\n";
+            curCode += String.format("sll %s,%s,2",reg1,reg1);
+            curCode += "\n";
+            curCode += String.format("addu %s,%s,%s",reg0,reg0,reg1);
+        }
     }
 
-    public void load1D(String name,String i) {
+    public String load1D(String name,String i) {
         //可能是全局或者局部 加载到t0 后续优化reg
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
+        String reg;
         if (!Optimizer.isOp()) {
             if (symbolTable.isLocal(func,name)) {
                 if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
                     //参数（存的是地址）
                     load(name);
                     curCode += "\n";
-                    calOffset1D(i);
+                    calOffset1D(i,null);
                     curCode += "\n";
                     curCode += String.format("lw $t0,0($t0)");
                 } else {
                     int offset_sp = symbolTable.searchOffset_sp(func,name);
                     curCode += String.format("addiu $t0,$sp,%d",offset_sp);
                     curCode += "\n";
-                    calOffset1D(i);
+                    calOffset1D(i,null);
                     curCode += "\n";
                     curCode += String.format("lw $t0,0($t0)");
                 }
@@ -423,292 +483,586 @@ public class MidCodeEntry {
                 int offset_gp = symbolTable.searchOffset_gp(name);
                 curCode += String.format("addiu $t0,$gp,%d",offset_gp);
                 curCode += "\n";
-                calOffset1D(i);
+                calOffset1D(i,null);
                 curCode += "\n";
                 curCode += String.format("lw $t0,0($t0)");
+            }
+            reg = "$t0";
+        } else {
+            if (symbolTable.isLocal(func,name)) {
+                if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
+                    //参数（存的是地址）
+                    reg = load(name);
+                    curCode += "\n";
+                    calOffset1D(i,reg);
+                    curCode += "\n";
+                    curCode += String.format("lw $t0,0(%s)",reg);
+                    //Todo change t
+                    reg = "$t0";
+                } else {
+                    int offset_sp = symbolTable.searchOffset_sp(func,name);
+                    curCode += String.format("addiu $t0,$sp,%d",offset_sp);
+                    curCode += "\n";
+                    reg = "$t0";
+                    calOffset1D(i,reg);
+                    curCode += "\n";
+                    curCode += String.format("lw $t0,0(%s)",reg);
+                    reg = "$t0";
+                }
+            } else {
+                assert symbolTable.isGlobal(name);
+                int offset_gp = symbolTable.searchOffset_gp(name);
+                curCode += String.format("addiu $t0,$gp,%d",offset_gp);
+                curCode += "\n";
+                reg = "$t0";
+                calOffset1D(i,reg);
+                curCode += "\n";
+                curCode += String.format("lw $t0,0(%s)",reg);
+                reg = "$t0";
+            }
+        }
+        return reg;
+    }
+
+    public String load2D(String name,String i,String j) {
+        //可能是全局或者局部 加载到t0 后续优化reg
+        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
+        String func = MidCodeGener.getFuncName();
+        int length2D;
+        String reg;
+        if (!Optimizer.isOp()) {
+            if (symbolTable.isLocal(func,name)) {
+                length2D = symbolTable.search_local(func,name).getLength2D();
+                if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
+                    load(name);
+                    curCode += "\n";
+                    calOffset2D(i,j,length2D,null);
+                    curCode += "\n";
+                    curCode += String.format("lw $t0,0($t0)");
+                } else {
+                    int offset_sp = symbolTable.searchOffset_sp(func,name);
+                    curCode += String.format("addiu $t0,$sp,%d",offset_sp);
+                    curCode += "\n";
+                    calOffset2D(i,j,length2D,null);
+                    curCode += "\n";
+                    curCode += String.format("lw $t0,0($t0)");
+                }
+            } else {
+                assert symbolTable.isGlobal(name);
+                length2D = symbolTable.search_global(name).getLength2D();
+                int offset_gp = symbolTable.searchOffset_gp(name);
+                curCode = String.format("addiu $t0,$gp,%d",offset_gp);
+                curCode += "\n";
+                calOffset2D(i,j,length2D,null);
+                curCode += "\n";
+                curCode += String.format("lw $t0,0($t0)");
+            }
+            reg = "$t0";
+        } else {
+            if (symbolTable.isLocal(func,name)) {
+                length2D = symbolTable.search_local(func,name).getLength2D();
+                if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
+                    reg = load(name);
+                    curCode += "\n";
+                    calOffset2D(i,j,length2D,reg);
+                    curCode += "\n";
+                    curCode += String.format("lw $t0,0(%s)",reg);
+                    //Todo t change
+                } else {
+                    int offset_sp = symbolTable.searchOffset_sp(func,name);
+                    curCode += String.format("addiu $t0,$sp,%d",offset_sp);
+                    curCode += "\n";
+                    reg = "$t0";
+                    calOffset2D(i,j,length2D,reg);
+                    curCode += "\n";
+                    curCode += String.format("lw $t0,0(%s)",reg);
+                    reg = "$t0";
+                }
+            } else {
+                assert symbolTable.isGlobal(name);
+                length2D = symbolTable.search_global(name).getLength2D();
+                int offset_gp = symbolTable.searchOffset_gp(name);
+                curCode = String.format("addiu $t0,$gp,%d",offset_gp);
+                curCode += "\n";
+                reg = "$t0";
+                calOffset2D(i,j,length2D,reg);
+                curCode += "\n";
+                curCode += String.format("lw $t0,0(%s)",reg);
+                reg = "$t0";
+            }
+        }
+        return reg;
+    }
+
+    public void store1D(String name,String i,String regVal) {
+        //Todo 常量传播可优化
+        //store时t0 已被用 后续优化reg
+        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
+        String func = MidCodeGener.getFuncName();
+        String reg;
+        if (!Optimizer.isOp()) {
+            if (symbolTable.isLocal(func,name)) {
+                if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
+                    //参数（存的是地址）
+                    curCode += String.format("move $t3,$t0");
+                    //$t0此时已经用了
+                    curCode += "\n";
+                    load(name);
+                    curCode += "\n";
+                    calOffset1D(i,null);
+                    curCode += "\n";
+                    curCode += String.format("sw $t3,0($t0)");
+                } else {
+                    int offset_sp = symbolTable.searchOffset_sp(func,name);
+                    curCode += String.format("move $t3,$t0");
+                    curCode += "\n";
+                    curCode += String.format("addiu $t0,$sp,%d",offset_sp);
+                    curCode += "\n";
+                    calOffset1D(i,null);
+                    curCode += "\n";
+                    curCode += String.format("sw $t3,0($t0)");
+                }
+            } else {
+                assert symbolTable.isGlobal(name);
+                int offset_gp = symbolTable.searchOffset_gp(name);
+                curCode += String.format("move $t3,$t0");
+                curCode += "\n";
+                curCode += String.format("addiu $t0,$gp,%d",offset_gp);
+                curCode += "\n";
+                calOffset1D(i,null);
+                curCode += "\n";
+                curCode += String.format("sw $t3,0($t0)");
             }
         } else {
             if (symbolTable.isLocal(func,name)) {
                 if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
                     //参数（存的是地址）
-                    load(name);
+                    if (regVal.equals("$t0")) {
+                        curCode += String.format("move $t3,$t0");
+                        regVal = "$t3";
+                    }
+                    //Todo t change
+                    //$t0此时已经用了
                     curCode += "\n";
-                    calOffset1D(i);
+                    reg = load(name);
                     curCode += "\n";
-                    curCode += String.format("lw $t0,0($t0)");
+                    calOffset1D(i,reg);
+                    curCode += "\n";
+                    curCode += String.format("sw %s,0(%s)",regVal,reg);
                 } else {
                     int offset_sp = symbolTable.searchOffset_sp(func,name);
+                    if (regVal.equals("$t0")) {
+                        curCode += String.format("move $t3,$t0");
+                        regVal = "$t3";
+                    }
+                    curCode += "\n";
                     curCode += String.format("addiu $t0,$sp,%d",offset_sp);
                     curCode += "\n";
-                    calOffset1D(i);
+                    reg = "$t0";
+                    calOffset1D(i,reg);
                     curCode += "\n";
-                    curCode += String.format("lw $t0,0($t0)");
+                    curCode += String.format("sw %s,0(%s)",regVal,reg);
                 }
             } else {
                 assert symbolTable.isGlobal(name);
                 int offset_gp = symbolTable.searchOffset_gp(name);
+                if (regVal.equals("$t0")) {
+                    curCode += String.format("move $t3,$t0");
+                    regVal = "$t3";
+                }
+                curCode += "\n";
                 curCode += String.format("addiu $t0,$gp,%d",offset_gp);
                 curCode += "\n";
-                calOffset1D(i);
+                reg = "$t0";
+                calOffset1D(i,reg);
                 curCode += "\n";
-                curCode += String.format("lw $t0,0($t0)");
+                curCode += String.format("sw %s,0(%s)",regVal,reg);
             }
         }
     }
 
-    public void load2D(String name,String i,String j) {
-        //Todo 常量传播可优化
-        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
-        String func = MidCodeGener.getFuncName();
-        int length2D;
-        if (symbolTable.isLocal(func,name)) {
-            length2D = symbolTable.search_local(func,name).getLength2D();
-            if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
-                load(name);
-                curCode += "\n";
-                calOffset2D(i,j,length2D);
-                curCode += "\n";
-                curCode += String.format("lw $t0,0($t0)");
-            } else {
-                int offset_sp = symbolTable.searchOffset_sp(func,name);
-                curCode += String.format("addiu $t0,$sp,%d",offset_sp);
-                curCode += "\n";
-                calOffset2D(i,j,length2D);
-                curCode += "\n";
-                curCode += String.format("lw $t0,0($t0)");
-            }
-        } else {
-            assert symbolTable.isGlobal(name);
-            length2D = symbolTable.search_global(name).getLength2D();
-            int offset_gp = symbolTable.searchOffset_gp(name);
-            curCode = String.format("addiu $t0,$gp,%d",offset_gp);
-            curCode += "\n";
-            calOffset2D(i,j,length2D);
-            curCode += "\n";
-            curCode += String.format("lw $t0,0($t0)");
-        }
-    }
-
-    public void store1D(String name,String i) {
-        //Todo 常量传播可优化
-        //store时t0 已被用 后续优化reg
-        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
-        String func = MidCodeGener.getFuncName();
-        if (symbolTable.isLocal(func,name)) {
-            if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
-                //参数（存的是地址）
-                curCode += String.format("move $t3,$t0");
-                //$t0此时已经用了
-                curCode += "\n";
-                load(name);
-                curCode += "\n";
-                calOffset1D(i);
-                curCode += "\n";
-                curCode += String.format("sw $t3,0($t0)");
-            } else {
-                int offset_sp = symbolTable.searchOffset_sp(func,name);
-                curCode += String.format("move $t3,$t0");
-                curCode += "\n";
-                curCode += String.format("addiu $t0,$sp,%d",offset_sp);
-                curCode += "\n";
-                calOffset1D(i);
-                curCode += "\n";
-                curCode += String.format("sw $t3,0($t0)");
-            }
-        } else {
-            assert symbolTable.isGlobal(name);
-            int offset_gp = symbolTable.searchOffset_gp(name);
-            curCode += String.format("move $t3,$t0");
-            curCode += "\n";
-            curCode += String.format("addiu $t0,$gp,%d",offset_gp);
-            curCode += "\n";
-            calOffset1D(i);
-            curCode += "\n";
-            curCode += String.format("sw $t3,0($t0)");
-        }
-    }
-
-    public void store2D(String name,String i,String j) {
+    public void store2D(String name,String i,String j,String regVal) {
         //Todo
         //store时t0 已被用 后续优化reg
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
         int length2D;
-        if (symbolTable.isLocal(func,name)) {
-            length2D = symbolTable.search_local(func,name).getLength2D();
-            if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
-                curCode += String.format("move $t3,$t0");
-                curCode += "\n";
-                load(name);//得到地址
-                curCode += "\n";
-                calOffset2D(i,j,length2D);
-                curCode += "\n";
-                curCode += String.format("sw $t3,0($t0)");
+        String reg;
+        if (!Optimizer.isOp()) {
+            if (symbolTable.isLocal(func,name)) {
+                length2D = symbolTable.search_local(func,name).getLength2D();
+                if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
+                    curCode += String.format("move $t3,$t0");
+                    curCode += "\n";
+                    load(name);//得到地址
+                    curCode += "\n";
+                    calOffset2D(i,j,length2D,null);
+                    curCode += "\n";
+                    curCode += String.format("sw $t3,0($t0)");
+                } else {
+                    int offset_sp = symbolTable.searchOffset_sp(func,name);
+                    curCode += String.format("move $t3,$t0");
+                    curCode += "\n";
+                    curCode += String.format("addiu $t0,$sp,%d",offset_sp);
+                    curCode += "\n";
+                    calOffset2D(i,j,length2D,null);
+                    curCode += "\n";
+                    curCode += String.format("sw $t3,0($t0)");
+                }
             } else {
-                int offset_sp = symbolTable.searchOffset_sp(func,name);
+                assert symbolTable.isGlobal(name);
+                length2D = symbolTable.search_global(name).getLength2D();
+                int offset_gp = symbolTable.searchOffset_gp(name);
                 curCode += String.format("move $t3,$t0");
                 curCode += "\n";
-                curCode += String.format("addiu $t0,$sp,%d",offset_sp);
+                curCode += String.format("addiu $t0,$gp,%d",offset_gp);
                 curCode += "\n";
-                calOffset2D(i,j,length2D);
+                calOffset2D(i,j,length2D,null);
                 curCode += "\n";
                 curCode += String.format("sw $t3,0($t0)");
             }
         } else {
-            assert symbolTable.isGlobal(name);
-            length2D = symbolTable.search_global(name).getLength2D();
-            int offset_gp = symbolTable.searchOffset_gp(name);
-            curCode += String.format("move $t3,$t0");
-            curCode += "\n";
-            curCode += String.format("addiu $t0,$gp,%d",offset_gp);
-            curCode += "\n";
-            calOffset2D(i,j,length2D);
-            curCode += "\n";
-            curCode += String.format("sw $t3,0($t0)");
+            if (symbolTable.isLocal(func,name)) {
+                length2D = symbolTable.search_local(func,name).getLength2D();
+                if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
+                    if (regVal.equals("$t0")) {
+                        curCode += String.format("move $t3,$t0");
+                        regVal = "$t3";
+                    }
+                    curCode += "\n";
+                    reg = load(name);//得到地址
+                    curCode += "\n";
+                    calOffset2D(i,j,length2D,reg);
+                    curCode += "\n";
+                    curCode += String.format("sw %s,0(%s)",regVal,reg);
+                } else {
+                    int offset_sp = symbolTable.searchOffset_sp(func,name);
+                    if (regVal.equals("$t0")) {
+                        curCode += String.format("move $t3,$t0");
+                        regVal = "$t3";
+                    }
+                    curCode += "\n";
+                    curCode += String.format("addiu $t0,$sp,%d",offset_sp);
+                    curCode += "\n";
+                    reg = "$t0";
+                    calOffset2D(i,j,length2D,reg);
+                    curCode += "\n";
+                    curCode += String.format("sw %s,0(%s)",regVal,reg);
+                }
+            } else {
+                assert symbolTable.isGlobal(name);
+                length2D = symbolTable.search_global(name).getLength2D();
+                int offset_gp = symbolTable.searchOffset_gp(name);
+                if (regVal.equals("$t0")) {
+                    curCode += String.format("move $t3,$t0");
+                    regVal = "$t3";
+                }
+                curCode += "\n";
+                curCode += String.format("addiu $t0,$gp,%d",offset_gp);
+                curCode += "\n";
+                reg = "$t0";
+                calOffset2D(i,j,length2D,reg);
+                curCode += "\n";
+                curCode += String.format("sw %s,0(%s)",regVal,reg);
+            }
         }
     }
 
     public void genLoadArray1D() {
-        load1D(r1,r2);
-        curCode += "\n";
-        store(dst);
-        //Todo 可以优化
+        String reg;
+        if (!Optimizer.isOp()) {
+            load1D(r1,r2);
+            curCode += "\n";
+            store(dst,null);
+        } else {
+            //Todo 直接load到变量中 如果还有reg
+            reg = load1D(r1,r2);
+            curCode += "\n";
+            store(dst,reg);
+            //T0在内存中
+            //Todo change t
+        }
     }
 
     public void genStoreArray1D() {
         //Todo 此处可优化
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
-            curCode += String.format("li $t0,%s",dst);
+        String regVal;
+        if (!Optimizer.isOp()) {
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
+                curCode += String.format("li $t0,%s",dst);
+            } else {
+                load(dst);
+            }
+            curCode += "\n";
+            store1D(r1,r2,null);
         } else {
-            load(dst);
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
+                curCode += String.format("li $t0,%s",dst);
+                //Todo t0 change
+                regVal = "$t0";
+            } else {
+                regVal = load(dst);
+            }
+            curCode += "\n";
+            store1D(r1,r2,regVal);
         }
-        curCode += "\n";
-        store1D(r1,r2);
     }
 
     public void genLoadArray2D() {
-        load2D(r1,r2,r3);
-        curCode += "\n";
-        store(dst);
+        String reg;
+        if (!Optimizer.isOp()) {
+            load2D(r1,r2,r3);
+            curCode += "\n";
+            store(dst,null);
+        } else {
+            //Todo 直接load到T0 不要存到内存
+            reg = load2D(r1,r2,r3);
+            curCode += "\n";
+            store(dst,reg);
+        }
     }
 
     public void genStoreArray2D() {
         //Todo 此处可优化
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
-            curCode += String.format("li $t0,%s",dst);
+        String regVal;
+        if (!Optimizer.isOp()) {
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
+                curCode += String.format("li $t0,%s",dst);
+            } else {
+                load(dst);
+            }
+            curCode += "\n";
+            store2D(r1,r2,r3,null);
         } else {
-            load(dst);
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
+                curCode += String.format("li $t0,%s",dst);
+                regVal = "$t0";
+            } else {
+                regVal = load(dst);
+            }
+            curCode += "\n";
+            store2D(r1,r2,r3,regVal);
         }
-        curCode += "\n";
-        store2D(r1,r2,r3);
     }
 
     public void genLoadAddress() {
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
-        if (r2 == null) {
-            if (symbolTable.isLocal(func,r1)) {
-                if (symbolTable.search_local(func,r1).getDeclType() == DeclType.PARAM) {
-                    load(r1);
-                    curCode += "\n";
-                    store(dst);
+        //Todo 直接把地址给T
+        if (!Optimizer.isOp()) {
+            if (r2 == null) {
+                if (symbolTable.isLocal(func,r1)) {
+                    if (symbolTable.search_local(func,r1).getDeclType() == DeclType.PARAM) {
+                        load(r1);
+                        curCode += "\n";
+                        store(dst,null);
+                    } else {
+                        int offset_sp = symbolTable.searchOffset_sp(func,r1);
+                        curCode += String.format("addiu $t0,$sp,%d",offset_sp);
+                        //算出地址
+                        curCode += "\n";
+                        store(dst,null);
+                    }
                 } else {
-                    int offset_sp = symbolTable.searchOffset_sp(func,r1);
-                    curCode += String.format("addiu $t0,$sp,%d",offset_sp);
+                    assert symbolTable.isGlobal(r1);
+                    int offset_gp = symbolTable.searchOffset_gp(r1);
+                    curCode += String.format("addiu $t0,$gp,%d",offset_gp);
                     //算出地址
                     curCode += "\n";
-                    store(dst);
+                    store(dst,null);
                 }
             } else {
-                assert symbolTable.isGlobal(r1);
-                int offset_gp = symbolTable.searchOffset_gp(r1);
-                curCode += String.format("addiu $t0,$gp,%d",offset_gp);
-                //算出地址
-                curCode += "\n";
-                store(dst);
+                //r2 不为0
+                if (symbolTable.isLocal(func,r1)) {
+                    //Todo 直接load到T中
+                    if (symbolTable.search_local(func,r1).getDeclType() == DeclType.PARAM) {
+                        load(r1);
+                        //参数中的地址 放在t0
+                        curCode += "\n";
+                        int length2D = symbolTable.search_local(func,r1).getLength2D();
+                        calOffsetAddr(r2,length2D,null);
+                        //$t0就是地址
+                        curCode += "\n";
+                        store(dst,null);
+                    } else {
+                        int offset_sp = symbolTable.searchOffset_sp(func,r1);
+                        curCode += String.format("addiu $t0,$sp,%d",offset_sp);
+                        int length2D = symbolTable.search_local(func,r1).getLength2D();
+                        curCode += "\n";
+                        calOffsetAddr(r2,length2D,null);
+                        //算出地址
+                        curCode += "\n";
+                        store(dst,null);
+                    }
+                } else {
+                    assert symbolTable.isGlobal(r1);
+                    int offset_gp = symbolTable.searchOffset_gp(r1);
+                    curCode += String.format("addiu $t0,$gp,%d",offset_gp);
+                    int length2D = symbolTable.search_global(r1).getLength2D();
+                    curCode += "\n";
+                    calOffsetAddr(r2,length2D,null);
+                    //算出地址
+                    curCode += "\n";
+                    store(dst,null);
+                }
             }
         } else {
-            if (symbolTable.isLocal(func,r1)) {
-                //Todo
-                if (symbolTable.search_local(func,r1).getDeclType() == DeclType.PARAM) {
-                    load(r1);
-                    //参数中的地址 放在t0
-                    curCode += "\n";
-                    int length2D = symbolTable.search_local(func,r1).getLength2D();
-                    calOffsetAddr(r2,length2D);
-                    //$t0就是地址
-                    curCode += "\n";
-                    store(dst);
+            String regVal;
+            if (r2 == null) {
+                if (symbolTable.isLocal(func,r1)) {
+                    if (symbolTable.search_local(func,r1).getDeclType() == DeclType.PARAM) {
+                        regVal = load(r1);
+                        curCode += "\n";
+                        store(dst,regVal);
+                    } else {
+                        int offset_sp = symbolTable.searchOffset_sp(func,r1);
+                        curCode += String.format("addiu $t0,$sp,%d",offset_sp);
+                        //算出地址
+                        curCode += "\n";
+                        regVal = "$t0";
+                        store(dst,regVal);
+                    }
                 } else {
-                    int offset_sp = symbolTable.searchOffset_sp(func,r1);
-                    curCode += String.format("addiu $t0,$sp,%d",offset_sp);
-                    int length2D = symbolTable.search_local(func,r1).getLength2D();
-                    curCode += "\n";
-                    calOffsetAddr(r2,length2D);
+                    assert symbolTable.isGlobal(r1);
+                    int offset_gp = symbolTable.searchOffset_gp(r1);
+                    curCode += String.format("addiu $t0,$gp,%d",offset_gp);
                     //算出地址
                     curCode += "\n";
-                    store(dst);
+                    regVal = "$t0";
+                    store(dst,regVal);
                 }
             } else {
-                assert symbolTable.isGlobal(r1);
-                int offset_gp = symbolTable.searchOffset_gp(r1);
-                curCode += String.format("addiu $t0,$gp,%d",offset_gp);
-                int length2D = symbolTable.search_global(r1).getLength2D();
-                curCode += "\n";
-                calOffsetAddr(r2,length2D);
-                //算出地址
-                curCode += "\n";
-                store(dst);
+                if (symbolTable.isLocal(func,r1)) {
+                    //Todo
+                    if (symbolTable.search_local(func,r1).getDeclType() == DeclType.PARAM) {
+                        regVal = load(r1);
+                        //参数中的地址 放在t0
+                        curCode += "\n";
+                        int length2D = symbolTable.search_local(func,r1).getLength2D();
+                        calOffsetAddr(r2,length2D,regVal);
+                        //$t0就是地址
+                        curCode += "\n";
+                        store(dst,regVal);
+                    } else {
+                        int offset_sp = symbolTable.searchOffset_sp(func,r1);
+                        curCode += String.format("addiu $t0,$sp,%d",offset_sp);
+                        int length2D = symbolTable.search_local(func,r1).getLength2D();
+                        curCode += "\n";
+                        regVal = "$t0";
+                        calOffsetAddr(r2,length2D,regVal);
+                        //算出地址
+                        curCode += "\n";
+                        store(dst,regVal);
+                    }
+                } else {
+                    assert symbolTable.isGlobal(r1);
+                    int offset_gp = symbolTable.searchOffset_gp(r1);
+                    curCode += String.format("addiu $t0,$gp,%d",offset_gp);
+                    int length2D = symbolTable.search_global(r1).getLength2D();
+                    curCode += "\n";
+                    regVal = "$t0";
+                    calOffsetAddr(r2,length2D,regVal);
+                    //算出地址
+                    curCode += "\n";
+                    store(dst,regVal);
+                }
             }
         }
+
     }
 
     public void genAssign() {
         //Todo 此处可优化
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
-            curCode += String.format("li $t0,%s",dst);
+        if (!Optimizer.isOp()) {
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
+                curCode += String.format("li $t0,%s",dst);
+            } else {
+                load(dst);
+            }
+            curCode += "\n";
+            store(r1,null);
         } else {
-            load(dst);
+            String regVal;
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
+                curCode += String.format("li $t0,%s",dst);
+                regVal = "$t0";
+            } else {
+                regVal = load(dst);
+            }
+            curCode += "\n";
+            store(r1,regVal);
         }
-        curCode += "\n";
-        store(r1);
     }
 
     public void genPrintStr() {
-        //Todo 寄存器冲突
-        curCode += String.format("la $a0,%s",dst);
-        curCode += "\n";
-        curCode += String.format("li $v0,4");
-        curCode += "\n";
-        curCode += String.format("syscall");
+        //Todo 寄存器冲突 a0 v0要不要看作普通reg
+        if (!Optimizer.isOp()) {
+            curCode += String.format("la $a0,%s",dst);
+            curCode += "\n";
+            curCode += String.format("li $v0,4");
+            curCode += "\n";
+            curCode += String.format("syscall");
+        } else {
+
+        }
     }
 
     public void genPrintInt() {
-        //Todo 此处可优化
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
-            curCode += String.format("li $t0,%s",dst);
+        if (!Optimizer.isOp()) {
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
+                curCode += String.format("li $t0,%s",dst);
+            } else {
+                load(dst);
+            }
+            curCode += "\n";
+            curCode += String.format("move $a0,$t0");
+            curCode += "\n";
+            curCode += String.format("li $v0,1");
+            curCode += "\n";
+            curCode += String.format("syscall");
         } else {
-            load(dst);
+            String regVal;
+            //Todo 此处可优化t
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
+                curCode += String.format("li $t0,%s",dst);
+                regVal = "$t0";
+            } else {
+                regVal = load(dst);
+            }
+            curCode += "\n";
+            curCode += String.format("move $a0,%s",regVal);
+            curCode += "\n";
+            curCode += String.format("li $v0,1");
+            curCode += "\n";
+            curCode += String.format("syscall");
         }
-        curCode += "\n";
-        curCode += String.format("move $a0,$t0");
-        curCode += "\n";
-        curCode += String.format("li $v0,1");
-        curCode += "\n";
-        curCode += String.format("syscall");
     }
 
     public void genRetValue() {
-        //Todo 此处可优化
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
-            curCode += String.format("li $t0,%s",dst);
+        if (!Optimizer.isOp()) {
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
+                curCode += String.format("li $t0,%s",dst);
+            } else {
+                load(dst);
+            }
+            curCode += "\n";
+            curCode += String.format("move $v0,$t0");
+            curCode += "\n";
+            curCode += String.format("jr $ra");
         } else {
-            load(dst);
+            //Todo 此处可优化t
+            String regVal;
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
+                curCode += String.format("li $t0,%s",dst);
+                regVal = "$t0";
+            } else {
+                regVal = load(dst);
+            }
+            curCode += "\n";
+            curCode += String.format("move $v0,%s",regVal);
+            curCode += "\n";
+            curCode += String.format("jr $ra");
         }
-        curCode += "\n";
-        curCode += String.format("move $v0,$t0");
-        curCode += "\n";
-        curCode += String.format("jr $ra");
     }
 
     public void genRetVoid() {
@@ -716,22 +1070,60 @@ public class MidCodeEntry {
     }
 
     public void genGetInt() {
-        curCode += String.format("li $v0,5");
-        curCode += "\n";
-        curCode += String.format("syscall");
-        curCode += "\n";
-        curCode += String.format("move $t0,$v0");
-        curCode += "\n";
-        store(dst);
+        if (!Optimizer.isOp()) {
+            curCode += String.format("li $v0,5");
+            curCode += "\n";
+            curCode += String.format("syscall");
+            curCode += "\n";
+            curCode += String.format("move $t0,$v0");
+            curCode += "\n";
+            store(dst,null);
+        } else {
+            String regVal;
+            //Todo 此处可优化t
+            curCode += String.format("li $v0,5");
+            curCode += "\n";
+            curCode += String.format("syscall");
+            curCode += "\n";
+            curCode += String.format("move $t0,$v0");
+            regVal = "$t0";
+            curCode += "\n";
+            store(dst,regVal);
+        }
     }
 
     public void genPrePareCall() {
         int size = MidCodeGener.getSymbolTable().getLocalSize(dst);
-        curCode += String.format("sw $ra,0($sp)");
-        curCode += "\n";
-        curCode += String.format("addiu $sp,$sp,-%d",size);
-        MidCodeGener.getSymbolTable().addStack_size(size);
-        //Todo save s t a
+        if (!Optimizer.isOp()) {
+            curCode += String.format("sw $ra,0($sp)");
+            curCode += "\n";
+            curCode += String.format("addiu $sp,$sp,-%d",size);
+            MidCodeGener.getSymbolTable().addStack_size(size);
+        } else {
+            curCode += String.format("sw $ra,0($sp)");
+            curCode += "\n";
+            genSaveSRegs();
+            curCode += "\n";
+            curCode += String.format("addiu $sp,$sp,-%d",size);
+            MidCodeGener.getSymbolTable().addStack_size(size);
+        }
+        //Todo save  t a
+    }
+
+    public void genSaveSRegs() {
+        HashMap<String,String> varToReg = fatherBlock.getVarToReg();
+        Iterator<Map.Entry<String, String>> iterator = varToReg.entrySet().iterator();
+        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
+        String func = MidCodeGener.getFuncName();
+        while (iterator.hasNext()) {
+            String var = iterator.next().getKey();
+            String reg = iterator.next().getValue();
+            int offset_sp = symbolTable.searchOffset_sp(func,var);
+            curCode += String.format("sw %s,%d($sp)",reg,offset_sp);
+            if (iterator.hasNext()) {
+                curCode += "\n";
+            }
+        }
     }
 
     public void genCall() {
@@ -741,10 +1133,35 @@ public class MidCodeEntry {
     public void genFinCall() {
         //Todo 恢复 s t a
         int size = MidCodeGener.getSymbolTable().getLocalSize(dst);
-        curCode += String.format("addiu $sp,$sp,%d",size);
-        curCode += "\n";
-        curCode += String.format("lw $ra,0($sp)");
-        MidCodeGener.getSymbolTable().subStack_size(size);
+        if (!Optimizer.isOp()) {
+            curCode += String.format("addiu $sp,$sp,%d",size);
+            MidCodeGener.getSymbolTable().subStack_size(size);
+            curCode += "\n";
+            curCode += String.format("lw $ra,0($sp)");
+        } else {
+            curCode += String.format("addiu $sp,$sp,%d",size);
+            MidCodeGener.getSymbolTable().subStack_size(size);
+            curCode += "\n";
+            curCode += String.format("lw $ra,0($sp)");
+            curCode += "\n";
+            genLoadSRegs();
+        }
+    }
+
+    public void genLoadSRegs() {
+        HashMap<String,String> varToReg = fatherBlock.getVarToReg();
+        Iterator<Map.Entry<String, String>> iterator = varToReg.entrySet().iterator();
+        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
+        String func = MidCodeGener.getFuncName();
+        while (iterator.hasNext()) {
+            String var = iterator.next().getKey();
+            String reg = iterator.next().getValue();
+            int offset_sp = symbolTable.searchOffset_sp(func,var);
+            curCode += String.format("lw %s,%d($sp)",reg,offset_sp);
+            if (iterator.hasNext()) {
+                curCode += "\n";
+            }
+        }
     }
 
     public void genExit() {
@@ -753,273 +1170,246 @@ public class MidCodeEntry {
         curCode += String.format("syscall");
     }
 
-    public void loadSec(String name) {
+    public String loadSec(String name) {
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
-        if (symbolTable.isNumber(func,name)) {
-            curCode += String.format("li $t1,%d",Integer.parseInt(name));
-        } else {
-            if (symbolTable.isLocal(func,name)) {
-                int offset = symbolTable.searchOffset_sp(func,name);
-                curCode += String.format("lw $t1,%d($sp)",offset);
+        String reg;
+        if (!Optimizer.isOp()) {
+            reg = "$t1";
+            if (symbolTable.isNumber(func,name)) {
+                curCode += String.format("li $t1,%d",Integer.parseInt(name));
             } else {
-                assert symbolTable.isGlobal(name);
-                int offset = symbolTable.searchOffset_gp(name);
-                curCode += String.format("lw $t1,%d($gp)",offset);
+                if (symbolTable.isLocal(func,name)) {
+                    int offset = symbolTable.searchOffset_sp(func,name);
+                    curCode += String.format("lw $t1,%d($sp)",offset);
+                } else {
+                    assert symbolTable.isGlobal(name);
+                    int offset = symbolTable.searchOffset_gp(name);
+                    curCode += String.format("lw $t1,%d($gp)",offset);
+                }
+            }
+        } else {
+            reg = "$t1";
+            if (symbolTable.isNumber(func,name)) {
+                curCode += String.format("li $t1,%d",Integer.parseInt(name));
+            } else {
+                if (symbolTable.isLocal(func,name)) {
+                    int offset = symbolTable.searchOffset_sp(func,name);
+                    if (fatherBlock.hasSReg(name)) {
+                        reg = fatherBlock.querySReg(name);
+                    } else {
+                        curCode += String.format("lw $t1,%d($sp)",offset);
+                    }
+                } else {
+                    assert symbolTable.isGlobal(name);
+                    int offset = symbolTable.searchOffset_gp(name);
+                    curCode += String.format("lw $t1,%d($gp)",offset);
+                }
             }
         }
+        return reg;
     }
 
-    public void loadThird(String name) {
+    public String loadThird(String name) {
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
-        if (symbolTable.isNumber(func,name)) {
-            curCode += String.format("li $t2,%d",Integer.parseInt(name));
-        } else {
-            if (symbolTable.isLocal(func,name)) {
-                int offset = symbolTable.searchOffset_sp(func,name);
-                curCode += String.format("lw $t2,%d($sp)",offset);
+        String reg;
+        if (!Optimizer.isOp()) {
+            reg = "$t2";
+            if (symbolTable.isNumber(func,name)) {
+                curCode += String.format("li $t2,%d",Integer.parseInt(name));
             } else {
-                assert symbolTable.isGlobal(name);
-                int offset = symbolTable.searchOffset_gp(name);
-                curCode += String.format("lw $t2,%d($gp)",offset);
+                if (symbolTable.isLocal(func,name)) {
+                    int offset = symbolTable.searchOffset_sp(func,name);
+                    curCode += String.format("lw $t2,%d($sp)",offset);
+                } else {
+                    assert symbolTable.isGlobal(name);
+                    int offset = symbolTable.searchOffset_gp(name);
+                    curCode += String.format("lw $t2,%d($gp)",offset);
+                }
+            }
+        } else {
+            reg = "$t2";
+            if (symbolTable.isNumber(func,name)) {
+                curCode += String.format("li $t2,%d",Integer.parseInt(name));
+            } else {
+                if (symbolTable.isLocal(func,name)) {
+                    int offset = symbolTable.searchOffset_sp(func,name);
+                    if (fatherBlock.hasSReg(name)) {
+                        reg = fatherBlock.querySReg(name);
+                    } else {
+                        curCode += String.format("lw $t2,%d($sp)",offset);
+                    }
+                } else {
+                    assert symbolTable.isGlobal(name);
+                    int offset = symbolTable.searchOffset_gp(name);
+                    curCode += String.format("lw $t2,%d($gp)",offset);
+                }
             }
         }
+        return reg;
     }
 
-    public void genAdd() {
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
-            curCode += String.format("li $t0,%s",r1);
+    public void genDoubleOperand() {
+        assert isDoubleOp();
+        if (!Optimizer.isOp()) {
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+                curCode += String.format("li $t0,%s",r1);
+            } else {
+                load(r1);
+            }
+            curCode += "\n";
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
+                curCode += String.format("li $t1,%s",r2);
+            } else {
+                loadSec(r2);
+            }
+            curCode += "\n";
+            if (opType == OpType.ADD) {
+                curCode += String.format("addu $t0,$t0,$t1");
+            } else if (opType == OpType.SUB) {
+                curCode += String.format("subu $t0,$t0,$t1");
+            } else if (opType == OpType.MULT) {
+                curCode += String.format("mult $t0,$t1");
+                curCode += "\n";
+                curCode += String.format("mflo $t0");
+            } else if (opType == OpType.DIV) {
+                curCode += String.format("div $t0,$t1");
+                curCode += "\n";
+                curCode += String.format("mflo $t0");
+            } else if (opType == OpType.MOD) {
+                curCode += String.format("div $t0,$t1");
+                curCode += "\n";
+                curCode += String.format("mfhi $t0");
+            } else if (opType == OpType.SLT) {
+                curCode += String.format("slt $t0,$t0,$t1");
+            } else if (opType == OpType.SLE) {
+                curCode += String.format("sgt $t0,$t0,$t1");
+                curCode += "\n";
+                //取反
+                curCode += String.format("seq $t0,$t0,$0");
+            } else if (opType == OpType.SGT) {
+                curCode += String.format("sgt $t0,$t0,$t1");
+            } else if (opType == OpType.SGE) {
+                curCode += String.format("slt $t0,$t0,$t1");
+                curCode += "\n";
+                //取反
+                curCode += String.format("seq $t0,$t0,$0");
+            } else if (opType == OpType.SEQ) {
+                curCode += String.format("seq $t0,$t0,$t1");
+            } else if (opType == OpType.SNE) {
+                curCode += String.format("sne $t0,$t0,$t1");
+            }
+            curCode += "\n";
+            store(dst,null);
         } else {
-            load(r1);
+            //Todo t优化
+            String reg0,reg1;
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+                curCode += String.format("li $t0,%s",r1);
+                reg0 = "$t0";
+            } else {
+                reg0 = load(r1);
+            }
+            curCode += "\n";
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
+                curCode += String.format("li $t1,%s",r2);
+                reg1 = "$t1";
+            } else {
+                reg1 = loadSec(r2);
+            }
+            curCode += "\n";
+            if (opType == OpType.ADD) {
+                curCode += String.format("addu %s,%s,%s",reg0,reg0,reg1);
+            } else if (opType == OpType.SUB) {
+                curCode += String.format("subu %s,%s,%s",reg0,reg0,reg1);
+            } else if (opType == OpType.MULT) {
+                curCode += String.format("mult %s,%s",reg0,reg1);
+                curCode += "\n";
+                curCode += String.format("mflo %s",reg0);
+            } else if (opType == OpType.DIV) {
+                curCode += String.format("div %s,%s",reg0,reg1);
+                curCode += "\n";
+                curCode += String.format("mflo %s",reg0);
+            } else if (opType == OpType.MOD) {
+                curCode += String.format("div %s,%s",reg0,reg1);
+                curCode += "\n";
+                curCode += String.format("mfhi %s",reg0);
+            } else if (opType == OpType.SLT) {
+                curCode += String.format("slt %s,%s,%s",reg0,reg0,reg1);
+            } else if (opType == OpType.SLE) {
+                curCode += String.format("sgt %s,%s,%s",reg0,reg0,reg1);
+                curCode += "\n";
+                //取反
+                curCode += String.format("seq %s,%s,$0",reg0,reg0);
+            } else if (opType == OpType.SGT) {
+                curCode += String.format("sgt %s,%s,%s",reg0,reg0,reg1);
+            } else if (opType == OpType.SGE) {
+                curCode += String.format("slt %s,%s,%s",reg0,reg0,reg1);
+                curCode += "\n";
+                //取反
+                curCode += String.format("seq %s,%s,$0",reg0,reg0);
+            } else if (opType == OpType.SEQ) {
+                curCode += String.format("seq %s,%s,%s",reg0,reg0,reg1);
+            } else if (opType == OpType.SNE) {
+                curCode += String.format("sne %s,%s,%s",reg0,reg0,reg1);
+            }
+            curCode += "\n";
+            //直接给另一个T
+            store(dst,reg0);
         }
-        curCode += "\n";
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
-            curCode += String.format("li $t1,%s",r2);
-        } else {
-            loadSec(r2);
-        }
-        curCode += "\n";
-        curCode += String.format("addu $t0,$t0,$t1");
-        curCode += "\n";
-        store(dst);
     }
 
-    public void genSub() {
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
-            curCode += String.format("li $t0,%s",r1);
+    public void genSingleOperand() {
+        assert isSingleOp();
+        if (!Optimizer.isOp()) {
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+                curCode += String.format("li $t0,%s",r1);
+            } else {
+                load(r1);
+            }
+            curCode += "\n";
+            if (opType == OpType.NEG) {
+                curCode += String.format("neg $t0,$t0");
+            } else if (opType == OpType.NOT) {
+                curCode += String.format("seq $t0,$t0,$0");
+            }
+            curCode += "\n";
+            store(dst,null);
         } else {
-            load(r1);
+            String reg0;
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+                curCode += String.format("li $t0,%s",r1);
+                reg0 = "$t0";
+            } else {
+                reg0 = load(r1);
+            }
+            curCode += "\n";
+            if (opType == OpType.NEG) {
+                curCode += String.format("neg %s,%s",reg0,reg0);
+            } else if (opType == OpType.NOT) {
+                curCode += String.format("seq %s,%s,$0",reg0,reg0);
+            }
+            curCode += "\n";
+            store(dst,reg0);
         }
-        curCode += "\n";
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
-            curCode += String.format("li $t1,%s",r2);
-        } else {
-            loadSec(r2);
-        }
-        curCode += "\n";
-        curCode += String.format("subu $t0,$t0,$t1");
-        curCode += "\n";
-        store(dst);
     }
 
-    public void genMult() {
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
-            curCode += String.format("li $t0,%s",r1);
-        } else {
-            load(r1);
+    public boolean isDoubleOp() {
+        if (opType == OpType.ADD || opType == OpType.SUB || opType == OpType.MULT || opType == OpType.DIV ||
+            opType == OpType.MOD ||
+            opType == OpType.SLT || opType == OpType.SLE || opType == OpType.SGT || opType == OpType.SGE ||
+            opType == OpType.SEQ || opType == OpType.SNE) {
+            return true;
         }
-        curCode += "\n";
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
-            curCode += String.format("li $t1,%s",r2);
-        } else {
-            loadSec(r2);
-        }
-        curCode += "\n";
-        curCode += String.format("mult $t0,$t1");
-        curCode += "\n";
-        curCode += String.format("mflo $t0");
-        curCode += "\n";
-        store(dst);
+        return false;
     }
 
-    public void genDiv() {
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
-            curCode += String.format("li $t0,%s",r1);
-        } else {
-            load(r1);
+    public boolean isSingleOp() {
+        if (opType == OpType.NEG || opType == OpType.NOT) {
+            return true;
         }
-        curCode += "\n";
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
-            curCode += String.format("li $t1,%s",r2);
-        } else {
-            loadSec(r2);
-        }
-        curCode += "\n";
-        curCode += String.format("div $t0,$t1");
-        curCode += "\n";
-        curCode += String.format("mflo $t0");
-        curCode += "\n";
-        store(dst);
-    }
-
-    public void genMod() {
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
-            curCode += String.format("li $t0,%s",r1);
-        } else {
-            load(r1);
-        }
-        curCode += "\n";
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
-            curCode += String.format("li $t1,%s",r2);
-        } else {
-            loadSec(r2);
-        }
-        curCode += "\n";
-        curCode += String.format("div $t0,$t1");
-        curCode += "\n";
-        curCode += String.format("mfhi $t0");
-        curCode += "\n";
-        store(dst);
-    }
-
-    public void genNeg() {
-        //Todo 此处可优化
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
-            curCode += String.format("li $t0,%s",r1);
-        } else {
-            load(r1);
-        }
-        curCode += "\n";
-        curCode += String.format("neg $t0,$t0");
-        curCode += "\n";
-        store(dst);
-    }
-
-    public void genSlt() {
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
-            curCode += String.format("li $t0,%s",r1);
-        } else {
-            load(r1);
-        }
-        curCode += "\n";
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
-            curCode += String.format("li $t1,%s",r2);
-        } else {
-            loadSec(r2);
-        }
-        curCode += "\n";
-        curCode += String.format("slt $t0,$t0,$t1");
-        curCode += "\n";
-        store(dst);
-    }
-
-    public void genSgt() {
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
-            curCode += String.format("li $t0,%s",r1);
-        } else {
-            load(r1);
-        }
-        curCode += "\n";
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
-            curCode += String.format("li $t1,%s",r2);
-        } else {
-            loadSec(r2);
-        }
-        curCode += "\n";
-        curCode += String.format("sgt $t0,$t0,$t1");
-        curCode += "\n";
-        store(dst);
-    }
-
-    public void genSge() {
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
-            curCode += String.format("li $t0,%s",r1);
-        } else {
-            load(r1);
-        }
-        curCode += "\n";
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
-            curCode += String.format("li $t1,%s",r2);
-        } else {
-            loadSec(r2);
-        }
-        curCode += "\n";
-        curCode += String.format("slt $t0,$t0,$t1");
-        curCode += "\n";
-        //取反
-        curCode += String.format("seq $t0,$t0,$0");
-        curCode += "\n";
-        store(dst);
-    }
-
-    public void genSle() {
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
-            curCode += String.format("li $t0,%s",r1);
-        } else {
-            load(r1);
-        }
-        curCode += "\n";
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
-            curCode += String.format("li $t1,%s",r2);
-        } else {
-            loadSec(r2);
-        }
-        curCode += "\n";
-        curCode += String.format("sgt $t0,$t0,$t1");
-        curCode += "\n";
-        //取反
-        curCode += String.format("seq $t0,$t0,$0");
-        curCode += "\n";
-        store(dst);
-    }
-
-    public void genSne() {
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
-            curCode += String.format("li $t0,%s",r1);
-        } else {
-            load(r1);
-        }
-        curCode += "\n";
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
-            curCode += String.format("li $t1,%s",r2);
-        } else {
-            loadSec(r2);
-        }
-        curCode += "\n";
-        curCode += String.format("sne $t0,$t0,$t1");
-        curCode += "\n";
-        store(dst);
-    }
-
-    public void genSeq() {
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
-            curCode += String.format("li $t0,%s",r1);
-        } else {
-            load(r1);
-        }
-        curCode += "\n";
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r2)) {
-            curCode += String.format("li $t1,%s",r2);
-        } else {
-            loadSec(r2);
-        }
-        curCode += "\n";
-        curCode += String.format("seq $t0,$t0,$t1");
-        curCode += "\n";
-        store(dst);
-    }
-
-    public void genNot() {
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
-            curCode += String.format("li $t0,%s",r1);
-        } else {
-            load(r1);
-        }
-        curCode += "\n";
-        curCode += String.format("seq $t0,$t0,$0");
-        curCode += "\n";
-        store(dst);
+        return false;
     }
 
     public void genLabel() {
@@ -1027,23 +1417,48 @@ public class MidCodeEntry {
     }
 
     public void genBeqz() {
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
-            curCode += String.format("li $t0,%s",r1);
+        //todo change t
+        if (!Optimizer.isOp()) {
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+                curCode += String.format("li $t0,%s",r1);
+            } else {
+                load(r1);
+            }
+            curCode += "\n";
+            curCode += String.format("beqz $t0,%s",dst);
         } else {
-            load(r1);
+            String reg0;
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+                curCode += String.format("li $t0,%s",r1);
+                reg0 = "$t0";
+            } else {
+                reg0 = load(r1);
+            }
+            curCode += "\n";
+            curCode += String.format("beqz %s,%s",reg0,dst);
         }
-        curCode += "\n";
-        curCode += String.format("beqz $t0,%s",dst);
     }
 
     public void genBnez() {
-        if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
-            curCode += String.format("li $t0,%s",r1);
+        if (!Optimizer.isOp()) {
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+                curCode += String.format("li $t0,%s",r1);
+            } else {
+                load(r1);
+            }
+            curCode += "\n";
+            curCode += String.format("bnez $t0,%s",dst);
         } else {
-            load(r1);
+            String reg0;
+            if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),r1)) {
+                curCode += String.format("li $t0,%s",r1);
+                reg0 = "$t0";
+            } else {
+                reg0 = load(r1);
+            }
+            curCode += "\n";
+            curCode += String.format("bnez %s,%s",reg0,dst);
         }
-        curCode += "\n";
-        curCode += String.format("bnez $t0,%s",dst);
     }
 
     public void genGoto() {
