@@ -1,18 +1,13 @@
-int r() {
-    return 1;
-    }
 int main() {
-    	int a,b,c;
-    	a=-3;
-        b=1;
-    	if (a>0) {
-    		b=1;c = 1;
-    	}
-    	else {
-    		b=1;
-    	}
-    	printf("%d",b);
-    	a = r();
-    	return 1;
-
+	int a,b,c,d,e,r,t,y,u,i,o,p;
+	a=-3;
+    b=1;
+	if (a>0) {
+		b=1;c=1;d=1;e=1;r=1;t=1;y=1;u=1;i=1;o=1;p=1;
+	}
+	else {
+		a=1;
+	}
+	printf("%d",b);
+	return 1;
 }

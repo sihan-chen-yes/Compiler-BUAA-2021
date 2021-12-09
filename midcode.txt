@@ -3,26 +3,26 @@
 ########################################ASCIIZ START########################################
 ########################################ASCIIZ END##########################################
 ########################################FUNC START##########################################
-FUNC_DECLARE r
-RET_VALUE 1
-########################################FUNC END############################################
-########################################FUNC START##########################################
 FUNC_DECLARE main
-ASSIGN a5 -3
-ASSIGN b5 1
-SGT a5 0 @T_0
+ASSIGN a2 -3
+ASSIGN b2 1
+SGT a2 0 @T_0
 BEQZ @T_0 label_0
-ASSIGN b5 1
-ASSIGN c5 1
+ASSIGN b2 1
+ASSIGN c2 1
+ASSIGN d2 1
+ASSIGN e2 1
+ASSIGN r2 1
+ASSIGN t2 1
+ASSIGN y2 1
+ASSIGN u2 1
+ASSIGN i2 1
+ASSIGN o2 1
+ASSIGN p2 1
 GOTO label_1
 LABEL_GEN label_0
-ASSIGN b5 1
+ASSIGN a2 1
 LABEL_GEN label_1
-PRINT_INT b5
-PREPARE r
-CALL r
-FIN_CALL r
-STORE_RET @T_1
-ASSIGN a5 @T_1
+PRINT_INT b2
 EXIT
 ########################################FUNC END############################################

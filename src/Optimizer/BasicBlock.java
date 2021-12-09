@@ -513,13 +513,14 @@ public class BasicBlock {
         setSRegs(basicBlock.getSRegs());
         setVarToReg(basicBlock.getVarToReg());
         Iterator<Map.Entry<String, String>> iterator = varToReg.entrySet().iterator();
+        HashSet<String> lastUseDefOutSet = basicBlock.getUseDefOutSet();
         while (iterator.hasNext()) {
             Map.Entry<String, String> entry = iterator.next();
             String var = entry.getKey();
-            if (!useDefInSet.contains(var)) {
-                iterator.remove();
+            if (!lastUseDefOutSet.contains(var)) {
                 //需要在外面remove一下
                 releaseSReg(var);
+                iterator.remove();
             }
         }
     }
@@ -532,7 +533,6 @@ public class BasicBlock {
 
     public void releaseSReg(String var) {
         sRegs.add(varToReg.get(var));
-        varToReg.remove(var);
     }
 
     public boolean hasSReg(String var) {

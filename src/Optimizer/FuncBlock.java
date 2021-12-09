@@ -94,6 +94,7 @@ public class FuncBlock {
             BasicBlock basicBlock = basicBlocks.get(i);
             if (i != 0) {
                 basicBlock.setAllocation(basicBlock.getPreBlocks().get(0));
+                //Todo 选那块
             }
             basicBlock.allocSRegs();
             //不是第一块
