@@ -9,7 +9,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-
 public class MidCodeGener {
     private FileWriter writer;
     private FileWriter opWriter;
@@ -31,6 +30,8 @@ public class MidCodeGener {
     private String globalEnd = "########################################GLOBAL END##########################################\n";
     private String asciizStart = "########################################ASCIIZ START########################################\n";
     private String asciizEnd = "########################################ASCIIZ END##########################################\n";
+    private String funcStart = "########################################FUNC START##########################################\n";
+    private String funcEnd = "########################################FUNC END############################################\n";
 
     private static ArrayList<MidCodeEntry> opMidCodeList = new ArrayList<>();
 
@@ -86,7 +87,15 @@ public class MidCodeGener {
             iterator = midCodeList.iterator();
             while (iterator.hasNext()) {
                 MidCodeEntry midCodeEntry = (MidCodeEntry) iterator.next();
+                if (midCodeEntry.getOpType() == OpType.FUNC_DECLARE) {
+                    writer.write(funcStart);
+                }
                 writer.write(midCodeEntry.toString() + "\n");
+                if (midCodeEntry.getOpType() == OpType.EXIT
+                        || midCodeEntry.getOpType() == OpType.RET_VALUE
+                        || midCodeEntry.getOpType() == OpType.RET_VOID) {
+                    writer.write(funcEnd);
+                }
             }
             writer.flush();
             writer.close();

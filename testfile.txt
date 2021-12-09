@@ -10,4 +10,6 @@ int main() {
 	}
 	printf("%d",b);
 	return 1;
+	int x = 1;
+	return 1;
 }

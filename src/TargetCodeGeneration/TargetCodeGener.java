@@ -4,7 +4,7 @@ import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 import MidCodeGeneration.Str;
 import Optimizer.Optimizer;
-
+import Enum.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -23,6 +23,8 @@ public class TargetCodeGener {
     private String globalEnd = "########################################GLOBAL END##########################################\n";
     private String asciizStart = "########################################ASCIIZ START########################################\n";
     private String asciizEnd = "########################################ASCIIZ END##########################################\n";
+    private String funcStart = "########################################FUNC START##########################################\n";
+    private String funcEnd = "########################################FUNC END############################################\n";
     private String data = ".data 0x10000000\n";
     private String text = ".text\n";
 
@@ -59,7 +61,15 @@ public class TargetCodeGener {
             Iterator iterator = midCodeList.iterator();
             while (iterator.hasNext()) {
                 MidCodeEntry midCodeEntry = (MidCodeEntry) iterator.next();
+                if (midCodeEntry.getOpType() == OpType.FUNC_DECLARE)  {
+                    writer.write(funcStart);
+                }
                 writer.write(midCodeEntry.toTargetCode() + "\n");
+                if (midCodeEntry.getOpType() == OpType.EXIT
+                || midCodeEntry.getOpType() == OpType.RET_VALUE
+                || midCodeEntry.getOpType() == OpType.RET_VOID) {
+                    writer.write(funcEnd);
+                }
             }
             writer.flush();
             writer.close();
