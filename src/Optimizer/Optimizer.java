@@ -43,7 +43,6 @@ public class Optimizer {
     }
 
 
-
     public void optimize() {
         genBlock();
         prune();
@@ -112,6 +111,7 @@ public class Optimizer {
                 curBasicBlock = new BasicBlock();
                 curBasicBlock.setBlockNum(blockNum++);
                 curFuncBlock.addBasicBlock(curBasicBlock);
+                curBasicBlock.setFatherBlock(curFuncBlock);
                 if (midCodeEntry.getOpType() != OpType.LABEL_GEN) {
                     curBasicBlock.addMideCodeEntry(midCodeEntry);
                 } else {
@@ -204,5 +204,4 @@ public class Optimizer {
             funcBlock.allocSRegs();
         }
     }
-
 }

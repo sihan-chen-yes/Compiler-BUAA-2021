@@ -11,8 +11,11 @@ public class FuncBlock {
     private EndBlock endBlock = new EndBlock();
     private String func;
 
+    private ConflictGraph conflictGraph = new ConflictGraph();
+
     public FuncBlock(MidCodeEntry midCodeEntry) {
         headBlock = new HeadBlock(midCodeEntry);
+        midCodeEntry.setFuncBlock(this);
         func = midCodeEntry.getDst();
     }
 
@@ -85,16 +88,14 @@ public class FuncBlock {
     }
 
     public void allocSRegs() {
-        basicBlocks.get(0).resetSRegs();
-        for (int i = 0;i < basicBlocks.size();i++) {
-            BasicBlock basicBlock = basicBlocks.get(i);
-            if (i != 0) {
-                basicBlock.setAllocation(basicBlock.getPreBlocks().get(0));
-                //随便选一个前驱
-            }
-            basicBlock.allocSRegs();
-            //不是第一块
+        for (BasicBlock basicBlock:basicBlocks) {
+            basicBlock.genSubConf(conflictGraph);
         }
+        conflictGraph.dye();
+    }
+
+    public ConflictGraph getConflictGraph() {
+        return conflictGraph;
     }
 
     @Override

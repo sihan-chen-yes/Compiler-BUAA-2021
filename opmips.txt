@@ -1,125 +1,651 @@
 .data 0x10000000
 ########################################GLOBAL START########################################
+#############GLOBAL_DECLARE pi#############
+pi:.word 3
+
+#############GLOBAL_DECLARE const2#############
+const2:.word 1,2,3,4,5,6,7,8,9
+
+#############GLOBAL_DECLARE constconst#############
+constconst:.word 1,1,1,1,1
+
+#############GLOBAL_DECLARE a33#############
+a33:.word 1,2,3,4,5,6,7,8,9
+
+#############GLOBAL_DECLARE const1#############
+const1:.word 1,1,1,1,1
+
 #############GLOBAL_DECLARE zero#############
 zero:.word 0
 
-#############GLOBAL_DECLARE one#############
-one:.word 1
+#############GLOBAL_DECLARE a2#############
+a2:.word 1,2,3,4
 
-#############GLOBAL_DECLARE minus_one#############
-minus_one:.word -1
+#############GLOBAL_DECLARE a1#############
+a1:.word 0,0,0,0,0
 
-#############GLOBAL_DECLARE two#############
-two:.word 2
+#############GLOBAL_DECLARE m#############
+m:.word 0
 
-#############GLOBAL_DECLARE times#############
-times:.word 0
+#############GLOBAL_DECLARE n#############
+n:.word 0
 
-#############GLOBAL_DECLARE while_times#############
-while_times:.word 0
+#############GLOBAL_DECLARE p#############
+p:.word 0
 
-#############GLOBAL_DECLARE groups#############
-groups:.word 10
+#############GLOBAL_DECLARE q#############
+q:.word 0
+
+#############GLOBAL_DECLARE i#############
+i:.word 0
 
 ########################################GLOBAL END##########################################
 ########################################ASCIIZ START########################################
-str_0:.asciiz "in "
+str_0:.asciiz "fffj "
 str_1:.asciiz "\n"
-str_2:.asciiz "item "
+str_2:.asciiz "fffsum "
 str_3:.asciiz "\n"
-str_4:.asciiz "one"
+str_4:.asciiz "size "
 str_5:.asciiz "\n"
-str_6:.asciiz "re"
+str_6:.asciiz "av "
 str_7:.asciiz "\n"
-str_8:.asciiz "re"
-str_9:.asciiz "\n"
-str_10:.asciiz "re"
-str_11:.asciiz "\n"
-str_12:.asciiz "16061069\n"
-str_13:.asciiz "input an integer,judge if it is prime number,10 groups in total\n"
-str_14:.asciiz "input > 0 is needed\n"
-str_15:.asciiz "1 is not concerned\n"
-str_16:.asciiz " is a prime number\n"
-str_17:.asciiz " is not a prime number\n"
-str_18:.asciiz "while times is "
-str_19:.asciiz " in total\n"
+str_8:.asciiz "19373330\n"
+str_9:.asciiz "D_const "
+str_10:.asciiz "\n"
 ########################################ASCIIZ END##########################################
 .text
-addiu $sp,$sp,-44
+addiu $sp,$sp,-48
 j main
 ########################################FUNC START##########################################
-#############FUNC_DECLARE is_prime#############
-is_prime:
+#############FUNC_DECLARE getSqu#############
+getSqu:
 
-#############ASSIGN result8 0#############
+#############MULT x12 x12 @T_0#############
+lw $t0,8($sp)
+lw $t1,8($sp)
+mult $t0,$t1
+mflo $t0
+sw $t0,4($sp)
+
+#############RET_VALUE @T_0#############
+lw $t0,4($sp)
+move $v0,$t0
+jr $ra
+
+########################################FUNC END############################################
+########################################FUNC START##########################################
+####var:k17 reg:$s2
+####var:j17 reg:$s1
+####var:sum18 reg:$s0
+#############FUNC_DECLARE getSquSum#############
+getSquSum:
+
+#############ASSIGN j17 0#############
 li $t0,0
-move $s0,$t0
-
-#############ASSIGN item9 2#############
-li $t0,2
 move $s1,$t0
 
-#############SEQ in7 2 @T_0#############
-lw $t0,36($sp)
-li $t1,2
-seq $t0,$t0,$t1
-sw $t0,24($sp)
+#############ASSIGN k17 0#############
+li $t0,0
+move $s2,$t0
 
-#############BEQZ @T_0 label_0#############
-lw $t0,24($sp)
-beqz $t0,label_0
-
-#############ASSIGN result8 1#############
-li $t0,1
+#############ASSIGN sum18 0#############
+li $t0,0
 move $s0,$t0
-
-#############GOTO label_1#############
-j label_1
 
 #############LABEL_GEN label_0#############
 label_0:
 
-#############LABEL_GEN label_2#############
-label_2:
+#############SLT j17 size16 @T_1#############
 
-#############SLT item9 in7 @T_1#############
-
-lw $t1,36($sp)
+lw $t1,52($sp)
 slt $t0,$s1,$t1
-sw $t0,20($sp)
+sw $t0,36($sp)
 
-#############BEQZ @T_1 label_4#############
-lw $t0,20($sp)
-beqz $t0,label_4
+#############BEQZ @T_1 label_2#############
+lw $t0,36($sp)
+beqz $t0,label_2
+
+#############LABEL_GEN label_1#############
+label_1:
 
 #############LABEL_GEN label_3#############
 label_3:
 
-#############MOD in7 item9 @T_2#############
-lw $t0,36($sp)
+#############SLT k17 3 @T_2#############
 
-div $t0,$s1
-mfhi $t0
+li $t1,3
+slt $t0,$s2,$t1
+sw $t0,32($sp)
+
+#############BEQZ @T_2 label_5#############
+lw $t0,32($sp)
+beqz $t0,label_5
+
+#############LABEL_GEN label_4#############
+label_4:
+
+#############PREPARE getSqu#############
+sw $ra,0($sp)
+sw $s2,44($sp)
+sw $s1,48($sp)
+sw $s0,40($sp)
+addiu $sp,$sp,-12
+
+#############LOAD_ARRAY_2D a16 j17 k17 @T_3#############
+lw $t0,68($sp)
+
+li $t2,3
+mult $s1,$t2
+mflo $t1
+
+addu $t1,$t1,$s2
+sll $t1,$t1,2
+addu $t0,$t0,$t1
+lw $t0,0($t0)
+sw $t0,40($sp)
+
+#############PUSH_PARAM @T_3 0 getSqu#############
+lw $t0,40($sp)
+sw $t0,8($sp)
+
+#############CALL getSqu#############
+jal getSqu
+
+#############FIN_CALL getSqu#############
+addiu $sp,$sp,12
+lw $ra,0($sp)
+lw $s2,44($sp)
+lw $s1,48($sp)
+lw $s0,40($sp)
+
+#############STORE_RET @T_4#############
+sw $v0,24($sp)
+
+#############ADD sum18 @T_4 @T_5#############
+
+lw $t1,24($sp)
+addu $t0,$s0,$t1
+sw $t0,20($sp)
+
+#############ASSIGN sum18 @T_5#############
+lw $t0,20($sp)
+move $s0,$t0
+
+#############ADD k17 1 @T_6#############
+
+li $t1,1
+addu $t0,$s2,$t1
 sw $t0,16($sp)
 
-#############SEQ @T_2 0 @T_3#############
+#############ASSIGN k17 @T_6#############
 lw $t0,16($sp)
-li $t1,0
-seq $t0,$t0,$t1
+move $s2,$t0
+
+#############SLT k17 3 @T_7#############
+
+li $t1,3
+slt $t0,$s2,$t1
 sw $t0,12($sp)
 
-#############BEQZ @T_3 label_5#############
+#############BNEZ @T_7 label_4#############
 lw $t0,12($sp)
-beqz $t0,label_5
+bnez $t0,label_4
+
+#############LABEL_GEN label_5#############
+label_5:
+
+#############ADD j17 1 @T_8#############
+
+li $t1,1
+addu $t0,$s1,$t1
+sw $t0,8($sp)
+
+#############ASSIGN j17 @T_8#############
+lw $t0,8($sp)
+move $s1,$t0
+
+#############SLT j17 size16 @T_9#############
+
+lw $t1,52($sp)
+slt $t0,$s1,$t1
+sw $t0,4($sp)
+
+#############BNEZ @T_9 label_1#############
+lw $t0,4($sp)
+bnez $t0,label_1
+
+#############LABEL_GEN label_2#############
+label_2:
+
+#############RET_VALUE sum18#############
+
+move $v0,$s0
+jr $ra
+
+########################################FUNC END############################################
+########################################FUNC START##########################################
+#############FUNC_DECLARE sleep#############
+sleep:
+
+#############ADD s29 101 @T_10#############
+lw $t0,8($sp)
+li $t1,101
+addu $t0,$t0,$t1
+sw $t0,4($sp)
+
+#############RET_VALUE @T_10#############
+lw $t0,4($sp)
+move $v0,$t0
+jr $ra
+
+########################################FUNC END############################################
+########################################FUNC START##########################################
+####var:medium37 reg:$s2
+####var:i35 reg:$s1
+####var:j36 reg:$s0
+#############FUNC_DECLARE sort#############
+sort:
+
+#############ASSIGN i35 l34#############
+lw $t0,132($sp)
+move $s1,$t0
+
+#############ASSIGN j36 r34#############
+lw $t0,128($sp)
+move $s0,$t0
+
+#############ADD i35 j36 @T_11#############
+
+
+addu $t0,$s1,$s0
+sw $t0,112($sp)
+
+#############DIV @T_11 2 @T_12#############
+lw $t0,112($sp)
+li $t1,2
+div $t0,$t1
+mflo $t0
+sw $t0,108($sp)
+
+#############ASSIGN medium37 @T_12#############
+lw $t0,108($sp)
+move $s2,$t0
+
+#############LABEL_GEN label_6#############
+label_6:
+
+#############SLT i35 j36 @T_13#############
+
+
+slt $t0,$s1,$s0
+sw $t0,100($sp)
+
+#############BEQZ @T_13 label_8#############
+lw $t0,100($sp)
+beqz $t0,label_8
+
+#############LABEL_GEN label_7#############
+label_7:
+
+#############LABEL_GEN label_9#############
+label_9:
+
+#############LOAD_ARRAY_1D a34 i35 @T_14#############
+lw $t0,136($sp)
+
+sll $t1,$s1,2
+addu $t0,$t0,$t1
+lw $t0,0($t0)
+sw $t0,96($sp)
+
+#############LOAD_ARRAY_1D a34 medium37 @T_15#############
+lw $t0,136($sp)
+
+sll $t1,$s2,2
+addu $t0,$t0,$t1
+lw $t0,0($t0)
+sw $t0,92($sp)
+
+#############SLT @T_14 @T_15 @T_16#############
+lw $t0,96($sp)
+lw $t1,92($sp)
+slt $t0,$t0,$t1
+sw $t0,88($sp)
+
+#############BEQZ @T_16 label_11#############
+lw $t0,88($sp)
+beqz $t0,label_11
+
+#############LABEL_GEN label_10#############
+label_10:
+
+#############ADD i35 1 @T_17#############
+
+li $t1,1
+addu $t0,$s1,$t1
+sw $t0,84($sp)
+
+#############ASSIGN i35 @T_17#############
+lw $t0,84($sp)
+move $s1,$t0
+
+#############LOAD_ARRAY_1D a34 i35 @T_18#############
+lw $t0,136($sp)
+
+sll $t1,$s1,2
+addu $t0,$t0,$t1
+lw $t0,0($t0)
+sw $t0,80($sp)
+
+#############LOAD_ARRAY_1D a34 medium37 @T_19#############
+lw $t0,136($sp)
+
+sll $t1,$s2,2
+addu $t0,$t0,$t1
+lw $t0,0($t0)
+sw $t0,76($sp)
+
+#############SLT @T_18 @T_19 @T_20#############
+lw $t0,80($sp)
+lw $t1,76($sp)
+slt $t0,$t0,$t1
+sw $t0,72($sp)
+
+#############BNEZ @T_20 label_10#############
+lw $t0,72($sp)
+bnez $t0,label_10
+
+#############LABEL_GEN label_11#############
+label_11:
+
+#############LABEL_GEN label_12#############
+label_12:
+
+#############LOAD_ARRAY_1D a34 j36 @T_21#############
+lw $t0,136($sp)
+
+sll $t1,$s0,2
+addu $t0,$t0,$t1
+lw $t0,0($t0)
+sw $t0,68($sp)
+
+#############LOAD_ARRAY_1D a34 medium37 @T_22#############
+lw $t0,136($sp)
+
+sll $t1,$s2,2
+addu $t0,$t0,$t1
+lw $t0,0($t0)
+sw $t0,64($sp)
+
+#############SGT @T_21 @T_22 @T_23#############
+lw $t0,68($sp)
+lw $t1,64($sp)
+sgt $t0,$t0,$t1
+sw $t0,60($sp)
+
+#############BEQZ @T_23 label_14#############
+lw $t0,60($sp)
+beqz $t0,label_14
+
+#############LABEL_GEN label_13#############
+label_13:
+
+#############SUB j36 1 @T_24#############
+
+li $t1,1
+subu $t0,$s0,$t1
+sw $t0,56($sp)
+
+#############ASSIGN j36 @T_24#############
+lw $t0,56($sp)
+move $s0,$t0
+
+#############LOAD_ARRAY_1D a34 j36 @T_25#############
+lw $t0,136($sp)
+
+sll $t1,$s0,2
+addu $t0,$t0,$t1
+lw $t0,0($t0)
+sw $t0,52($sp)
+
+#############LOAD_ARRAY_1D a34 medium37 @T_26#############
+lw $t0,136($sp)
+
+sll $t1,$s2,2
+addu $t0,$t0,$t1
+lw $t0,0($t0)
+sw $t0,48($sp)
+
+#############SGT @T_25 @T_26 @T_27#############
+lw $t0,52($sp)
+lw $t1,48($sp)
+sgt $t0,$t0,$t1
+sw $t0,44($sp)
+
+#############BNEZ @T_27 label_13#############
+lw $t0,44($sp)
+bnez $t0,label_13
+
+#############LABEL_GEN label_14#############
+label_14:
+
+#############SLE i35 j36 @T_28#############
+
+
+sgt $t0,$s1,$s0
+seq $t0,$t0,$0
+sw $t0,40($sp)
+
+#############BEQZ @T_28 label_15#############
+lw $t0,40($sp)
+beqz $t0,label_15
+
+#############LOAD_ARRAY_1D a34 i35 @T_29#############
+lw $t0,136($sp)
+
+sll $t1,$s1,2
+addu $t0,$t0,$t1
+lw $t0,0($t0)
+sw $t0,36($sp)
+
+#############ASSIGN temp38 @T_29#############
+lw $t0,36($sp)
+sw $t0,104($sp)
+
+#############LOAD_ARRAY_1D a34 j36 @T_30#############
+lw $t0,136($sp)
+
+sll $t1,$s0,2
+addu $t0,$t0,$t1
+lw $t0,0($t0)
+sw $t0,32($sp)
+
+#############STORE_ARRAY_1D a34 i35 @T_30#############
+lw $t0,32($sp)
+move $t3,$t0
+lw $t0,136($sp)
+
+sll $t1,$s1,2
+addu $t0,$t0,$t1
+sw $t3,0($t0)
+
+#############STORE_ARRAY_1D a34 j36 temp38#############
+lw $t0,104($sp)
+move $t3,$t0
+lw $t0,136($sp)
+
+sll $t1,$s0,2
+addu $t0,$t0,$t1
+sw $t3,0($t0)
+
+#############ADD i35 1 @T_31#############
+
+li $t1,1
+addu $t0,$s1,$t1
+sw $t0,28($sp)
+
+#############ASSIGN i35 @T_31#############
+lw $t0,28($sp)
+move $s1,$t0
+
+#############SUB j36 1 @T_32#############
+
+li $t1,1
+subu $t0,$s0,$t1
+sw $t0,24($sp)
+
+#############ASSIGN j36 @T_32#############
+lw $t0,24($sp)
+move $s0,$t0
+
+#############LABEL_GEN label_15#############
+label_15:
+
+#############SLT i35 j36 @T_33#############
+
+
+slt $t0,$s1,$s0
+sw $t0,20($sp)
+
+#############BNEZ @T_33 label_7#############
+lw $t0,20($sp)
+bnez $t0,label_7
+
+#############LABEL_GEN label_8#############
+label_8:
+
+#############SLT l34 j36 @T_34#############
+lw $t0,132($sp)
+
+slt $t0,$t0,$s0
+sw $t0,16($sp)
+
+#############BEQZ @T_34 label_16#############
+lw $t0,16($sp)
+beqz $t0,label_16
+
+#############PREPARE sort#############
+sw $ra,0($sp)
+sw $s2,116($sp)
+sw $s1,124($sp)
+sw $s0,120($sp)
+addiu $sp,$sp,-140
+
+#############LOAD_ADDRESS a34 @T_35#############
+lw $t0,276($sp)
+sw $t0,152($sp)
+
+#############PUSH_PARAM @T_35 0 sort#############
+lw $t0,152($sp)
+sw $t0,136($sp)
+
+#############PUSH_PARAM l34 1 sort#############
+lw $t0,272($sp)
+sw $t0,132($sp)
+
+#############PUSH_PARAM j36 2 sort#############
+sw $s0,128($sp)
+
+#############CALL sort#############
+jal sort
+
+#############FIN_CALL sort#############
+addiu $sp,$sp,140
+lw $ra,0($sp)
+lw $s2,116($sp)
+lw $s1,124($sp)
+lw $s0,120($sp)
+
+#############LABEL_GEN label_16#############
+label_16:
+
+#############SGT r34 i35 @T_36#############
+lw $t0,128($sp)
+
+sgt $t0,$t0,$s1
+sw $t0,8($sp)
+
+#############BEQZ @T_36 label_17#############
+lw $t0,8($sp)
+beqz $t0,label_17
+
+#############PREPARE sort#############
+sw $ra,0($sp)
+sw $s2,116($sp)
+sw $s1,124($sp)
+sw $s0,120($sp)
+addiu $sp,$sp,-140
+
+#############LOAD_ADDRESS a34 @T_37#############
+lw $t0,276($sp)
+sw $t0,144($sp)
+
+#############PUSH_PARAM @T_37 0 sort#############
+lw $t0,144($sp)
+sw $t0,136($sp)
+
+#############PUSH_PARAM i35 1 sort#############
+sw $s1,132($sp)
+
+#############PUSH_PARAM r34 2 sort#############
+lw $t0,268($sp)
+sw $t0,128($sp)
+
+#############CALL sort#############
+jal sort
+
+#############FIN_CALL sort#############
+addiu $sp,$sp,140
+lw $ra,0($sp)
+lw $s2,116($sp)
+lw $s1,124($sp)
+lw $s0,120($sp)
+
+#############LABEL_GEN label_17#############
+label_17:
+
+#############RET_VOID#############
+jr $ra
+
+########################################FUNC END############################################
+########################################FUNC START##########################################
+####var:j58 reg:$s1
+####var:sum60 reg:$s0
+#############FUNC_DECLARE getD#############
+getD:
+
+#############ASSIGN j58 0#############
+li $t0,0
+move $s1,$t0
+
+#############ASSIGN sum60 0#############
+li $t0,0
+move $s0,$t0
+
+#############LABEL_GEN label_18#############
+label_18:
+
+#############SLT j58 size57 @T_38#############
+
+lw $t1,44($sp)
+slt $t0,$s1,$t1
+sw $t0,28($sp)
+
+#############BEQZ @T_38 label_20#############
+lw $t0,28($sp)
+beqz $t0,label_20
+
+#############LABEL_GEN label_19#############
+label_19:
 
 #############PRINT_STRING str_0#############
 la $a0,str_0
 li $v0,4
 syscall
 
-#############PRINT_INT in7#############
-lw $t0,36($sp)
-move $a0,$t0
+#############PRINT_INT j58#############
+
+move $a0,$s1
 li $v0,1
 syscall
 
@@ -133,9 +659,9 @@ la $a0,str_2
 li $v0,4
 syscall
 
-#############PRINT_INT item9#############
+#############PRINT_INT sum60#############
 
-move $a0,$s1
+move $a0,$s0
 li $v0,1
 syscall
 
@@ -144,23 +670,65 @@ la $a0,str_3
 li $v0,4
 syscall
 
-#############ASSIGN result8 0#############
-li $t0,0
-move $s2,$t0
+#############LOAD_ARRAY_1D a57 j58 @T_39#############
+lw $t0,48($sp)
 
-#############GOTO label_4#############
-j label_4
+sll $t1,$s1,2
+addu $t0,$t0,$t1
+lw $t0,0($t0)
+sw $t0,24($sp)
 
-#############LABEL_GEN label_5#############
-label_5:
+#############ADD sum60 @T_39 @T_40#############
+
+lw $t1,24($sp)
+addu $t0,$s0,$t1
+sw $t0,20($sp)
+
+#############ASSIGN sum60 @T_40#############
+lw $t0,20($sp)
+move $s0,$t0
+
+#############ADD j58 1 @T_41#############
+
+li $t1,1
+addu $t0,$s1,$t1
+sw $t0,16($sp)
+
+#############ASSIGN j58 @T_41#############
+lw $t0,16($sp)
+move $s1,$t0
+
+#############SLT j58 size57 @T_42#############
+
+lw $t1,44($sp)
+slt $t0,$s1,$t1
+sw $t0,12($sp)
+
+#############BNEZ @T_42 label_19#############
+lw $t0,12($sp)
+bnez $t0,label_19
+
+#############LABEL_GEN label_20#############
+label_20:
+
+#############DIV sum60 size57 @T_43#############
+
+lw $t1,44($sp)
+div $s0,$t1
+mflo $t0
+sw $t0,8($sp)
+
+#############ASSIGN average60 @T_43#############
+lw $t0,8($sp)
+sw $t0,36($sp)
 
 #############PRINT_STRING str_4#############
 la $a0,str_4
 li $v0,4
 syscall
 
-#############PRINT_INT 1#############
-li $t0,1
+#############PRINT_INT size57#############
+lw $t0,44($sp)
 move $a0,$t0
 li $v0,1
 syscall
@@ -170,18 +738,22 @@ la $a0,str_5
 li $v0,4
 syscall
 
-#############ASSIGN result8 1#############
-li $t0,1
-move $s2,$t0
+#############ASSIGN j58 0#############
+li $t0,0
+move $s1,$t0
+
+#############ASSIGN sum60 0#############
+li $t0,0
+move $s0,$t0
 
 #############PRINT_STRING str_6#############
 la $a0,str_6
 li $v0,4
 syscall
 
-#############PRINT_INT result8#############
-
-move $a0,$s2
+#############PRINT_INT average60#############
+lw $t0,36($sp)
+move $a0,$t0
 li $v0,1
 syscall
 
@@ -190,67 +762,16 @@ la $a0,str_7
 li $v0,4
 syscall
 
-#############ADD item9 1 @T_4#############
+#############DIV sum60 size57 @T_44#############
 
-li $t1,1
-addu $t0,$s1,$t1
-sw $t0,8($sp)
-
-#############ASSIGN item9 @T_4#############
-lw $t0,8($sp)
-move $s1,$t0
-
-#############SLT item9 in7 @T_5#############
-
-lw $t1,36($sp)
-slt $t0,$s1,$t1
+lw $t1,44($sp)
+div $s0,$t1
+mflo $t0
 sw $t0,4($sp)
 
-#############BNEZ @T_5 label_3#############
+#############RET_VALUE @T_44#############
 lw $t0,4($sp)
-bnez $t0,label_3
-
-#############LABEL_GEN label_4#############
-label_4:
-
-#############PRINT_STRING str_8#############
-la $a0,str_8
-li $v0,4
-syscall
-
-#############PRINT_INT result8#############
-
-move $a0,$s0
-li $v0,1
-syscall
-
-#############PRINT_STRING str_9#############
-la $a0,str_9
-li $v0,4
-syscall
-
-#############LABEL_GEN label_1#############
-label_1:
-
-#############PRINT_STRING str_10#############
-la $a0,str_10
-li $v0,4
-syscall
-
-#############PRINT_INT result8#############
-
-move $a0,$s0
-li $v0,1
-syscall
-
-#############PRINT_STRING str_11#############
-la $a0,str_11
-li $v0,4
-syscall
-
-#############RET_VALUE result8#############
-
-move $v0,$s0
+move $v0,$t0
 jr $ra
 
 ########################################FUNC END############################################
@@ -258,205 +779,236 @@ jr $ra
 #############FUNC_DECLARE main#############
 main:
 
-#############PRINT_STRING str_12#############
-la $a0,str_12
-li $v0,4
-syscall
+#############ASSIGN m 2#############
+li $t0,2
+sw $t0,-32612($gp)
 
-#############PRINT_STRING str_13#############
-la $a0,str_13
-li $v0,4
-syscall
+#############ASSIGN n 3#############
+li $t0,3
+sw $t0,-32608($gp)
 
-#############LABEL_GEN label_6#############
-label_6:
+#############ASSIGN p 4#############
+li $t0,4
+sw $t0,-32604($gp)
 
-#############SNE groups 0 @T_6#############
-lw $t0,-32744($gp)
+#############ASSIGN q 5#############
+li $t0,5
+sw $t0,-32600($gp)
+
+#############STORE_ARRAY_1D a1 0 1#############
+li $t0,1
+move $t3,$t0
+addiu $t0,$gp,-32632
 li $t1,0
-sne $t0,$t0,$t1
+sll $t1,$t1,2
+addu $t0,$t0,$t1
+sw $t3,0($t0)
+
+#############STORE_ARRAY_1D a1 1 n#############
+lw $t0,-32608($gp)
+move $t3,$t0
+addiu $t0,$gp,-32632
+li $t1,1
+sll $t1,$t1,2
+addu $t0,$t0,$t1
+sw $t3,0($t0)
+
+#############LOAD_ARRAY_1D a1 0 @T_45#############
+addiu $t0,$gp,-32632
+li $t1,0
+sll $t1,$t1,2
+addu $t0,$t0,$t1
+lw $t0,0($t0)
+sw $t0,48($sp)
+
+#############STORE_ARRAY_1D a1 2 @T_45#############
+lw $t0,48($sp)
+move $t3,$t0
+addiu $t0,$gp,-32632
+li $t1,2
+sll $t1,$t1,2
+addu $t0,$t0,$t1
+sw $t3,0($t0)
+
+#############STORE_ARRAY_1D a1 3 p#############
+lw $t0,-32604($gp)
+move $t3,$t0
+addiu $t0,$gp,-32632
+li $t1,3
+sll $t1,$t1,2
+addu $t0,$t0,$t1
+sw $t3,0($t0)
+
+#############STORE_ARRAY_1D a1 4 q#############
+lw $t0,-32600($gp)
+move $t3,$t0
+addiu $t0,$gp,-32632
+li $t1,4
+sll $t1,$t1,2
+addu $t0,$t0,$t1
+sw $t3,0($t0)
+
+#############PRINT_STRING str_8#############
+la $a0,str_8
+li $v0,4
+syscall
+
+#############LABEL_GEN label_21#############
+label_21:
+
+#############SLT i m @T_46#############
+lw $t0,-32596($gp)
+lw $t1,-32612($gp)
+slt $t0,$t0,$t1
+sw $t0,44($sp)
+
+#############BEQZ @T_46 label_23#############
+lw $t0,44($sp)
+beqz $t0,label_23
+
+#############LABEL_GEN label_22#############
+label_22:
+
+#############ADD n 1 @T_47#############
+lw $t0,-32608($gp)
+li $t1,1
+addu $t0,$t0,$t1
 sw $t0,40($sp)
 
-#############BEQZ @T_6 label_8#############
+#############ASSIGN n @T_47#############
 lw $t0,40($sp)
-beqz $t0,label_8
+sw $t0,-32608($gp)
 
-#############LABEL_GEN label_7#############
-label_7:
-
-#############GETINT @T_7#############
-li $v0,5
-syscall
-move $t0,$v0
+#############ADD i 1 @T_48#############
+lw $t0,-32596($gp)
+li $t1,1
+addu $t0,$t0,$t1
 sw $t0,36($sp)
 
-#############ASSIGN input35 @T_7#############
+#############ASSIGN i @T_48#############
 lw $t0,36($sp)
-move $s0,$t0
+sw $t0,-32596($gp)
 
-#############SLE input35 0 @T_8#############
-
-li $t1,0
-sgt $t0,$s0,$t1
-seq $t0,$t0,$0
+#############SGT m n @T_49#############
+lw $t0,-32612($gp)
+lw $t1,-32608($gp)
+sgt $t0,$t0,$t1
 sw $t0,32($sp)
 
-#############BEQZ @T_8 label_9#############
+#############BEQZ @T_49 label_24#############
 lw $t0,32($sp)
-beqz $t0,label_9
+beqz $t0,label_24
 
-#############PRINT_STRING str_14#############
-la $a0,str_14
-li $v0,4
-syscall
+#############GOTO label_21#############
+j label_21
 
-#############SUB groups 1 @T_9#############
-lw $t0,-32744($gp)
-li $t1,1
-subu $t0,$t0,$t1
-sw $t0,28($sp)
+#############LABEL_GEN label_24#############
+label_24:
 
-#############ASSIGN groups @T_9#############
-lw $t0,28($sp)
-sw $t0,-32744($gp)
-
-#############GOTO label_6#############
-j label_6
-
-#############LABEL_GEN label_9#############
-label_9:
-
-#############SEQ input35 1 @T_10#############
-
-li $t1,1
-seq $t0,$s0,$t1
-sw $t0,24($sp)
-
-#############BEQZ @T_10 label_10#############
-lw $t0,24($sp)
-beqz $t0,label_10
-
-#############PRINT_STRING str_15#############
-la $a0,str_15
-li $v0,4
-syscall
-
-#############SUB groups 1 @T_11#############
-lw $t0,-32744($gp)
-li $t1,1
-subu $t0,$t0,$t1
-sw $t0,20($sp)
-
-#############ASSIGN groups @T_11#############
-lw $t0,20($sp)
-sw $t0,-32744($gp)
-
-#############GOTO label_6#############
-j label_6
-
-#############LABEL_GEN label_10#############
-label_10:
-
-#############PREPARE is_prime#############
+#############PREPARE getSqu#############
 sw $ra,0($sp)
-sw $s0,44($sp)
-addiu $sp,$sp,-40
 
-#############PUSH_PARAM input35 0 is_prime#############
-sw $s0,36($sp)
+addiu $sp,$sp,-12
 
-#############CALL is_prime#############
-jal is_prime
-
-#############FIN_CALL is_prime#############
-addiu $sp,$sp,40
-lw $ra,0($sp)
-lw $s0,44($sp)
-
-#############STORE_RET @T_12#############
-sw $v0,16($sp)
-
-#############SGE @T_12 1 @T_13#############
-lw $t0,16($sp)
+#############ADD p 1 @T_50#############
+lw $t0,-32604($gp)
 li $t1,1
-slt $t0,$t0,$t1
-seq $t0,$t0,$0
-sw $t0,12($sp)
+addu $t0,$t0,$t1
+sw $t0,40($sp)
 
-#############BEQZ @T_13 label_12#############
-lw $t0,12($sp)
-beqz $t0,label_12
-
-#############PRINT_INT input35#############
-
-move $a0,$s0
-li $v0,1
-syscall
-
-#############PRINT_STRING str_16#############
-la $a0,str_16
-li $v0,4
-syscall
-
-#############GOTO label_13#############
-j label_13
-
-#############LABEL_GEN label_12#############
-label_12:
-
-#############PRINT_INT input35#############
-
-move $a0,$s0
-li $v0,1
-syscall
-
-#############PRINT_STRING str_17#############
-la $a0,str_17
-li $v0,4
-syscall
-
-#############LABEL_GEN label_13#############
-label_13:
-
-#############LABEL_GEN label_11#############
-label_11:
-
-#############SUB groups 1 @T_14#############
-lw $t0,-32744($gp)
-li $t1,1
-subu $t0,$t0,$t1
+#############PUSH_PARAM @T_50 0 getSqu#############
+lw $t0,40($sp)
 sw $t0,8($sp)
 
-#############ASSIGN groups @T_14#############
-lw $t0,8($sp)
-sw $t0,-32744($gp)
+#############CALL getSqu#############
+jal getSqu
 
-#############SNE groups 0 @T_15#############
-lw $t0,-32744($gp)
-li $t1,0
-sne $t0,$t0,$t1
-sw $t0,4($sp)
+#############FIN_CALL getSqu#############
+addiu $sp,$sp,12
+lw $ra,0($sp)
 
-#############BNEZ @T_15 label_7#############
+
+#############STORE_RET @T_51#############
+sw $v0,24($sp)
+
+#############ASSIGN p @T_51#############
+lw $t0,24($sp)
+sw $t0,-32604($gp)
+
+#############SLT m q @T_52#############
+lw $t0,-32612($gp)
+lw $t1,-32600($gp)
+slt $t0,$t0,$t1
+sw $t0,20($sp)
+
+#############BEQZ @T_52 label_25#############
+lw $t0,20($sp)
+beqz $t0,label_25
+
+#############GOTO label_23#############
+j label_23
+
+#############LABEL_GEN label_25#############
+label_25:
+
+#############SLT i m @T_53#############
+lw $t0,-32596($gp)
+lw $t1,-32612($gp)
+slt $t0,$t0,$t1
+sw $t0,16($sp)
+
+#############BNEZ @T_53 label_22#############
+lw $t0,16($sp)
+bnez $t0,label_22
+
+#############LABEL_GEN label_23#############
+label_23:
+
+#############PREPARE getD#############
+sw $ra,0($sp)
+
+addiu $sp,$sp,-52
+
+#############LOAD_ADDRESS const1 @T_54#############
+addiu $t0,$gp,-32672
+sw $t0,60($sp)
+
+#############PUSH_PARAM @T_54 0 getD#############
+lw $t0,60($sp)
+sw $t0,48($sp)
+
+#############PUSH_PARAM 5 1 getD#############
+li $t0,5
+sw $t0,44($sp)
+
+#############CALL getD#############
+jal getD
+
+#############FIN_CALL getD#############
+addiu $sp,$sp,52
+lw $ra,0($sp)
+
+
+#############STORE_RET @T_55#############
+sw $v0,4($sp)
+
+#############ASSIGN D_const104 @T_55#############
 lw $t0,4($sp)
-bnez $t0,label_7
+sw $t0,12($sp)
 
-#############LABEL_GEN label_8#############
-label_8:
-
-#############PRINT_STRING str_18#############
-la $a0,str_18
+#############PRINT_STRING str_9#############
+la $a0,str_9
 li $v0,4
 syscall
 
-#############PRINT_INT while_times#############
-lw $t0,-32748($gp)
+#############PRINT_INT D_const104#############
+lw $t0,12($sp)
 move $a0,$t0
 li $v0,1
 syscall
 
-#############PRINT_STRING str_19#############
-la $a0,str_19
+#############PRINT_STRING str_10#############
+la $a0,str_10
 li $v0,4
 syscall
 

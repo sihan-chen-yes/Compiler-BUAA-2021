@@ -4,10 +4,7 @@ import Enum.DeclType;
 import Enum.OpType;
 import GrammarAnalysis.SymbolTable;
 import GrammarAnalysis.SymbolTableEntry;
-import Optimizer.BasicBlock;
-import Optimizer.DefPoint;
-import Optimizer.FuncBlock;
-import Optimizer.Optimizer;
+import Optimizer.*;
 
 import java.util.*;
 
@@ -20,7 +17,9 @@ public class MidCodeEntry {
 
     private boolean isEntryPoint = false;
 
-    private BasicBlock fatherBlock;
+    private BasicBlock basicBlock;
+    private FuncBlock funcBlock;
+    private ConflictGraph conflictGraph;
 
     private DefPoint gen;
     private HashSet<DefPoint> kill = new HashSet<>();
@@ -121,6 +120,7 @@ public class MidCodeEntry {
         }
         return midCode;
     }
+
 
     public String toTargetCode() {
         curCode = "";
@@ -261,8 +261,8 @@ public class MidCodeEntry {
                 if (symbolTable.isLocal(func,r1)) {
                     int offset = symbolTable.searchOffset_sp(func,r1);
                     //相对于当前sp的offset
-                    if (fatherBlock.hasSReg(r1)) {
-                        curCode += String.format("sw %s,%d($sp)",fatherBlock.querySReg(r1),arg_offset);
+                    if (conflictGraph.hasReg(r1)) {
+                        curCode += String.format("sw %s,%d($sp)", conflictGraph.getReg(r1),arg_offset);
                     } else {
                         //Todo t change
                         curCode += String.format("lw $t0,%d($sp)",offset);
@@ -324,8 +324,8 @@ public class MidCodeEntry {
             } else {
                 if (symbolTable.isLocal(func,name)) {
                     int offset = symbolTable.searchOffset_sp(func,name);
-                    if (fatherBlock.hasSReg(name)) {
-                        reg = fatherBlock.querySReg(name);
+                    if (conflictGraph.hasReg(name)) {
+                        reg = conflictGraph.getReg(name);
                     } else {
                         curCode += String.format("lw $t0,%d($sp)",offset);
                     }
@@ -368,7 +368,8 @@ public class MidCodeEntry {
     }
 
     public void calOffset1D(String i,String reg0) {
-        // t0 = t0 + t1 i is T 算出绝对地址 存到t0 或者其他s
+        // t0 = t0 + t1 * 4   算出绝对地址 存到t0 或者其他s
+        //传进来的reg0值会发生变化
         if (!Optimizer.isOp()) {
             loadSec(i);
             curCode += "\n";
@@ -380,15 +381,17 @@ public class MidCodeEntry {
             String reg1;
             reg1 = loadSec(i);
             curCode += "\n";
-            curCode += String.format("sll %s,%s,2",reg1,reg1);
+            //Todo change t1
+            curCode += String.format("sll $t1,%s,2",reg1);
             curCode += "\n";
-            curCode += String.format("addu %s,%s,%s",reg0,reg0,reg1);
+            curCode += String.format("addu %s,%s,$t1",reg0,reg0);
         }
     }
 
     public void calOffset2D(String i, String j, int length2D,String reg0) {
         //i j is T t1 t2 算出绝对地址放到t0 或者其他s
         //t0 = t0 + (t1 * t2 + t2) * 4
+        //传进来的reg0值会变化
         String reg1,reg2;
         if (!Optimizer.isOp()) {
             loadSec(i);
@@ -415,20 +418,22 @@ public class MidCodeEntry {
             curCode += "\n";
             curCode += String.format("mult %s,$t2",reg1);
             curCode += "\n";
-            curCode += String.format("mflo %s",reg1);
+            curCode += String.format("mflo $t1");
             curCode += "\n";
             reg2 = loadThird(j);
             curCode += "\n";
-            curCode += String.format("addu %s,%s,%s",reg1,reg1,reg2);
+            curCode += String.format("addu $t1,$t1,%s",reg2);
             curCode += "\n";
-            curCode += String.format("sll %s,%s,2",reg1,reg1);
+            curCode += String.format("sll $t1,$t1,2");
+            //Todo change t
             curCode += "\n";
-            curCode += String.format("addu %s,%s,%s",reg0,reg0,reg1);
+            curCode += String.format("addu %s,%s,$t1",reg0,reg0);
         }
     }
 
     public void calOffsetAddr(String i,int length2D,String reg0) {
         //t0 = t0 + t1 * t2 * 4
+        //传进来的reg0会发生变化
         if (!Optimizer.isOp()) {
             loadSec(i);
             //$t1
@@ -453,11 +458,11 @@ public class MidCodeEntry {
             curCode += "\n";
             curCode += String.format("mult %s,$t2",reg1);
             curCode += "\n";
-            curCode += String.format("mflo %s",reg1);
+            curCode += String.format("mflo $t1");
             curCode += "\n";
-            curCode += String.format("sll %s,%s,2",reg1,reg1);
+            curCode += String.format("sll $t1,$t1,2");
             curCode += "\n";
-            curCode += String.format("addu %s,%s,%s",reg0,reg0,reg1);
+            curCode += String.format("addu %s,%s,$t1",reg0,reg0);
         }
     }
 
@@ -498,6 +503,7 @@ public class MidCodeEntry {
                 if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
                     //参数（存的是地址）
                     reg = load(name);
+                    assert reg.equals("$t0");
                     curCode += "\n";
                     calOffset1D(i,reg);
                     curCode += "\n";
@@ -568,6 +574,7 @@ public class MidCodeEntry {
                 length2D = symbolTable.search_local(func,name).getLength2D();
                 if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
                     reg = load(name);
+                    assert reg.equals("$t0");
                     curCode += "\n";
                     calOffset2D(i,j,length2D,reg);
                     curCode += "\n";
@@ -651,6 +658,7 @@ public class MidCodeEntry {
                     //$t0此时已经用了
                     curCode += "\n";
                     reg = load(name);
+                    assert reg.equals("$t0");
                     curCode += "\n";
                     calOffset1D(i,reg);
                     curCode += "\n";
@@ -738,6 +746,7 @@ public class MidCodeEntry {
                     }
                     curCode += "\n";
                     reg = load(name);//得到地址
+                    assert reg.equals("$t0");
                     curCode += "\n";
                     calOffset2D(i,j,length2D,reg);
                     curCode += "\n";
@@ -944,6 +953,7 @@ public class MidCodeEntry {
                     //Todo 直接load到T中
                     if (symbolTable.search_local(func,r1).getDeclType() == DeclType.PARAM) {
                         regVal = load(r1);
+                        assert regVal.equals("$t0");
                         //参数中的地址 放在t0
                         curCode += "\n";
                         int length2D = symbolTable.search_local(func,r1).getLength2D();
@@ -999,8 +1009,8 @@ public class MidCodeEntry {
                 //Todo t change 现在默认在内存
             }
             curCode += "\n";
-            if (fatherBlock.hasSReg(r1)) {
-                curCode += String.format("move %s,%s",fatherBlock.querySReg(r1),regVal);
+            if (conflictGraph.hasReg(r1)) {
+                curCode += String.format("move %s,%s", conflictGraph.getReg(r1),regVal);
             } else {
                 store(r1,regVal);
             }
@@ -1130,7 +1140,7 @@ public class MidCodeEntry {
     }
 
     public void genSaveSRegs() {
-        HashMap<String,String> varToReg = fatherBlock.getVarToReg();
+        HashMap<String,String> varToReg = conflictGraph.getVarToReg();
         Iterator<Map.Entry<String, String>> iterator = varToReg.entrySet().iterator();
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
@@ -1169,7 +1179,7 @@ public class MidCodeEntry {
     }
 
     public void genLoadSRegs() {
-        HashMap<String,String> varToReg = fatherBlock.getVarToReg();
+        HashMap<String,String> varToReg = conflictGraph.getVarToReg();
         Iterator<Map.Entry<String, String>> iterator = varToReg.entrySet().iterator();
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
@@ -1216,8 +1226,8 @@ public class MidCodeEntry {
             } else {
                 if (symbolTable.isLocal(func,name)) {
                     int offset = symbolTable.searchOffset_sp(func,name);
-                    if (fatherBlock.hasSReg(name)) {
-                        reg = fatherBlock.querySReg(name);
+                    if (conflictGraph.hasReg(name)) {
+                        reg = conflictGraph.getReg(name);
                     } else {
                         curCode += String.format("lw $t1,%d($sp)",offset);
                     }
@@ -1256,8 +1266,8 @@ public class MidCodeEntry {
             } else {
                 if (symbolTable.isLocal(func,name)) {
                     int offset = symbolTable.searchOffset_sp(func,name);
-                    if (fatherBlock.hasSReg(name)) {
-                        reg = fatherBlock.querySReg(name);
+                    if (conflictGraph.hasReg(name)) {
+                        reg = conflictGraph.getReg(name);
                     } else {
                         curCode += String.format("lw $t2,%d($sp)",offset);
                     }
@@ -1559,8 +1569,19 @@ public class MidCodeEntry {
         return gen;
     }
 
-    public void setFatherBlock(BasicBlock basicBlock) {
-        fatherBlock = basicBlock;
+    public void setBasicBlock(BasicBlock basicBlock) {
+        this.basicBlock = basicBlock;
+        funcBlock = basicBlock.getFatherBlock();
+        conflictGraph = funcBlock.getConflictGraph();
+    }
+
+    public void setFuncBlock(FuncBlock funcBlock) {
+        this.funcBlock = funcBlock;
+        conflictGraph = funcBlock.getConflictGraph();
+    }
+
+    public HashMap<String, String> getVarToReg() {
+        return conflictGraph.getVarToReg();
     }
 
     @Override

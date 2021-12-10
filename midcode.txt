@@ -1,127 +1,327 @@
 ########################################GLOBAL START########################################
-GLOBAL_DECLARE zero
-GLOBAL_DECLARE one
-GLOBAL_DECLARE minus_one
-GLOBAL_DECLARE two
-GLOBAL_DECLARE times
-GLOBAL_DECLARE while_times
-GLOBAL_DECLARE groups
+GLOBAL_DECLARE a
+GLOBAL_DECLARE b
+GLOBAL_DECLARE a_row
+GLOBAL_DECLARE a_col
+GLOBAL_DECLARE b_row
+GLOBAL_DECLARE b_col
+GLOBAL_DECLARE c_row
+GLOBAL_DECLARE c_col
+GLOBAL_DECLARE c
+GLOBAL_DECLARE err
+GLOBAL_DECLARE l
+GLOBAL_DECLARE r
 ########################################GLOBAL END##########################################
 ########################################ASCIIZ START########################################
-str_0:in 
+str_0:19182604\n
 str_1:\n
-str_2:item 
-str_3:\n
-str_4:one
-str_5:\n
-str_6:re
-str_7:\n
-str_8:re
-str_9:\n
-str_10:re
-str_11:\n
-str_12:16061069\n
-str_13:input an integer,judge if it is prime number,10 groups in total\n
-str_14:input > 0 is needed\n
-str_15:1 is not concerned\n
-str_16: is a prime number\n
-str_17: is not a prime number\n
-str_18:while times is 
-str_19: in total\n
 ########################################ASCIIZ END##########################################
 ########################################FUNC START##########################################
-FUNC_DECLARE is_prime
-ASSIGN result8 0
-ASSIGN item9 2
-SEQ in7 2 @T_0
-BEQZ @T_0 label_0
-ASSIGN result8 1
-GOTO label_1
+FUNC_DECLARE Matrix_mult
+ASSIGN i12 0
 LABEL_GEN label_0
-LABEL_GEN label_2
-SLT item9 in7 @T_1
-BEQZ @T_1 label_4
-LABEL_GEN label_3
-MOD in7 item9 @T_2
-SEQ @T_2 0 @T_3
-BEQZ @T_3 label_5
-PRINT_STRING str_0
-PRINT_INT in7
-PRINT_STRING str_1
-PRINT_STRING str_2
-PRINT_INT item9
-PRINT_STRING str_3
-ASSIGN result8 0
-GOTO label_4
-LABEL_GEN label_5
-PRINT_STRING str_4
-PRINT_INT 1
-PRINT_STRING str_5
-ASSIGN result8 1
-PRINT_STRING str_6
-PRINT_INT result8
-PRINT_STRING str_7
-ADD item9 1 @T_4
-ASSIGN item9 @T_4
-SLT item9 in7 @T_5
-BNEZ @T_5 label_3
-LABEL_GEN label_4
-PRINT_STRING str_8
-PRINT_INT result8
-PRINT_STRING str_9
+SLT i12 a_row @T_0
+BEQZ @T_0 label_2
 LABEL_GEN label_1
-PRINT_STRING str_10
-PRINT_INT result8
-PRINT_STRING str_11
-RET_VALUE result8
+ASSIGN j12 0
+LABEL_GEN label_3
+SLT j12 b_col @T_1
+BEQZ @T_1 label_5
+LABEL_GEN label_4
+ASSIGN k12 0
+LABEL_GEN label_6
+SLT k12 a_col @T_2
+BEQZ @T_2 label_8
+LABEL_GEN label_7
+LOAD_ARRAY_2D c i12 j12 @T_3
+LOAD_ARRAY_2D a i12 k12 @T_4
+LOAD_ARRAY_2D b k12 j12 @T_5
+MULT @T_4 @T_5 @T_6
+ADD @T_3 @T_6 @T_7
+STORE_ARRAY_2D c i12 j12 @T_7
+ADD k12 1 @T_8
+ASSIGN k12 @T_8
+SLT k12 a_col @T_9
+BNEZ @T_9 label_7
+LABEL_GEN label_8
+ADD j12 1 @T_10
+ASSIGN j12 @T_10
+SLT j12 b_col @T_11
+BNEZ @T_11 label_4
+LABEL_GEN label_5
+ADD i12 1 @T_12
+ASSIGN i12 @T_12
+SLT i12 a_row @T_13
+BNEZ @T_13 label_1
+LABEL_GEN label_2
+ASSIGN c_row i12
+ASSIGN c_col j12
+RET_VOID
+########################################FUNC END############################################
+########################################FUNC START##########################################
+FUNC_DECLARE Matrix_add
+ASSIGN i32 0
+LABEL_GEN label_9
+SLT i32 row31 @T_14
+BEQZ @T_14 label_11
+LABEL_GEN label_10
+ASSIGN j32 0
+LABEL_GEN label_12
+SLT j32 col31 @T_15
+BEQZ @T_15 label_14
+LABEL_GEN label_13
+LOAD_ARRAY_2D a i32 j32 @T_16
+LOAD_ARRAY_2D b i32 j32 @T_17
+ADD @T_16 @T_17 @T_18
+STORE_ARRAY_2D c i32 j32 @T_18
+ADD j32 1 @T_19
+ASSIGN j32 @T_19
+SLT j32 col31 @T_20
+BNEZ @T_20 label_13
+LABEL_GEN label_14
+ADD i32 1 @T_21
+ASSIGN i32 @T_21
+SLT i32 row31 @T_22
+BNEZ @T_22 label_10
+LABEL_GEN label_11
+ASSIGN c_row i32
+ASSIGN c_col j32
+RET_VOID
+########################################FUNC END############################################
+########################################FUNC START##########################################
+FUNC_DECLARE Matrix_sub
+ASSIGN i48 0
+LABEL_GEN label_15
+SLT i48 row47 @T_23
+BEQZ @T_23 label_17
+LABEL_GEN label_16
+ASSIGN j48 0
+LABEL_GEN label_18
+SLT j48 col47 @T_24
+BEQZ @T_24 label_20
+LABEL_GEN label_19
+LOAD_ARRAY_2D a i48 j48 @T_25
+LOAD_ARRAY_2D b i48 j48 @T_26
+SUB @T_25 @T_26 @T_27
+STORE_ARRAY_2D c i48 j48 @T_27
+ADD j48 1 @T_28
+ASSIGN j48 @T_28
+SLT j48 col47 @T_29
+BNEZ @T_29 label_19
+LABEL_GEN label_20
+ADD i48 1 @T_30
+ASSIGN i48 @T_30
+SLT i48 row47 @T_31
+BNEZ @T_31 label_16
+LABEL_GEN label_17
+ASSIGN c_row i48
+ASSIGN c_col j48
+RET_VOID
+########################################FUNC END############################################
+########################################FUNC START##########################################
+FUNC_DECLARE Error
+ASSIGN err 1
+RET_VOID
+########################################FUNC END############################################
+########################################FUNC START##########################################
+FUNC_DECLARE init
+ASSIGN i70 0
+LABEL_GEN label_21
+SLT i70 row69 @T_32
+BEQZ @T_32 label_23
+LABEL_GEN label_22
+ASSIGN j70 0
+LABEL_GEN label_24
+SLT j70 col69 @T_33
+BEQZ @T_33 label_26
+LABEL_GEN label_25
+STORE_ARRAY_2D c i70 j70 0
+ADD j70 1 @T_34
+ASSIGN j70 @T_34
+SLT j70 col69 @T_35
+BNEZ @T_35 label_25
+LABEL_GEN label_26
+ADD i70 1 @T_36
+ASSIGN i70 @T_36
+SLT i70 row69 @T_37
+BNEZ @T_37 label_22
+LABEL_GEN label_23
+RET_VOID
+########################################FUNC END############################################
+########################################FUNC START##########################################
+FUNC_DECLARE Print
+ASSIGN i83 0
+LABEL_GEN label_27
+SLT i83 row82 @T_38
+BEQZ @T_38 label_29
+LABEL_GEN label_28
+ASSIGN j83 0
+LABEL_GEN label_30
+SLT j83 col82 @T_39
+BEQZ @T_39 label_32
+LABEL_GEN label_31
+ADD j83 1 @T_40
+ASSIGN j83 @T_40
+SLT j83 col82 @T_41
+BNEZ @T_41 label_31
+LABEL_GEN label_32
+ADD i83 1 @T_42
+ASSIGN i83 @T_42
+SLT i83 row82 @T_43
+BNEZ @T_43 label_28
+LABEL_GEN label_29
+PREPARE init
+PUSH_PARAM row82 0 init
+PUSH_PARAM col82 1 init
+CALL init
+FIN_CALL init
+RET_VOID
+########################################FUNC END############################################
+########################################FUNC START##########################################
+FUNC_DECLARE meet_conditions
+SEQ kind98 1 @T_44
+BEQZ @T_44 label_33
+SEQ a_row b_row @T_45
+BEQZ @T_45 label_34
+SEQ a_col b_col @T_46
+BEQZ @T_46 label_35
+ASSIGN row102 a_row
+ASSIGN col103 b_col
+PREPARE Matrix_add
+PUSH_PARAM row102 0 Matrix_add
+PUSH_PARAM col103 1 Matrix_add
+CALL Matrix_add
+FIN_CALL Matrix_add
+LABEL_GEN label_35
+GOTO label_36
+LABEL_GEN label_34
+PREPARE Error
+CALL Error
+FIN_CALL Error
+LABEL_GEN label_36
+GOTO label_37
+LABEL_GEN label_33
+SEQ kind98 2 @T_47
+BEQZ @T_47 label_38
+SEQ a_row b_row @T_48
+BEQZ @T_48 label_39
+SEQ a_col b_col @T_49
+BEQZ @T_49 label_40
+ASSIGN row114 a_row
+ASSIGN col115 b_col
+PREPARE Matrix_sub
+PUSH_PARAM row114 0 Matrix_sub
+PUSH_PARAM col115 1 Matrix_sub
+CALL Matrix_sub
+FIN_CALL Matrix_sub
+LABEL_GEN label_40
+GOTO label_41
+LABEL_GEN label_39
+PREPARE Error
+CALL Error
+FIN_CALL Error
+LABEL_GEN label_41
+GOTO label_42
+LABEL_GEN label_38
+SEQ kind98 3 @T_50
+BEQZ @T_50 label_43
+SEQ a_col b_row @T_51
+BEQZ @T_51 label_44
+PREPARE Matrix_mult
+CALL Matrix_mult
+FIN_CALL Matrix_mult
+GOTO label_45
+LABEL_GEN label_44
+PREPARE Error
+CALL Error
+FIN_CALL Error
+LABEL_GEN label_45
+GOTO label_46
+LABEL_GEN label_43
+PREPARE Error
+CALL Error
+FIN_CALL Error
+LABEL_GEN label_46
+LABEL_GEN label_42
+LABEL_GEN label_37
+RET_VOID
 ########################################FUNC END############################################
 ########################################FUNC START##########################################
 FUNC_DECLARE main
-PRINT_STRING str_12
-PRINT_STRING str_13
-LABEL_GEN label_6
-SNE groups 0 @T_6
-BEQZ @T_6 label_8
-LABEL_GEN label_7
-GETINT @T_7
-ASSIGN input35 @T_7
-SLE input35 0 @T_8
-BEQZ @T_8 label_9
-PRINT_STRING str_14
-SUB groups 1 @T_9
-ASSIGN groups @T_9
-GOTO label_6
-LABEL_GEN label_9
-SEQ input35 1 @T_10
-BEQZ @T_10 label_10
-PRINT_STRING str_15
-SUB groups 1 @T_11
-ASSIGN groups @T_11
-GOTO label_6
-GOTO label_11
-LABEL_GEN label_10
-PREPARE is_prime
-PUSH_PARAM input35 0 is_prime
-CALL is_prime
-FIN_CALL is_prime
-STORE_RET @T_12
-SGE @T_12 1 @T_13
-BEQZ @T_13 label_12
-PRINT_INT input35
-PRINT_STRING str_16
-GOTO label_13
-LABEL_GEN label_12
-PRINT_INT input35
-PRINT_STRING str_17
-LABEL_GEN label_13
-LABEL_GEN label_11
-SUB groups 1 @T_14
-ASSIGN groups @T_14
-SNE groups 0 @T_15
-BNEZ @T_15 label_7
-LABEL_GEN label_8
-PRINT_STRING str_18
-PRINT_INT while_times
-PRINT_STRING str_19
+PRINT_STRING str_0
+ASSIGN num140 0
+LABEL_GEN label_47
+SLT num140 9 @T_52
+BEQZ @T_52 label_49
+LABEL_GEN label_48
+ASSIGN err 0
+GETINT @T_53
+ASSIGN a_row @T_53
+GETINT @T_54
+ASSIGN a_col @T_54
+ASSIGN i139 0
+LABEL_GEN label_50
+SLT i139 a_row @T_55
+BEQZ @T_55 label_52
+LABEL_GEN label_51
+ASSIGN j139 0
+LABEL_GEN label_53
+SLT j139 a_col @T_56
+BEQZ @T_56 label_55
+LABEL_GEN label_54
+GETINT @T_57
+STORE_ARRAY_2D a i139 j139 @T_57
+ADD j139 1 @T_58
+ASSIGN j139 @T_58
+SLT j139 a_col @T_59
+BNEZ @T_59 label_54
+LABEL_GEN label_55
+ADD i139 1 @T_60
+ASSIGN i139 @T_60
+SLT i139 a_row @T_61
+BNEZ @T_61 label_51
+LABEL_GEN label_52
+GETINT @T_62
+ASSIGN b_row @T_62
+GETINT @T_63
+ASSIGN b_col @T_63
+ASSIGN i139 0
+LABEL_GEN label_56
+SLT i139 b_row @T_64
+BEQZ @T_64 label_58
+LABEL_GEN label_57
+ASSIGN j139 0
+LABEL_GEN label_59
+SLT j139 b_col @T_65
+BEQZ @T_65 label_61
+LABEL_GEN label_60
+GETINT @T_66
+STORE_ARRAY_2D b i139 j139 @T_66
+ADD j139 1 @T_67
+ASSIGN j139 @T_67
+SLT j139 b_col @T_68
+BNEZ @T_68 label_60
+LABEL_GEN label_61
+ADD i139 1 @T_69
+ASSIGN i139 @T_69
+SLT i139 b_row @T_70
+BNEZ @T_70 label_57
+LABEL_GEN label_58
+PRINT_INT num140
+PRINT_STRING str_1
+GETINT @T_71
+ASSIGN kind166 @T_71
+PREPARE meet_conditions
+PUSH_PARAM kind166 0 meet_conditions
+CALL meet_conditions
+FIN_CALL meet_conditions
+SNE err 1 @T_72
+BEQZ @T_72 label_62
+LABEL_GEN label_62
+ADD num140 1 @T_73
+ASSIGN num140 @T_73
+SLT num140 9 @T_74
+BNEZ @T_74 label_48
+LABEL_GEN label_49
 EXIT
 ########################################FUNC END############################################

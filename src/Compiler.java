@@ -18,8 +18,8 @@ public class Compiler {
     // 影响sregs
 
 
-    private static boolean debug = true;
-//    private static boolean debug = false;
+//    private static boolean debug = true;
+    private static boolean debug = false;
     //debug开关
 
     public static void main(java.lang.String[] args) {

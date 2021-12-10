@@ -37,10 +37,11 @@ public class BasicBlock {
     private ArrayList<String> sRegs = new ArrayList<>();
     private ArrayList<String> tRegs = new ArrayList<>();
     private HashMap<String, String> varToReg = new HashMap<>();
+    private FuncBlock fatherBlock;
 
     public void addMideCodeEntry(MidCodeEntry midCodeEntry) {
         midCodeList.add(midCodeEntry);
-        midCodeEntry.setFatherBlock(this);
+        midCodeEntry.setBasicBlock(this);
     }
 
     public void link(BasicBlock basicBlock) {
@@ -66,6 +67,14 @@ public class BasicBlock {
 
     public ArrayList<MidCodeEntry> getMidCodeList() {
         return midCodeList;
+    }
+
+    public FuncBlock getFatherBlock() {
+        return fatherBlock;
+    }
+
+    public void setFatherBlock(FuncBlock fatherBlock) {
+        this.fatherBlock = fatherBlock;
     }
 
     public void genGenKillSet() {
@@ -580,6 +589,10 @@ public class BasicBlock {
 
     public boolean crossBasicBlock(String name) {
         return useDefOutSet.contains(name);
+    }
+
+    public void genSubConf(ConflictGraph conflictGraph) {
+        conflictGraph.addLiveVars(useDefOutSet);
     }
 
     public boolean r1IsLocalVar(MidCodeEntry midCodeEntry) {

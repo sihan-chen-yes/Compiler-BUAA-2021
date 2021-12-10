@@ -4,13 +4,15 @@ import Enum.OpType;
 import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 import MidCodeGeneration.Str;
-import Optimizer.Optimizer;
+import Optimizer.*;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class TargetCodeGener {
     private FileWriter writer;
@@ -66,6 +68,16 @@ public class TargetCodeGener {
                 MidCodeEntry midCodeEntry = (MidCodeEntry) iterator.next();
                 if (midCodeEntry.getOpType() == OpType.FUNC_DECLARE)  {
                     writer.write(funcStart);
+                    if (Optimizer.isOp()) {
+                        HashMap<String, String> varToReg = midCodeEntry.getVarToReg();
+                        Iterator<Map.Entry<String, String>> iterator1 = varToReg.entrySet().iterator();
+                        while (iterator1.hasNext()) {
+                            Map.Entry<String,String> entry = iterator1.next();
+                            String var = entry.getKey();
+                            String reg = entry.getValue();
+                            writer.write(String.format("####var:%s reg:%s\n",var,reg));
+                        }
+                    }
                 }
                 writer.write(midCodeEntry.toTargetCode() + "\n");
                 if (midCodeEntry.getOpType() == OpType.EXIT

@@ -1,0 +1,232 @@
+########################################GLOBAL START########################################
+GLOBAL_DECLARE pi
+GLOBAL_DECLARE const2
+GLOBAL_DECLARE constconst
+GLOBAL_DECLARE a33
+GLOBAL_DECLARE const1
+GLOBAL_DECLARE zero
+GLOBAL_DECLARE a2
+GLOBAL_DECLARE a1
+GLOBAL_DECLARE m
+GLOBAL_DECLARE n
+GLOBAL_DECLARE p
+GLOBAL_DECLARE q
+GLOBAL_DECLARE i
+########################################GLOBAL END##########################################
+########################################ASCIIZ START########################################
+str_0:fffj 
+str_1:\n
+str_2:fffsum 
+str_3:\n
+str_4:size 
+str_5:\n
+str_6:av 
+str_7:\n
+str_8:19373330\n
+str_9:D_const 
+str_10:\n
+########################################ASCIIZ END##########################################
+########################################FUNC START##########################################
+FUNC_DECLARE getSqu
+MULT x12 x12 @T_0
+RET_VALUE @T_0
+########################################FUNC END############################################
+########################################FUNC START##########################################
+FUNC_DECLARE getSquSum
+ASSIGN j17 0
+ASSIGN k17 0
+ASSIGN sum18 0
+LABEL_GEN label_0
+SLT j17 size16 @T_1
+BEQZ @T_1 label_2
+LABEL_GEN label_1
+LABEL_GEN label_3
+SLT k17 3 @T_2
+BEQZ @T_2 label_5
+LABEL_GEN label_4
+PREPARE getSqu
+LOAD_ARRAY_2D a16 j17 k17 @T_3
+PUSH_PARAM @T_3 0 getSqu
+CALL getSqu
+FIN_CALL getSqu
+STORE_RET @T_4
+ADD sum18 @T_4 @T_5
+ASSIGN sum18 @T_5
+ADD k17 1 @T_6
+ASSIGN k17 @T_6
+SLT k17 3 @T_7
+BNEZ @T_7 label_4
+LABEL_GEN label_5
+ADD j17 1 @T_8
+ASSIGN j17 @T_8
+SLT j17 size16 @T_9
+BNEZ @T_9 label_1
+LABEL_GEN label_2
+RET_VALUE sum18
+########################################FUNC END############################################
+########################################FUNC START##########################################
+FUNC_DECLARE sleep
+ADD s29 101 @T_10
+RET_VALUE @T_10
+########################################FUNC END############################################
+########################################FUNC START##########################################
+FUNC_DECLARE sort
+ASSIGN i35 l34
+ASSIGN j36 r34
+ADD i35 j36 @T_11
+DIV @T_11 2 @T_12
+ASSIGN medium37 @T_12
+LABEL_GEN label_6
+SLT i35 j36 @T_13
+BEQZ @T_13 label_8
+LABEL_GEN label_7
+LABEL_GEN label_9
+LOAD_ARRAY_1D a34 i35 @T_14
+LOAD_ARRAY_1D a34 medium37 @T_15
+SLT @T_14 @T_15 @T_16
+BEQZ @T_16 label_11
+LABEL_GEN label_10
+ADD i35 1 @T_17
+ASSIGN i35 @T_17
+LOAD_ARRAY_1D a34 i35 @T_18
+LOAD_ARRAY_1D a34 medium37 @T_19
+SLT @T_18 @T_19 @T_20
+BNEZ @T_20 label_10
+LABEL_GEN label_11
+LABEL_GEN label_12
+LOAD_ARRAY_1D a34 j36 @T_21
+LOAD_ARRAY_1D a34 medium37 @T_22
+SGT @T_21 @T_22 @T_23
+BEQZ @T_23 label_14
+LABEL_GEN label_13
+SUB j36 1 @T_24
+ASSIGN j36 @T_24
+LOAD_ARRAY_1D a34 j36 @T_25
+LOAD_ARRAY_1D a34 medium37 @T_26
+SGT @T_25 @T_26 @T_27
+BNEZ @T_27 label_13
+LABEL_GEN label_14
+SLE i35 j36 @T_28
+BEQZ @T_28 label_15
+LOAD_ARRAY_1D a34 i35 @T_29
+ASSIGN temp38 @T_29
+LOAD_ARRAY_1D a34 j36 @T_30
+STORE_ARRAY_1D a34 i35 @T_30
+STORE_ARRAY_1D a34 j36 temp38
+ADD i35 1 @T_31
+ASSIGN i35 @T_31
+SUB j36 1 @T_32
+ASSIGN j36 @T_32
+LABEL_GEN label_15
+SLT i35 j36 @T_33
+BNEZ @T_33 label_7
+LABEL_GEN label_8
+SLT l34 j36 @T_34
+BEQZ @T_34 label_16
+PREPARE sort
+LOAD_ADDRESS a34 @T_35
+PUSH_PARAM @T_35 0 sort
+PUSH_PARAM l34 1 sort
+PUSH_PARAM j36 2 sort
+CALL sort
+FIN_CALL sort
+LABEL_GEN label_16
+SGT r34 i35 @T_36
+BEQZ @T_36 label_17
+PREPARE sort
+LOAD_ADDRESS a34 @T_37
+PUSH_PARAM @T_37 0 sort
+PUSH_PARAM i35 1 sort
+PUSH_PARAM r34 2 sort
+CALL sort
+FIN_CALL sort
+LABEL_GEN label_17
+RET_VOID
+########################################FUNC END############################################
+########################################FUNC START##########################################
+FUNC_DECLARE getD
+ASSIGN j58 0
+ASSIGN sum60 0
+LABEL_GEN label_18
+SLT j58 size57 @T_38
+BEQZ @T_38 label_20
+LABEL_GEN label_19
+PRINT_STRING str_0
+PRINT_INT j58
+PRINT_STRING str_1
+PRINT_STRING str_2
+PRINT_INT sum60
+PRINT_STRING str_3
+LOAD_ARRAY_1D a57 j58 @T_39
+ADD sum60 @T_39 @T_40
+ASSIGN sum60 @T_40
+ADD j58 1 @T_41
+ASSIGN j58 @T_41
+SLT j58 size57 @T_42
+BNEZ @T_42 label_19
+LABEL_GEN label_20
+DIV sum60 size57 @T_43
+ASSIGN average60 @T_43
+PRINT_STRING str_4
+PRINT_INT size57
+PRINT_STRING str_5
+ASSIGN j58 0
+ASSIGN sum60 0
+PRINT_STRING str_6
+PRINT_INT average60
+PRINT_STRING str_7
+DIV sum60 size57 @T_44
+RET_VALUE @T_44
+########################################FUNC END############################################
+########################################FUNC START##########################################
+FUNC_DECLARE main
+ASSIGN m 2
+ASSIGN n 3
+ASSIGN p 4
+ASSIGN q 5
+STORE_ARRAY_1D a1 0 1
+STORE_ARRAY_1D a1 1 n
+LOAD_ARRAY_1D a1 0 @T_45
+STORE_ARRAY_1D a1 2 @T_45
+STORE_ARRAY_1D a1 3 p
+STORE_ARRAY_1D a1 4 q
+PRINT_STRING str_8
+LABEL_GEN label_21
+SLT i m @T_46
+BEQZ @T_46 label_23
+LABEL_GEN label_22
+ADD n 1 @T_47
+ASSIGN n @T_47
+ADD i 1 @T_48
+ASSIGN i @T_48
+SGT m n @T_49
+BEQZ @T_49 label_24
+GOTO label_21
+LABEL_GEN label_24
+PREPARE getSqu
+ADD p 1 @T_50
+PUSH_PARAM @T_50 0 getSqu
+CALL getSqu
+FIN_CALL getSqu
+STORE_RET @T_51
+ASSIGN p @T_51
+SLT m q @T_52
+BEQZ @T_52 label_25
+GOTO label_23
+LABEL_GEN label_25
+SLT i m @T_53
+BNEZ @T_53 label_22
+LABEL_GEN label_23
+PREPARE getD
+LOAD_ADDRESS const1 @T_54
+PUSH_PARAM @T_54 0 getD
+PUSH_PARAM 5 1 getD
+CALL getD
+FIN_CALL getD
+STORE_RET @T_55
+ASSIGN D_const104 @T_55
+PRINT_STRING str_9
+PRINT_INT D_const104
+PRINT_STRING str_10
+EXIT
+########################################FUNC END############################################
