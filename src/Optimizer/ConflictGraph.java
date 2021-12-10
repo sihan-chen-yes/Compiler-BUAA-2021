@@ -23,8 +23,8 @@ public class ConflictGraph {
             LiveVar liveVar = search(new LiveVar(var));
             tmp.add(liveVar);
         }
-        for (int i = 0;i < tmp.size();i++) {
-            for (int j = 1;j < tmp.size();j++) {
+        for (int i = 0;i < tmp.size() - 1;i++) {
+            for (int j = i + 1;j < tmp.size();j++) {
                 tmp.get(i).addConflictVar(tmp.get(j));
             }
         }

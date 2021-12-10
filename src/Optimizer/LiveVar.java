@@ -32,7 +32,13 @@ public class LiveVar {
     }
 
     public int getEdgeNum() {
-        return conflictVar.size();
+        int num = 0;
+        for (LiveVar liveVar:conflictVar) {
+            if (!(liveVar.isDeleted() || liveVar.isRemoved())) {
+                num++;
+            }
+        }
+        return num;
     }
 
     public void setReg(boolean hasReg) {
@@ -84,6 +90,7 @@ public class LiveVar {
         HashSet<String> regs = new HashSet<>();
         for (LiveVar liveVar:conflictVar) {
             if (!liveVar.deleted && !liveVar.removed) {
+                assert liveVar.hasReg;
                 regs.add(liveVar.getReg());
             }
         }
