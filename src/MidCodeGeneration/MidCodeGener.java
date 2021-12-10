@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+
 public class MidCodeGener {
     private FileWriter writer;
     private FileWriter opWriter;
@@ -61,10 +62,12 @@ public class MidCodeGener {
     }
 
     public void saveMidCode() {
+        Optimizer.setOp(false);
         save(writer,midCodeList);
     }
 
     public void saveOpMidCode() {
+        Optimizer.setOp(true);
         save(opWriter,opMidCodeList);
     }
 
@@ -89,12 +92,15 @@ public class MidCodeGener {
                 MidCodeEntry midCodeEntry = (MidCodeEntry) iterator.next();
                 if (midCodeEntry.getOpType() == OpType.FUNC_DECLARE) {
                     writer.write(funcStart);
+//                    System.out.println(funcStart);
                 }
                 writer.write(midCodeEntry.toString() + "\n");
+//                System.out.println(midCodeEntry.toString() + "\n");
                 if (midCodeEntry.getOpType() == OpType.EXIT
                         || midCodeEntry.getOpType() == OpType.RET_VALUE
                         || midCodeEntry.getOpType() == OpType.RET_VOID) {
                     writer.write(funcEnd);
+//                    System.out.println(funcEnd);
                 }
             }
             writer.flush();

@@ -1,7 +1,8 @@
 package Optimizer;
 
-import Enum.OpType;
+import Enum.*;
 import MidCodeGeneration.MidCodeEntry;
+import MidCodeGeneration.MidCodeGener;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -168,11 +169,13 @@ public class BasicBlock {
     }
 
     public boolean needInUseSet(String name) {
-        return name != null && isVar(name) && !defSet.contains(name);
+        return name != null && MidCodeGener.getSymbolTable().search_local(func,name) != null
+                && isLocalVar(name) && !defSet.contains(name);
     }
 
     public boolean needInDefSet(String name) {
-        return name != null && isVar(name) && !useSet.contains(name);
+        return name != null && MidCodeGener.getSymbolTable().search_local(func,name) != null
+                &&  isLocalVar(name) && !useSet.contains(name);
     }
 
     public boolean isNumber(String name) {
@@ -197,14 +200,23 @@ public class BasicBlock {
         return false;
     }
 
-    public boolean isVar(String name) {
-        return name != null && !isNumber(name) && !isTemp(name);
+    public boolean isLocalVar(String name) {
+        //Todo 参数不参与分配 数组不参与分配
+        return name != null && MidCodeGener.getSymbolTable().search_local(func,name) != null
+                && MidCodeGener.getSymbolTable().search_local(func,name).getDataType() == DataType.INT
+                && MidCodeGener.getSymbolTable().search_local(func,name).getDeclType() != DeclType.PARAM
+                && !isNumber(name) && !isTemp(name);
     }
 
-//    public ArrayList<MidCodeEntry> getOptimizedMidCode() {
-//        return optimizedMidCode;
-//    }
-//
+    public ArrayList<MidCodeEntry> getOptimizedMidCode() {
+        ArrayList<MidCodeEntry> midCodeEntries = new ArrayList<>();
+        for (String label:labels) {
+            midCodeEntries.add(new MidCodeEntry(OpType.LABEL_GEN,null,null,null,label));
+        }
+        midCodeEntries.addAll(midCodeList);
+        return midCodeEntries;
+    }
+
 //    public void addOptimizedMidCode(MidCodeEntry midCodeEntry) {
 //        optimizedMidCode.add(midCodeEntry);
 //    }
@@ -512,6 +524,7 @@ public class BasicBlock {
         //传进来的基本块是前驱
         setSRegs(basicBlock.getSRegs());
         setVarToReg(basicBlock.getVarToReg());
+        //复制状态
         Iterator<Map.Entry<String, String>> iterator = varToReg.entrySet().iterator();
         HashSet<String> lastUseDefOutSet = basicBlock.getUseDefOutSet();
         while (iterator.hasNext()) {
@@ -544,39 +557,49 @@ public class BasicBlock {
     }
 
     public void allocSRegs() {
+        //只对跨越基本块的localvar分配reg
         for (MidCodeEntry midCodeEntry:midCodeList) {
-            if (sRegs.size() > 0 && !hasSReg(midCodeEntry.getR1()) && r1IsVar(midCodeEntry)) {
+            if (sRegs.size() > 0 && crossBasicBlock(midCodeEntry.getR1())
+                    &&!hasSReg(midCodeEntry.getR1()) && r1IsLocalVar(midCodeEntry)) {
                 allocSReg(midCodeEntry.getR1());
             }
-            if (sRegs.size() > 0 && !hasSReg(midCodeEntry.getR2()) && r2IsVar(midCodeEntry)) {
+            if (sRegs.size() > 0 && crossBasicBlock(midCodeEntry.getR2())
+                    && !hasSReg(midCodeEntry.getR2()) && r2IsLocalVar(midCodeEntry)) {
                 allocSReg(midCodeEntry.getR2());
             }
-            if (sRegs.size() > 0 && !hasSReg(midCodeEntry.getR3()) && r3IsVar(midCodeEntry)) {
+            if (sRegs.size() > 0 && crossBasicBlock(midCodeEntry.getR3())
+                    && !hasSReg(midCodeEntry.getR3()) && r3IsLocalVar(midCodeEntry)) {
                 allocSReg(midCodeEntry.getR3());
             }
-            if (sRegs.size() > 0 && !hasSReg(midCodeEntry.getDst()) && dstIsVar(midCodeEntry)) {
+            if (sRegs.size() > 0 && crossBasicBlock(midCodeEntry.getDst()) &&
+                    !hasSReg(midCodeEntry.getDst()) && dstIsLocalVar(midCodeEntry)) {
                 allocSReg(midCodeEntry.getDst());
             }
         }
     }
 
-    public boolean r1IsVar(MidCodeEntry midCodeEntry) {
+    public boolean crossBasicBlock(String name) {
+        return useDefOutSet.contains(name);
+    }
+
+    public boolean r1IsLocalVar(MidCodeEntry midCodeEntry) {
         OpType opType = midCodeEntry.getOpType();
-        if (isVar(midCodeEntry.getR1()) &&
+        if (isLocalVar(midCodeEntry.getR1()) &&
                 (opType == OpType.PUSH_PARAM || opType == OpType.ASSIGN
                         || opType == OpType.ADD || opType == OpType.SUB || opType == OpType.MULT
                         || opType == OpType.DIV || opType == OpType.MOD || opType == OpType.NEG
                         || opType == OpType.SLT || opType == OpType.SLE || opType == OpType.SGT
                         || opType == OpType.SGE || opType == OpType.SEQ || opType == OpType.SNE
                         || opType == OpType.NOT || opType == OpType.BEQZ || opType == OpType.BNEZ)) {
+            //只给局部变量分配sreg
             return true;
         }
         return false;
     }
 
-    public boolean r2IsVar(MidCodeEntry midCodeEntry) {
+    public boolean r2IsLocalVar(MidCodeEntry midCodeEntry) {
         OpType opType = midCodeEntry.getOpType();
-        if (isVar(midCodeEntry.getR2()) &&
+        if (isLocalVar(midCodeEntry.getR2()) &&
                 (opType == OpType.LOAD_ARRAY_1D || opType == OpType.STORE_ARRAY_1D || opType == OpType.LOAD_ARRAY_2D
                 || opType == OpType.STORE_ARRAY_2D || opType == OpType.LOAD_ARRDESS
                 || opType == OpType.ADD || opType == OpType.SUB || opType == OpType.MULT
@@ -588,19 +611,20 @@ public class BasicBlock {
         return false;
     }
 
-    public boolean r3IsVar(MidCodeEntry midCodeEntry) {
+    public boolean r3IsLocalVar(MidCodeEntry midCodeEntry) {
         OpType opType = midCodeEntry.getOpType();
-        if (isVar(midCodeEntry.getR3()) &&
+        if (isLocalVar(midCodeEntry.getR3()) &&
                 (opType == OpType.LOAD_ARRAY_2D || opType == OpType.STORE_ARRAY_2D )) {
             return true;
         }
         return false;
     }
 
-    public boolean dstIsVar(MidCodeEntry midCodeEntry) {
+    public boolean dstIsLocalVar(MidCodeEntry midCodeEntry) {
         OpType opType = midCodeEntry.getOpType();
-        if (isVar(midCodeEntry.getDst()) &&
-                (opType == OpType.ASSIGN || opType == OpType.PRINT_INT || opType == OpType.RET_VALUE)) {
+        if (isLocalVar(midCodeEntry.getDst()) &&
+                (opType == OpType.ASSIGN || opType == OpType.PRINT_INT || opType == OpType.RET_VALUE
+                        || opType == OpType.STORE_ARRAY_1D || opType == OpType.STORE_ARRAY_2D)) {
             return true;
         }
         return false;

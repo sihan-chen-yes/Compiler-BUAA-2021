@@ -43,18 +43,14 @@ public class FuncBlock {
         return func;
     }
 
-//    public ArrayList<MidCodeEntry> getOptimizedMidCode() {
-//        ArrayList<MidCodeEntry> optimizedMidCode = new ArrayList<>();
-//        optimizedMidCode.add(headBlock.getMidCodeEntry());
-//        for(BasicBlock basicBlock:basicBlocks) {
-//            ArrayList<String> labels = new ArrayList<>();
-//            for (String label:labels) {
-//                optimizedMidCode.add(new MidCodeEntry(OpType.LABEL_GEN,null,null,null,label));
-//            }
-//            optimizedMidCode.addAll(basicBlock.getOptimizedMidCode());
-//        }
-//        return optimizedMidCode;
-//    }
+    public ArrayList<MidCodeEntry> getOptimizedMidCode() {
+        ArrayList<MidCodeEntry> optimizedMidCode = new ArrayList<>();
+        optimizedMidCode.add(headBlock.getMidCodeEntry());
+        for(BasicBlock basicBlock:basicBlocks) {
+            optimizedMidCode.addAll(basicBlock.getOptimizedMidCode());
+        }
+        return optimizedMidCode;
+    }
 
     public void genReachDef() {
         for (BasicBlock basicBlock:basicBlocks) {
@@ -94,7 +90,7 @@ public class FuncBlock {
             BasicBlock basicBlock = basicBlocks.get(i);
             if (i != 0) {
                 basicBlock.setAllocation(basicBlock.getPreBlocks().get(0));
-                //Todo 选那块
+                //随便选一个前驱
             }
             basicBlock.allocSRegs();
             //不是第一块

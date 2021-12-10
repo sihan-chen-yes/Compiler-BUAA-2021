@@ -11,21 +11,22 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class Compiler {
-//    private static boolean op = true;
-    private static boolean op = false;
+    private static boolean op = true;
+//    private static boolean op = false;
     //优化开关
     // 影响while
+    // 影响sregs
 
 
-//    private static boolean debug = true;
-    private static boolean debug = false;
+    private static boolean debug = true;
+//    private static boolean debug = false;
     //debug开关
 
     public static void main(java.lang.String[] args) {
         Optimizer.setDebug(debug);
         //本地debug模式
         Optimizer.setOp(op);
-        //优化开关
+        //优化开关~
 
         File readFile = new File("testfile.txt");
         File outputFile = new File("output.txt");
@@ -58,27 +59,31 @@ public class Compiler {
             if (!op) {
                 //未开启优化
                 midCodeGener.saveMidCode();
-                System.out.println("genMidcode OK\n");
+//                System.out.println("genMidcode OK\n");
                 TargetCodeGener targetCodeGener = new TargetCodeGener(targetCodeFile,opTargetCodeFile);
                 targetCodeGener.saveTargetCode();
-                System.out.println("genTargetCode OK\n");
+//                System.out.println("genTargetCode OK\n");
             } else {
-                midCodeGener.saveMidCode();
-                System.out.println("genMidcode OK\n");
+                if (debug) {
+                    midCodeGener.saveMidCode();
+                }
+//                System.out.println("genMidcode OK\n");
                 Optimizer optimizer = new Optimizer();
                 optimizer.optimize();
                 midCodeGener.saveOpMidCode();
-                System.out.println("opMidcode OK\n");
+//                System.out.println("opMidcode OK\n");
                 TargetCodeGener targetCodeGener = new TargetCodeGener(targetCodeFile,opTargetCodeFile);
-                targetCodeGener.saveTargetCode();
-                System.out.println("genTargetCode OK\n");
+                if (debug) {
+                    targetCodeGener.saveTargetCode();
+                }
+//                System.out.println("genTargetCode OK\n");
                 targetCodeGener.saveOpTarCode();
-                System.out.println("opTargetCode OK\n");
+//                System.out.println("opTargetCode OK\n");
             }
         }
         if (debug) {
             MidCodeGener.getSymbolTable().saveSymbleTable();
-            System.out.println("genSymbolTable OK\n");
+//            System.out.println("genSymbolTable OK\n");
             //打印符号表
         }
     }

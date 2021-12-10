@@ -1,10 +1,11 @@
 package TargetCodeGeneration;
 
+import Enum.OpType;
 import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 import MidCodeGeneration.Str;
 import Optimizer.Optimizer;
-import Enum.*;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -46,10 +47,12 @@ public class TargetCodeGener {
     }
 
     public void saveTargetCode() {
+        Optimizer.setOp(false);
         save(writer,midCodeList);
     }
 
     public void saveOpTarCode() {
+        Optimizer.setOp(true);
         save(opWriter,opMideCodeList);
     }
 
@@ -82,9 +85,7 @@ public class TargetCodeGener {
         try {
             writer.write(data);
             writer.write(globalStart);
-            Iterator iterator = global.iterator();
-            while (iterator.hasNext()) {
-                MidCodeEntry midCodeEntry = (MidCodeEntry) iterator.next();
+            for (MidCodeEntry midCodeEntry:global) {
                 writer.write(midCodeEntry.toTargetCode() + "\n");
             }
             writer.write(globalEnd);

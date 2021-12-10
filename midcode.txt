@@ -1,37 +1,127 @@
 ########################################GLOBAL START########################################
+GLOBAL_DECLARE zero
+GLOBAL_DECLARE one
+GLOBAL_DECLARE minus_one
+GLOBAL_DECLARE two
+GLOBAL_DECLARE times
+GLOBAL_DECLARE while_times
+GLOBAL_DECLARE groups
 ########################################GLOBAL END##########################################
 ########################################ASCIIZ START########################################
+str_0:in 
+str_1:\n
+str_2:item 
+str_3:\n
+str_4:one
+str_5:\n
+str_6:re
+str_7:\n
+str_8:re
+str_9:\n
+str_10:re
+str_11:\n
+str_12:16061069\n
+str_13:input an integer,judge if it is prime number,10 groups in total\n
+str_14:input > 0 is needed\n
+str_15:1 is not concerned\n
+str_16: is a prime number\n
+str_17: is not a prime number\n
+str_18:while times is 
+str_19: in total\n
 ########################################ASCIIZ END##########################################
 ########################################FUNC START##########################################
-FUNC_DECLARE t
-LOAD_ARRAY_1D a1 0 @T_0
-RET_VALUE @T_0
+FUNC_DECLARE is_prime
+ASSIGN result8 0
+ASSIGN item9 2
+SEQ in7 2 @T_0
+BEQZ @T_0 label_0
+ASSIGN result8 1
+GOTO label_1
+LABEL_GEN label_0
+LABEL_GEN label_2
+SLT item9 in7 @T_1
+BEQZ @T_1 label_4
+LABEL_GEN label_3
+MOD in7 item9 @T_2
+SEQ @T_2 0 @T_3
+BEQZ @T_3 label_5
+PRINT_STRING str_0
+PRINT_INT in7
+PRINT_STRING str_1
+PRINT_STRING str_2
+PRINT_INT item9
+PRINT_STRING str_3
+ASSIGN result8 0
+GOTO label_4
+LABEL_GEN label_5
+PRINT_STRING str_4
+PRINT_INT 1
+PRINT_STRING str_5
+ASSIGN result8 1
+PRINT_STRING str_6
+PRINT_INT result8
+PRINT_STRING str_7
+ADD item9 1 @T_4
+ASSIGN item9 @T_4
+SLT item9 in7 @T_5
+BNEZ @T_5 label_3
+LABEL_GEN label_4
+PRINT_STRING str_8
+PRINT_INT result8
+PRINT_STRING str_9
+LABEL_GEN label_1
+PRINT_STRING str_10
+PRINT_INT result8
+PRINT_STRING str_11
+RET_VALUE result8
 ########################################FUNC END############################################
 ########################################FUNC START##########################################
 FUNC_DECLARE main
-ASSIGN a5 -3
-ASSIGN b5 1
-STORE_ARRAY_1D z8 0 1
-STORE_ARRAY_1D z8 1 2
-PREPARE t
-LOAD_ADDRESS z8 @T_1
-PUSH_PARAM @T_1 0 t
-CALL t
-FIN_CALL t
-STORE_RET @T_2
-STORE_ARRAY_1D z8 0 a5
-LOAD_ARRAY_1D z8 0 @T_3
-ASSIGN a5 @T_3
-SGT a5 0 @T_4
-BEQZ @T_4 label_0
-ASSIGN b5 1
-GOTO label_1
-LABEL_GEN label_0
-ASSIGN a5 1
-LABEL_GEN label_1
-PRINT_INT b5
-EXIT
-########################################FUNC END############################################
-ASSIGN x20 1
+PRINT_STRING str_12
+PRINT_STRING str_13
+LABEL_GEN label_6
+SNE groups 0 @T_6
+BEQZ @T_6 label_8
+LABEL_GEN label_7
+GETINT @T_7
+ASSIGN input35 @T_7
+SLE input35 0 @T_8
+BEQZ @T_8 label_9
+PRINT_STRING str_14
+SUB groups 1 @T_9
+ASSIGN groups @T_9
+GOTO label_6
+LABEL_GEN label_9
+SEQ input35 1 @T_10
+BEQZ @T_10 label_10
+PRINT_STRING str_15
+SUB groups 1 @T_11
+ASSIGN groups @T_11
+GOTO label_6
+GOTO label_11
+LABEL_GEN label_10
+PREPARE is_prime
+PUSH_PARAM input35 0 is_prime
+CALL is_prime
+FIN_CALL is_prime
+STORE_RET @T_12
+SGE @T_12 1 @T_13
+BEQZ @T_13 label_12
+PRINT_INT input35
+PRINT_STRING str_16
+GOTO label_13
+LABEL_GEN label_12
+PRINT_INT input35
+PRINT_STRING str_17
+LABEL_GEN label_13
+LABEL_GEN label_11
+SUB groups 1 @T_14
+ASSIGN groups @T_14
+SNE groups 0 @T_15
+BNEZ @T_15 label_7
+LABEL_GEN label_8
+PRINT_STRING str_18
+PRINT_INT while_times
+PRINT_STRING str_19
 EXIT
 ########################################FUNC END############################################

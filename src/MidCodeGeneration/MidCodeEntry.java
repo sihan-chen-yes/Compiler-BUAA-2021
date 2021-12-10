@@ -123,6 +123,7 @@ public class MidCodeEntry {
     }
 
     public String toTargetCode() {
+        curCode = "";
         String start = String.format("#############") + toString() + String.format("#############\n");
         String end = "\n";
         curCode += start;
@@ -256,13 +257,14 @@ public class MidCodeEntry {
                 curCode += "\n";
                 curCode += String.format("sw $t0,%d($sp)",arg_offset);
             } else {
-                //是局部变量
+                //是变量
                 if (symbolTable.isLocal(func,r1)) {
                     int offset = symbolTable.searchOffset_sp(func,r1);
                     //相对于当前sp的offset
                     if (fatherBlock.hasSReg(r1)) {
                         curCode += String.format("sw %s,%d($sp)",fatherBlock.querySReg(r1),arg_offset);
                     } else {
+                        //Todo t change
                         curCode += String.format("lw $t0,%d($sp)",offset);
                         curCode += "\n";
                         curCode += String.format("sw $t0,%d($sp)",arg_offset);
@@ -270,6 +272,7 @@ public class MidCodeEntry {
                 } else {
                     assert symbolTable.isGlobal(r1);
                     int offset = symbolTable.searchOffset_gp(r1);
+                    //Todo t change
                     curCode += String.format("lw $t0,%d($gp)",offset);
                     curCode += "\n";
                     curCode += String.format("sw $t0,%d($sp)",arg_offset);
@@ -293,11 +296,12 @@ public class MidCodeEntry {
     }
 
     public String load(String name) {
-        //将四元式中的Ident或者常数load到t0 或者 其他s中
+        //将四元式中的Ident或者常数load到t0 或者 s中
         //Todo 分配其他reg
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
         String reg;
+        //放入了哪个reg
         if (!Optimizer.isOp()) {
             reg = "$t0";
             if (symbolTable.isNumber(func,name)) {
@@ -314,6 +318,7 @@ public class MidCodeEntry {
             }
         } else {
             reg = "$t0";
+            //Todo t change
             if (symbolTable.isNumber(func,name)) {
                 curCode += String.format("li $t0,%d",Integer.parseInt(name));
             } else {
@@ -423,7 +428,7 @@ public class MidCodeEntry {
     }
 
     public void calOffsetAddr(String i,int length2D,String reg0) {
-        //t0 = t0 + t1 * t2 *4
+        //t0 = t0 + t1 * t2 * 4
         if (!Optimizer.isOp()) {
             loadSec(i);
             //$t1
@@ -568,6 +573,7 @@ public class MidCodeEntry {
                     curCode += "\n";
                     curCode += String.format("lw $t0,0(%s)",reg);
                     //Todo t change
+                    reg = "$t0";
                 } else {
                     int offset_sp = symbolTable.searchOffset_sp(func,name);
                     curCode += String.format("addiu $t0,$sp,%d",offset_sp);
@@ -725,6 +731,7 @@ public class MidCodeEntry {
             if (symbolTable.isLocal(func,name)) {
                 length2D = symbolTable.search_local(func,name).getLength2D();
                 if (symbolTable.search_local(func,name).getDeclType() == DeclType.PARAM) {
+                    //Todo change t
                     if (regVal.equals("$t0")) {
                         curCode += String.format("move $t3,$t0");
                         regVal = "$t3";
@@ -874,7 +881,6 @@ public class MidCodeEntry {
             } else {
                 //r2 不为0
                 if (symbolTable.isLocal(func,r1)) {
-                    //Todo 直接load到T中
                     if (symbolTable.search_local(func,r1).getDeclType() == DeclType.PARAM) {
                         load(r1);
                         //参数中的地址 放在t0
@@ -914,6 +920,7 @@ public class MidCodeEntry {
                         regVal = load(r1);
                         curCode += "\n";
                         store(dst,regVal);
+                        //Todo t change
                     } else {
                         int offset_sp = symbolTable.searchOffset_sp(func,r1);
                         curCode += String.format("addiu $t0,$sp,%d",offset_sp);
@@ -932,8 +939,9 @@ public class MidCodeEntry {
                     store(dst,regVal);
                 }
             } else {
+                //r2 存在
                 if (symbolTable.isLocal(func,r1)) {
-                    //Todo
+                    //Todo 直接load到T中
                     if (symbolTable.search_local(func,r1).getDeclType() == DeclType.PARAM) {
                         regVal = load(r1);
                         //参数中的地址 放在t0
@@ -988,9 +996,14 @@ public class MidCodeEntry {
                 regVal = "$t0";
             } else {
                 regVal = load(dst);
+                //Todo t change 现在默认在内存
             }
             curCode += "\n";
-            store(r1,regVal);
+            if (fatherBlock.hasSReg(r1)) {
+                curCode += String.format("move %s,%s",fatherBlock.querySReg(r1),regVal);
+            } else {
+                store(r1,regVal);
+            }
         }
     }
 
@@ -1003,7 +1016,11 @@ public class MidCodeEntry {
             curCode += "\n";
             curCode += String.format("syscall");
         } else {
-
+            curCode += String.format("la $a0,%s",dst);
+            curCode += "\n";
+            curCode += String.format("li $v0,4");
+            curCode += "\n";
+            curCode += String.format("syscall");
         }
     }
 
@@ -1062,6 +1079,7 @@ public class MidCodeEntry {
             curCode += String.format("move $v0,%s",regVal);
             curCode += "\n";
             curCode += String.format("jr $ra");
+            //Todo 不要放在v0中
         }
     }
 
@@ -1086,6 +1104,7 @@ public class MidCodeEntry {
             curCode += String.format("syscall");
             curCode += "\n";
             curCode += String.format("move $t0,$v0");
+            //Todo t change
             regVal = "$t0";
             curCode += "\n";
             store(dst,regVal);
@@ -1116,8 +1135,9 @@ public class MidCodeEntry {
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
         while (iterator.hasNext()) {
-            String var = iterator.next().getKey();
-            String reg = iterator.next().getValue();
+            Map.Entry<String, String> entry = iterator.next();
+            String var = entry.getKey();
+            String reg = entry.getValue();
             int offset_sp = symbolTable.searchOffset_sp(func,var);
             curCode += String.format("sw %s,%d($sp)",reg,offset_sp);
             if (iterator.hasNext()) {
@@ -1154,8 +1174,9 @@ public class MidCodeEntry {
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
         while (iterator.hasNext()) {
-            String var = iterator.next().getKey();
-            String reg = iterator.next().getValue();
+            Map.Entry<String, String> entry = iterator.next();
+            String var = entry.getKey();
+            String reg = entry.getValue();
             int offset_sp = symbolTable.searchOffset_sp(func,var);
             curCode += String.format("lw %s,%d($sp)",reg,offset_sp);
             if (iterator.hasNext()) {
@@ -1302,6 +1323,7 @@ public class MidCodeEntry {
             }
             curCode += "\n";
             store(dst,null);
+            //Todo t change
         } else {
             //Todo t优化
             String reg0,reg1;
@@ -1319,43 +1341,46 @@ public class MidCodeEntry {
                 reg1 = loadSec(r2);
             }
             curCode += "\n";
+            //Todo t change
             if (opType == OpType.ADD) {
-                curCode += String.format("addu %s,%s,%s",reg0,reg0,reg1);
+                curCode += String.format("addu $t0,%s,%s",reg0,reg1);
             } else if (opType == OpType.SUB) {
-                curCode += String.format("subu %s,%s,%s",reg0,reg0,reg1);
+                curCode += String.format("subu $t0,%s,%s",reg0,reg1);
             } else if (opType == OpType.MULT) {
                 curCode += String.format("mult %s,%s",reg0,reg1);
                 curCode += "\n";
-                curCode += String.format("mflo %s",reg0);
+                curCode += String.format("mflo $t0");
             } else if (opType == OpType.DIV) {
                 curCode += String.format("div %s,%s",reg0,reg1);
                 curCode += "\n";
-                curCode += String.format("mflo %s",reg0);
+                curCode += String.format("mflo $t0");
             } else if (opType == OpType.MOD) {
                 curCode += String.format("div %s,%s",reg0,reg1);
                 curCode += "\n";
-                curCode += String.format("mfhi %s",reg0);
+                curCode += String.format("mfhi $t0");
             } else if (opType == OpType.SLT) {
-                curCode += String.format("slt %s,%s,%s",reg0,reg0,reg1);
+                curCode += String.format("slt $t0,%s,%s",reg0,reg1);
             } else if (opType == OpType.SLE) {
-                curCode += String.format("sgt %s,%s,%s",reg0,reg0,reg1);
+                curCode += String.format("sgt $t0,%s,%s",reg0,reg1);
                 curCode += "\n";
                 //取反
-                curCode += String.format("seq %s,%s,$0",reg0,reg0);
+                curCode += String.format("seq $t0,$t0,$0");
             } else if (opType == OpType.SGT) {
-                curCode += String.format("sgt %s,%s,%s",reg0,reg0,reg1);
+                curCode += String.format("sgt $t0,%s,%s",reg0,reg1);
             } else if (opType == OpType.SGE) {
-                curCode += String.format("slt %s,%s,%s",reg0,reg0,reg1);
+                curCode += String.format("slt $t0,%s,%s",reg0,reg1);
                 curCode += "\n";
                 //取反
-                curCode += String.format("seq %s,%s,$0",reg0,reg0);
+                curCode += String.format("seq $t0,$t0,$0");
             } else if (opType == OpType.SEQ) {
-                curCode += String.format("seq %s,%s,%s",reg0,reg0,reg1);
+                curCode += String.format("seq $t0,%s,%s",reg0,reg1);
             } else if (opType == OpType.SNE) {
-                curCode += String.format("sne %s,%s,%s",reg0,reg0,reg1);
+                curCode += String.format("sne $t0,%s,%s",reg0,reg1);
             }
             curCode += "\n";
             //直接给另一个T
+            //Todo t change
+            reg0 = "$t0";
             store(dst,reg0);
         }
     }
@@ -1386,12 +1411,14 @@ public class MidCodeEntry {
             }
             curCode += "\n";
             if (opType == OpType.NEG) {
-                curCode += String.format("neg %s,%s",reg0,reg0);
+                curCode += String.format("neg $t0,%s",reg0);
             } else if (opType == OpType.NOT) {
-                curCode += String.format("seq %s,%s,$0",reg0,reg0);
+                curCode += String.format("seq $t0,%s,$0",reg0);
             }
             curCode += "\n";
+            reg0 = "$t0";
             store(dst,reg0);
+            //Todo change t
         }
     }
 

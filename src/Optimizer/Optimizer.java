@@ -47,10 +47,10 @@ public class Optimizer {
     public void optimize() {
         genBlock();
         prune();
-        print();
+//        print();
         genDataFlow();
 //        genDAG();
-//        MidCodeGener.setMidCodeList(getOptimizedMidCode());
+        MidCodeGener.setMidCodeList(getOptimizedMidCode());
     }
 
     public void prune() {
@@ -80,6 +80,7 @@ public class Optimizer {
             MidCodeEntry midCodeEntry = midCodeList.get(i);
             if (midCodeEntry.getOpType() == OpType.LABEL_GEN &&
                     (i - 1 < 0 || i - 1 >= 0 && midCodeList.get(i - 1).getOpType() != OpType.LABEL_GEN)) {
+                //第一个label点
                 midCodeEntry.setEntryPoint(true);
             } else if ((midCodeEntry.getOpType() == OpType.BEQZ
                     || midCodeEntry.getOpType() == OpType.BNEZ
@@ -98,11 +99,13 @@ public class Optimizer {
         for (int i = 0;i < midCodeList.size();i++) {
             MidCodeEntry midCodeEntry = midCodeList.get(i);
             if (midCodeEntry.getOpType() == OpType.FUNC_DECLARE) {
+                //当前中间代码是FUNC DECLARE
                 curFuncBlock = new FuncBlock(midCodeEntry);
                 blockNum = 0;
                 funcBlocks.add(curFuncBlock);
                 //创建新的func块
                 if (i + 1 < midCodeList.size() && midCodeList.get(i + 1).getOpType() != OpType.FUNC_DECLARE) {
+                    //不是空函数 FUNC DECLARE 的下一个中间代码是entry点
                     midCodeList.get(i + 1).setEntryPoint(true);
                 }
             } else if (midCodeEntry.isEntryPoint()) {
@@ -112,12 +115,17 @@ public class Optimizer {
                 if (midCodeEntry.getOpType() != OpType.LABEL_GEN) {
                     curBasicBlock.addMideCodeEntry(midCodeEntry);
                 } else {
+                    //第一个label点
                     curBasicBlock.addLabel(midCodeEntry.getDst());
                     if (!funcToLabel.containsKey(curBasicBlock.getFunc())) {
                         funcToLabel.put(curBasicBlock.getFunc(),new HashMap<>());
                     }
                     funcToLabel.get(curBasicBlock.getFunc()).put(midCodeEntry.getDst(),curBasicBlock.getBlockNum());
                 }
+            } else if (midCodeEntry.getOpType() == OpType.LABEL_GEN) {
+                //其他连续的label点
+                curBasicBlock.addLabel(midCodeEntry.getDst());
+                funcToLabel.get(curBasicBlock.getFunc()).put(midCodeEntry.getDst(),curBasicBlock.getBlockNum());
             } else {
                 curBasicBlock.addMideCodeEntry(midCodeEntry);
             }
@@ -163,18 +171,17 @@ public class Optimizer {
 //        getOptimizedMidCode();
 //    }
 
-//    public ArrayList<MidCodeEntry> getOptimizedMidCode() {
-//        if (optimizedMidCode == null) {
-//            optimizedMidCode = new ArrayList<>();
-//            for (FuncBlock funcBlock:funcBlocks) {
-//                optimizedMidCode.addAll(funcBlock.getOptimizedMidCode());
-//            }
-//        }
-//        return optimizedMidCode;
-//    }
+    public ArrayList<MidCodeEntry> getOptimizedMidCode() {
+        if (optimizedMidCode == null) {
+            optimizedMidCode = new ArrayList<>();
+            for (FuncBlock funcBlock:funcBlocks) {
+                optimizedMidCode.addAll(funcBlock.getOptimizedMidCode());
+            }
+        }
+        return optimizedMidCode;
+    }
 
     public void genDataFlow() {
-//        genReachDef();
         genDefUse();
         allocSRegs();
         System.out.println("genDF OK");

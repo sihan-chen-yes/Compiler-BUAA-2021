@@ -1,30 +1,467 @@
 .data 0x10000000
 ########################################GLOBAL START########################################
-#############GLOBAL_DECLARE a1#############
-a1:.word 1
+#############GLOBAL_DECLARE zero#############
+zero:.word 0
 
-#############GLOBAL_DECLARE a2#############
-a2:.word 3
+#############GLOBAL_DECLARE one#############
+one:.word 1
 
-#############GLOBAL_DECLARE a3#############
-a3:.word 8
+#############GLOBAL_DECLARE minus_one#############
+minus_one:.word -1
 
-#############GLOBAL_DECLARE b1#############
-b1:.word 2
+#############GLOBAL_DECLARE two#############
+two:.word 2
 
-#############GLOBAL_DECLARE b2#############
-b2:.word -5
+#############GLOBAL_DECLARE times#############
+times:.word 0
 
-#############GLOBAL_DECLARE b3#############
-b3:.word 6
+#############GLOBAL_DECLARE while_times#############
+while_times:.word 0
+
+#############GLOBAL_DECLARE groups#############
+groups:.word 10
 
 ########################################GLOBAL END##########################################
 ########################################ASCIIZ START########################################
-str_0:.asciiz "a1+b1 is "
+str_0:.asciiz "in "
 str_1:.asciiz "\n"
-str_2:.asciiz "a2+b2 is "
+str_2:.asciiz "item "
 str_3:.asciiz "\n"
+str_4:.asciiz "one"
+str_5:.asciiz "\n"
+str_6:.asciiz "re"
+str_7:.asciiz "\n"
+str_8:.asciiz "re"
+str_9:.asciiz "\n"
+str_10:.asciiz "re"
+str_11:.asciiz "\n"
+str_12:.asciiz "16061069\n"
+str_13:.asciiz "input an integer,judge if it is prime number,10 groups in total\n"
+str_14:.asciiz "input > 0 is needed\n"
+str_15:.asciiz "1 is not concerned\n"
+str_16:.asciiz " is a prime number\n"
+str_17:.asciiz " is not a prime number\n"
+str_18:.asciiz "while times is "
+str_19:.asciiz " in total\n"
 ########################################ASCIIZ END##########################################
 .text
-addiu $sp,$sp,-20
+addiu $sp,$sp,-44
 j main
+########################################FUNC START##########################################
+#############FUNC_DECLARE is_prime#############
+is_prime:
+
+#############ASSIGN result8 0#############
+li $t0,0
+move $s0,$t0
+
+#############ASSIGN item9 2#############
+li $t0,2
+move $s1,$t0
+
+#############SEQ in7 2 @T_0#############
+lw $t0,36($sp)
+li $t1,2
+seq $t0,$t0,$t1
+sw $t0,24($sp)
+
+#############BEQZ @T_0 label_0#############
+lw $t0,24($sp)
+beqz $t0,label_0
+
+#############ASSIGN result8 1#############
+li $t0,1
+move $s0,$t0
+
+#############GOTO label_1#############
+j label_1
+
+#############LABEL_GEN label_0#############
+label_0:
+
+#############LABEL_GEN label_2#############
+label_2:
+
+#############SLT item9 in7 @T_1#############
+
+lw $t1,36($sp)
+slt $t0,$s1,$t1
+sw $t0,20($sp)
+
+#############BEQZ @T_1 label_4#############
+lw $t0,20($sp)
+beqz $t0,label_4
+
+#############LABEL_GEN label_3#############
+label_3:
+
+#############MOD in7 item9 @T_2#############
+lw $t0,36($sp)
+
+div $t0,$s1
+mfhi $t0
+sw $t0,16($sp)
+
+#############SEQ @T_2 0 @T_3#############
+lw $t0,16($sp)
+li $t1,0
+seq $t0,$t0,$t1
+sw $t0,12($sp)
+
+#############BEQZ @T_3 label_5#############
+lw $t0,12($sp)
+beqz $t0,label_5
+
+#############PRINT_STRING str_0#############
+la $a0,str_0
+li $v0,4
+syscall
+
+#############PRINT_INT in7#############
+lw $t0,36($sp)
+move $a0,$t0
+li $v0,1
+syscall
+
+#############PRINT_STRING str_1#############
+la $a0,str_1
+li $v0,4
+syscall
+
+#############PRINT_STRING str_2#############
+la $a0,str_2
+li $v0,4
+syscall
+
+#############PRINT_INT item9#############
+
+move $a0,$s1
+li $v0,1
+syscall
+
+#############PRINT_STRING str_3#############
+la $a0,str_3
+li $v0,4
+syscall
+
+#############ASSIGN result8 0#############
+li $t0,0
+move $s2,$t0
+
+#############GOTO label_4#############
+j label_4
+
+#############LABEL_GEN label_5#############
+label_5:
+
+#############PRINT_STRING str_4#############
+la $a0,str_4
+li $v0,4
+syscall
+
+#############PRINT_INT 1#############
+li $t0,1
+move $a0,$t0
+li $v0,1
+syscall
+
+#############PRINT_STRING str_5#############
+la $a0,str_5
+li $v0,4
+syscall
+
+#############ASSIGN result8 1#############
+li $t0,1
+move $s2,$t0
+
+#############PRINT_STRING str_6#############
+la $a0,str_6
+li $v0,4
+syscall
+
+#############PRINT_INT result8#############
+
+move $a0,$s2
+li $v0,1
+syscall
+
+#############PRINT_STRING str_7#############
+la $a0,str_7
+li $v0,4
+syscall
+
+#############ADD item9 1 @T_4#############
+
+li $t1,1
+addu $t0,$s1,$t1
+sw $t0,8($sp)
+
+#############ASSIGN item9 @T_4#############
+lw $t0,8($sp)
+move $s1,$t0
+
+#############SLT item9 in7 @T_5#############
+
+lw $t1,36($sp)
+slt $t0,$s1,$t1
+sw $t0,4($sp)
+
+#############BNEZ @T_5 label_3#############
+lw $t0,4($sp)
+bnez $t0,label_3
+
+#############LABEL_GEN label_4#############
+label_4:
+
+#############PRINT_STRING str_8#############
+la $a0,str_8
+li $v0,4
+syscall
+
+#############PRINT_INT result8#############
+
+move $a0,$s0
+li $v0,1
+syscall
+
+#############PRINT_STRING str_9#############
+la $a0,str_9
+li $v0,4
+syscall
+
+#############LABEL_GEN label_1#############
+label_1:
+
+#############PRINT_STRING str_10#############
+la $a0,str_10
+li $v0,4
+syscall
+
+#############PRINT_INT result8#############
+
+move $a0,$s0
+li $v0,1
+syscall
+
+#############PRINT_STRING str_11#############
+la $a0,str_11
+li $v0,4
+syscall
+
+#############RET_VALUE result8#############
+
+move $v0,$s0
+jr $ra
+
+########################################FUNC END############################################
+########################################FUNC START##########################################
+#############FUNC_DECLARE main#############
+main:
+
+#############PRINT_STRING str_12#############
+la $a0,str_12
+li $v0,4
+syscall
+
+#############PRINT_STRING str_13#############
+la $a0,str_13
+li $v0,4
+syscall
+
+#############LABEL_GEN label_6#############
+label_6:
+
+#############SNE groups 0 @T_6#############
+lw $t0,-32744($gp)
+li $t1,0
+sne $t0,$t0,$t1
+sw $t0,40($sp)
+
+#############BEQZ @T_6 label_8#############
+lw $t0,40($sp)
+beqz $t0,label_8
+
+#############LABEL_GEN label_7#############
+label_7:
+
+#############GETINT @T_7#############
+li $v0,5
+syscall
+move $t0,$v0
+sw $t0,36($sp)
+
+#############ASSIGN input35 @T_7#############
+lw $t0,36($sp)
+move $s0,$t0
+
+#############SLE input35 0 @T_8#############
+
+li $t1,0
+sgt $t0,$s0,$t1
+seq $t0,$t0,$0
+sw $t0,32($sp)
+
+#############BEQZ @T_8 label_9#############
+lw $t0,32($sp)
+beqz $t0,label_9
+
+#############PRINT_STRING str_14#############
+la $a0,str_14
+li $v0,4
+syscall
+
+#############SUB groups 1 @T_9#############
+lw $t0,-32744($gp)
+li $t1,1
+subu $t0,$t0,$t1
+sw $t0,28($sp)
+
+#############ASSIGN groups @T_9#############
+lw $t0,28($sp)
+sw $t0,-32744($gp)
+
+#############GOTO label_6#############
+j label_6
+
+#############LABEL_GEN label_9#############
+label_9:
+
+#############SEQ input35 1 @T_10#############
+
+li $t1,1
+seq $t0,$s0,$t1
+sw $t0,24($sp)
+
+#############BEQZ @T_10 label_10#############
+lw $t0,24($sp)
+beqz $t0,label_10
+
+#############PRINT_STRING str_15#############
+la $a0,str_15
+li $v0,4
+syscall
+
+#############SUB groups 1 @T_11#############
+lw $t0,-32744($gp)
+li $t1,1
+subu $t0,$t0,$t1
+sw $t0,20($sp)
+
+#############ASSIGN groups @T_11#############
+lw $t0,20($sp)
+sw $t0,-32744($gp)
+
+#############GOTO label_6#############
+j label_6
+
+#############LABEL_GEN label_10#############
+label_10:
+
+#############PREPARE is_prime#############
+sw $ra,0($sp)
+sw $s0,44($sp)
+addiu $sp,$sp,-40
+
+#############PUSH_PARAM input35 0 is_prime#############
+sw $s0,36($sp)
+
+#############CALL is_prime#############
+jal is_prime
+
+#############FIN_CALL is_prime#############
+addiu $sp,$sp,40
+lw $ra,0($sp)
+lw $s0,44($sp)
+
+#############STORE_RET @T_12#############
+sw $v0,16($sp)
+
+#############SGE @T_12 1 @T_13#############
+lw $t0,16($sp)
+li $t1,1
+slt $t0,$t0,$t1
+seq $t0,$t0,$0
+sw $t0,12($sp)
+
+#############BEQZ @T_13 label_12#############
+lw $t0,12($sp)
+beqz $t0,label_12
+
+#############PRINT_INT input35#############
+
+move $a0,$s0
+li $v0,1
+syscall
+
+#############PRINT_STRING str_16#############
+la $a0,str_16
+li $v0,4
+syscall
+
+#############GOTO label_13#############
+j label_13
+
+#############LABEL_GEN label_12#############
+label_12:
+
+#############PRINT_INT input35#############
+
+move $a0,$s0
+li $v0,1
+syscall
+
+#############PRINT_STRING str_17#############
+la $a0,str_17
+li $v0,4
+syscall
+
+#############LABEL_GEN label_13#############
+label_13:
+
+#############LABEL_GEN label_11#############
+label_11:
+
+#############SUB groups 1 @T_14#############
+lw $t0,-32744($gp)
+li $t1,1
+subu $t0,$t0,$t1
+sw $t0,8($sp)
+
+#############ASSIGN groups @T_14#############
+lw $t0,8($sp)
+sw $t0,-32744($gp)
+
+#############SNE groups 0 @T_15#############
+lw $t0,-32744($gp)
+li $t1,0
+sne $t0,$t0,$t1
+sw $t0,4($sp)
+
+#############BNEZ @T_15 label_7#############
+lw $t0,4($sp)
+bnez $t0,label_7
+
+#############LABEL_GEN label_8#############
+label_8:
+
+#############PRINT_STRING str_18#############
+la $a0,str_18
+li $v0,4
+syscall
+
+#############PRINT_INT while_times#############
+lw $t0,-32748($gp)
+move $a0,$t0
+li $v0,1
+syscall
+
+#############PRINT_STRING str_19#############
+la $a0,str_19
+li $v0,4
+syscall
+
+#############EXIT#############
+li $v0,10
+syscall
+
+########################################FUNC END############################################
