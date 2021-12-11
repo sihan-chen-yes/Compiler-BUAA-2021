@@ -18,15 +18,15 @@ public class Compiler {
     // 影响sregs
 
 
-    private static boolean debug = true;
-//    private static boolean debug = false;
+//    private static boolean debug = true;
+    private static boolean debug = false;
     //debug开关
 
     public static void main(java.lang.String[] args) {
         Optimizer.setDebug(debug);
         //本地debug模式
         Optimizer.setOp(op);
-        //优化开关~
+        //优化开关
 
         File readFile = new File("testfile.txt");
         File outputFile = new File("output.txt");

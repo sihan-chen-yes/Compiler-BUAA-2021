@@ -1,12 +1,11 @@
 package Optimizer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 public class ConflictGraph {
     private ArrayList<LiveVar> liveVars = new ArrayList<>();
     private HashMap<String, String> varToReg = new HashMap<>();
+    private HashMap<String, String> forStack = new HashMap<>();
     private ArrayList<LiveVar> tmp = new ArrayList<>();
     private ArrayList<LiveVar> deleted = new ArrayList<>();
 
@@ -39,10 +38,19 @@ public class ConflictGraph {
         for (int i = 0; i < 8;i++) {
             regs.add(String.format("$s%d",i));
         }
+        //$v0 $at $0 $a0 $t0 $t1 $t2 $t3 $gp $sp $ra 保留
+        regs.add("$v1");
+        regs.add("$a1");
+        regs.add("$a2");
+        regs.add("$a3");
+        for (int i = 4;i < 10;i++) {
+            regs.add(String.format("$t%d",i));
+        }
+        regs.add("$fp");
     }
 
-    public HashMap<String, String> getVarToReg() {
-        return varToReg;
+    public HashMap<String, String> getForStack() {
+        return forStack;
     }
 
     public void dye() {
@@ -84,6 +92,31 @@ public class ConflictGraph {
                 }
             }
         }
+        genForStack();
+    }
+
+    public void genForStack() {
+        Iterator<Map.Entry<String, String>> iterator = varToReg.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> entry = iterator.next();
+            String var = entry.getKey();
+            String reg = entry.getValue();
+            if (!exist(reg)) {
+                forStack.put(var,reg);
+            }
+        }
+    }
+
+    public boolean exist(String check) {
+        Iterator<Map.Entry<String, String>> iterator = forStack.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> entry = iterator.next();
+            String reg = entry.getValue();
+            if (reg.equals(check)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public LiveVar search(LiveVar var) {

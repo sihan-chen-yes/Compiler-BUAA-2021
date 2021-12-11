@@ -262,26 +262,22 @@ public class BasicBlock {
     }
 
     public boolean needInUseSet(String name) {
-        assert name != null;
-        return MidCodeGener.getSymbolTable().search_local(func,name) != null
+        return name != null && MidCodeGener.getSymbolTable().search_local(func,name) != null
                 && isLocalVar(name) && !defSet.contains(name);
     }
 
     public boolean needInUseSetMid(MidCodeEntry midCodeEntry,String name) {
-        assert name != null;
-        return MidCodeGener.getSymbolTable().search_local(func,name) != null
+        return name != null && MidCodeGener.getSymbolTable().search_local(func,name) != null
                 && isLocalVar(name) && !midCodeEntry.getDefSet().contains(name);
     }
 
     public boolean needInDefSet(String name) {
-        assert name != null;
-        return MidCodeGener.getSymbolTable().search_local(func,name) != null
-                &&  isLocalVar(name) && !useSet.contains(name);
+        return name != null && MidCodeGener.getSymbolTable().search_local(func,name) != null
+                && isLocalVar(name) && !useSet.contains(name);
     }
 
     public boolean needInDefSetMid(MidCodeEntry midCodeEntry,String name) {
-        assert name != null;
-        return MidCodeGener.getSymbolTable().search_local(func,name) != null
+        return name != null && MidCodeGener.getSymbolTable().search_local(func,name) != null
                 && isLocalVar(name) && !midCodeEntry.getUseSet().contains(name);
     }
 
