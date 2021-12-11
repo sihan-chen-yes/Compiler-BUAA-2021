@@ -7,6 +7,8 @@ import GrammarAnalysis.SymbolTableEntry;
 import Optimizer.*;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MidCodeEntry {
     private OpType opType;
@@ -339,6 +341,7 @@ public class MidCodeEntry {
             }
         } else {
             reg = "$t0";
+            //Todo 是否可优化为addi
             if (symbolTable.isNumber(func,name)) {
                 curCode += String.format("li $t0,%d",Integer.parseInt(name));
             } else {
@@ -388,7 +391,6 @@ public class MidCodeEntry {
     }
 
     public void store(String name,String regVal) {
-        //将t0存到对应的Ident中
         //将值存入内存
         SymbolTable symbolTable = MidCodeGener.getSymbolTable();
         String func = MidCodeGener.getFuncName();
@@ -1049,6 +1051,43 @@ public class MidCodeEntry {
         }
     }
 
+    public String opLoad(String name) {
+        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
+        String func = MidCodeGener.getFuncName();
+        String reg;
+        reg = "$t0";
+        if (symbolTable.isNumber(func,name)) {
+           return name;
+        } else {
+            if (symbolTable.isLocal(func,name)) {
+                int offset = symbolTable.searchOffset_sp(func,name);
+                if (conflictGraph.hasReg(name)) {
+                    reg = conflictGraph.getReg(name);
+                } else {
+                    curCode += String.format("lw $t0,%d($sp)",offset);
+                }
+            } else {
+                assert symbolTable.isGlobal(name);
+                int offset = symbolTable.searchOffset_gp(name);
+                curCode += String.format("lw $t0,%d($gp)",offset);
+            }
+        }
+        return reg;
+    }
+
+    public boolean isNumber(String name) {
+        Pattern pattern = Pattern.compile("^(-)?\\d+");
+        Matcher matcher = pattern.matcher(name);
+        if (matcher.matches()) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isReg(String name) {
+        return !isNumber(name);
+    }
+
     public void genAssign() {
         if (!Optimizer.isOp()) {
             if (MidCodeGener.getSymbolTable().isNumber(MidCodeGener.getFuncName(),dst)) {
@@ -1060,12 +1099,32 @@ public class MidCodeEntry {
             store(r1,null);
         } else {
             String regVal;
-            regVal = load(dst);
-            curCode += "\n";
+            //a=b a:reg mem b:reg meme const 一共6中情况
             if (conflictGraph.hasReg(r1)) {
-                curCode += String.format("move %s,%s", conflictGraph.getReg(r1),regVal);
+                String name = opLoad(dst);
+                curCode += "\n";
+                if (isReg(name)) {
+                    //可能在mem或者reg
+                    regVal = name;
+                    curCode += String.format("move %s,%s", conflictGraph.getReg(r1),regVal);
+                } else {
+                    assert isNumber(name);
+                    curCode += String.format("li %s,%s",conflictGraph.getReg(r1),name);
+                }
             } else {
-                store(r1,regVal);
+                //在内存
+                String name = opLoad(dst);
+                curCode += "\n";
+                if (isReg(name)) {
+                    regVal = name;
+                    store(r1,regVal);
+                } else {
+                    assert isNumber(name);
+                    curCode += String.format("li $t0,%s",name);
+                    regVal = "$t0";
+                    curCode += "\n";
+                    store(r1,regVal);
+                }
             }
         }
     }
@@ -1100,10 +1159,16 @@ public class MidCodeEntry {
             curCode += "\n";
             curCode += String.format("syscall");
         } else {
-            String regVal;
-            regVal = load(dst);
+            String regVal,name;
+            name = opLoad(dst);
             curCode += "\n";
-            curCode += String.format("move $a0,%s",regVal);
+            if (isReg(name)) {
+                regVal = name;
+                curCode += String.format("move $a0,%s",regVal);
+            } else {
+                assert isNumber(name);
+                curCode += String.format("li $a0,%s",dst);
+            }
             curCode += "\n";
             curCode += String.format("li $v0,1");
             curCode += "\n";
@@ -1123,10 +1188,16 @@ public class MidCodeEntry {
             curCode += "\n";
             curCode += String.format("jr $ra");
         } else {
-            String regVal;
-            regVal = load(dst);
+            String regVal,name;
+            name = opLoad(dst);
             curCode += "\n";
-            curCode += String.format("move $v0,%s",regVal);
+            if (isReg(name)) {
+                regVal = name;
+                curCode += String.format("move $v0,%s",regVal);
+            } else {
+                assert isNumber(name);
+                curCode += String.format("li $v0,%s",dst);
+            }
             curCode += "\n";
             curCode += String.format("jr $ra");
         }
@@ -1154,8 +1225,7 @@ public class MidCodeEntry {
             if (conflictGraph.hasReg(dst)) {
                 curCode += String.format("move %s,$v0",conflictGraph.getReg(dst));
             } else {
-                curCode += String.format("move $t0,$v0");
-                regVal = "$t0";
+                regVal = "$v0";
                 curCode += "\n";
                 store(dst,regVal);
             }
@@ -1373,49 +1443,104 @@ public class MidCodeEntry {
             curCode += "\n";
             store(dst,null);
         } else {
-            String reg0,reg1,regDst;
-            reg0 = load(r1);
-            curCode += "\n";
-            reg1 = loadSec(r2);
-            curCode += "\n";
+            //最多存在一个操作数是常数的情况
+            String reg0 = null,reg1 = null,regDst,c = null,reg = null;
+            boolean needConstOp = false;
+            if (opType == OpType.ADD && (isNumber(r1) || isNumber(r2))
+                    || (opType == OpType.SUB || opType == OpType.SLT || opType == OpType.SGE)
+                    && isNumber(r2)) {
+                needConstOp = true;
+                if (opType == OpType.ADD) {
+                    if (isNumber(r1)) {
+                        c = r1;
+                        reg = loadSec(r2);
+                    } else {
+                        assert isNumber(r2);
+                        c = r2;
+                        reg = load(r1);
+                    }
+                } else {
+                    assert opType != OpType.ADD;
+                    c = r2;
+                    reg = load(r1);
+                }
+                curCode += "\n";
+            } else {
+                //没有常数
+                reg0 = load(r1);
+                curCode += "\n";
+                reg1 = loadSec(r2);
+                curCode += "\n";
+            }
             if (conflictGraph.hasReg(dst)) {
                 regDst = conflictGraph.getReg(dst);
             } else {
                 regDst = "$t0";
             }
             if (opType == OpType.ADD) {
-                curCode += String.format("addu %s,%s,%s",regDst,reg0,reg1);
+                if (!needConstOp) {
+                    curCode += String.format("addu %s,%s,%s",regDst,reg0,reg1);
+                } else {
+                    assert needConstOp && reg != null;
+                    curCode += String.format("addiu %s,%s,%s",regDst,reg,c);
+                }
             } else if (opType == OpType.SUB) {
-                curCode += String.format("subu %s,%s,%s",regDst,reg0,reg1);
+                if (!needConstOp) {
+                    curCode += String.format("subu %s,%s,%s",regDst,reg0,reg1);
+                } else {
+                    assert needConstOp && reg != null && isNumber(r2);
+                    if (r2.charAt(0) == '-') {
+                        c = r2.substring(1);
+                        curCode += String.format("addiu %s,%s,%s",regDst,reg,c);
+                    } else {
+                        curCode += String.format("addiu %s,%s,-%s",regDst,reg,c);
+                    }
+                }
             } else if (opType == OpType.MULT) {
-                curCode += String.format("mult %s,%s",reg0,reg1);
-                curCode += "\n";
-                curCode += String.format("mflo %s",regDst);
+                assert !needConstOp;
+                curCode += String.format("mul %s,%s,%s",regDst,reg0,reg1);
             } else if (opType == OpType.DIV) {
+                assert !needConstOp;
                 curCode += String.format("div %s,%s",reg0,reg1);
                 curCode += "\n";
                 curCode += String.format("mflo %s",regDst);
             } else if (opType == OpType.MOD) {
+                assert !needConstOp;
                 curCode += String.format("div %s,%s",reg0,reg1);
                 curCode += "\n";
                 curCode += String.format("mfhi %s",regDst);
             } else if (opType == OpType.SLT) {
-                curCode += String.format("slt %s,%s,%s",regDst,reg0,reg1);
+                if (!needConstOp) {
+                    curCode += String.format("slt %s,%s,%s",regDst,reg0,reg1);
+                } else {
+                    curCode += String.format("slti %s,%s,%s",regDst,reg,c);
+                }
             } else if (opType == OpType.SLE) {
+                assert !needConstOp;
                 curCode += String.format("sgt %s,%s,%s",regDst,reg0,reg1);
                 curCode += "\n";
                 //取反
                 curCode += String.format("seq %s,%s,$0",regDst,regDst);
             } else if (opType == OpType.SGT) {
+                assert !needConstOp;
                 curCode += String.format("sgt %s,%s,%s",regDst,reg0,reg1);
             } else if (opType == OpType.SGE) {
-                curCode += String.format("slt %s,%s,%s",regDst,reg0,reg1);
-                curCode += "\n";
-                //取反
-                curCode += String.format("seq %s,%s,$0",regDst,regDst);
+                if (!needConstOp) {
+                    curCode += String.format("slt %s,%s,%s",regDst,reg0,reg1);
+                    curCode += "\n";
+                    //取反
+                    curCode += String.format("seq %s,%s,$0",regDst,regDst);
+                } else {
+                    curCode += String.format("slti %s,%s,%s",regDst,reg,c);
+                    curCode += "\n";
+                    //取反
+                    curCode += String.format("seq %s,%s,$0",regDst,regDst);
+                }
             } else if (opType == OpType.SEQ) {
+                assert !needConstOp;
                 curCode += String.format("seq %s,%s,%s",regDst,reg0,reg1);
             } else if (opType == OpType.SNE) {
+                assert !needConstOp;
                 curCode += String.format("sne %s,%s,%s",regDst,reg0,reg1);
             }
             if (!conflictGraph.hasReg(dst)) {
@@ -1443,6 +1568,7 @@ public class MidCodeEntry {
             curCode += "\n";
             store(dst,null);
         } else {
+            //不可能出现常数 已在中间代码优化
             String reg0,regDst;
             reg0 = load(r1);
             curCode += "\n";

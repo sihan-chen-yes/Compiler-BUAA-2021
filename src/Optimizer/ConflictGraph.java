@@ -47,6 +47,8 @@ public class ConflictGraph {
             regs.add(String.format("$t%d",i));
         }
         regs.add("$fp");
+        regs.add("$k0");
+        regs.add("$k1");
     }
 
     public HashMap<String, String> getForStack() {

@@ -388,7 +388,7 @@ public class BasicBlock {
 //                    deletedOperand.add(midCodeEntry.getDst());
 //                    continue;
 //                }
-//            } else if (midCodeEntitry.getOpType() == OpType.BEQZ) {
+//            } else if (midCodeEntitiry.getOpType() == OpType.BEQZ) {
 //                if (needChange(midCodeEntry.getR1())) {
 //                    midCodeEntry.setR1(replace(midCodeEntry.getR1()));
 //                }
