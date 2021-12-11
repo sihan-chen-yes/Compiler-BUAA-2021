@@ -1,8 +1,16 @@
-int try() {
-    return 1;
-}
+int a = 3;
+int b[3] = {1,1,1};
 int main() {
-       int a = try() + 5;
-       return 1;
-
+int x = 1 + a +  a +a +a;
+int y = 1 + x + x +x+x+ x;
+if (x == 1) {
+    printf("%d",x);
+    printf("%d",y);
+} else{
+    printf("%d",x);
+    printf("%d",y);
+}
+    printf("%d",x);
+    printf("%d",y);
+    return 1;
 }

@@ -1,18 +1,32 @@
 ########################################GLOBAL START########################################
+GLOBAL_DECLARE a
+GLOBAL_DECLARE b
 ########################################GLOBAL END##########################################
 ########################################ASCIIZ START########################################
 ########################################ASCIIZ END##########################################
 ########################################FUNC START##########################################
-FUNC_DECLARE try
-RET_VALUE 1
-########################################FUNC END############################################
-########################################FUNC START##########################################
 FUNC_DECLARE main
-PREPARE try
-CALL try
-FIN_CALL try
-STORE_RET @T_0
-ADD @T_0 5 @T_1
-ASSIGN a5 @T_1
+ADD 1 a @T_0
+ADD @T_0 a @T_1
+ADD @T_1 a @T_2
+ADD @T_2 a @T_3
+ASSIGN x4 @T_3
+ADD 1 x4 @T_4
+ADD @T_4 x4 @T_5
+ADD @T_5 x4 @T_6
+ADD @T_6 x4 @T_7
+ADD @T_7 x4 @T_8
+ASSIGN y5 @T_8
+SEQ x4 1 @T_9
+BEQZ @T_9 label_0
+PRINT_INT x4
+PRINT_INT y5
+GOTO label_1
+LABEL_GEN label_0
+PRINT_INT x4
+PRINT_INT y5
+LABEL_GEN label_1
+PRINT_INT x4
+PRINT_INT y5
 EXIT
 ########################################FUNC END############################################

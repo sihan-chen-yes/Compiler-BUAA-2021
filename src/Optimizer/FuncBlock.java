@@ -85,6 +85,9 @@ public class FuncBlock {
                 break;
             }
         }
+        for (int i = basicBlocks.size() - 1;i >= 0;i--) {
+            basicBlocks.get(i).genUseDef();
+        }
     }
 
     public void allocSRegs() {

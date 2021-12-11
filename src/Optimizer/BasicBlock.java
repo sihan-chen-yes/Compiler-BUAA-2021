@@ -131,17 +131,61 @@ public class BasicBlock {
 
     public void genUseDefSet() {
         for (MidCodeEntry midCodeEntry:midCodeList) {
-            if (midCodeEntry.getOpType() == OpType.LOAD_ARRDESS && needInUseSet(midCodeEntry.getR2())) {
-                useSet.add(midCodeEntry.getR2());
+            if (midCodeEntry.getOpType() == OpType.LOAD_ARRDESS) {
+                if (needInUseSet(midCodeEntry.getR2())) {
+                    useSet.add(midCodeEntry.getR2());
+                }
+                if (needInDefSet(midCodeEntry.getDst())) {
+                    defSet.add(midCodeEntry.getDst());
+                }
+                if (needInUseSetMid(midCodeEntry,midCodeEntry.getR2())) {
+                    midCodeEntry.addUseSet(midCodeEntry.getR2());
+                }
+                if (needInDefSetMid(midCodeEntry,midCodeEntry.getDst())) {
+                    midCodeEntry.addDefSet(midCodeEntry.getDst());
+                }
+            } else if (midCodeEntry.getOpType() == OpType.STORE_RET) {
+                if (needInDefSet(midCodeEntry.getDst())) {
+                    defSet.add(midCodeEntry.getDst());
+                }
+                if (needInDefSetMid(midCodeEntry,midCodeEntry.getDst())) {
+                    midCodeEntry.addDefSet(midCodeEntry.getDst());
+                }
             } else if (midCodeEntry.getOpType() == OpType.PUSH_PARAM
-                    || midCodeEntry.getOpType() == OpType.NEG || midCodeEntry.getOpType() == OpType.NOT
                     || midCodeEntry.getOpType() == OpType.BEQZ || midCodeEntry.getOpType() == OpType.BNEZ) {
                 if (needInUseSet(midCodeEntry.getR1())) {
                     useSet.add(midCodeEntry.getR1());
                 }
+                if (needInUseSetMid(midCodeEntry,midCodeEntry.getR1())) {
+                    midCodeEntry.addUseSet(midCodeEntry.getR1());
+                }
+            } else if (midCodeEntry.getOpType() == OpType.NEG || midCodeEntry.getOpType() == OpType.NOT) {
+                if (needInUseSet(midCodeEntry.getR1())) {
+                    useSet.add(midCodeEntry.getR1());
+                }
+                if (needInDefSet(midCodeEntry.getDst())) {
+                    defSet.add(midCodeEntry.getDst());
+                }
+                if (needInUseSetMid(midCodeEntry,midCodeEntry.getR1())) {
+                    midCodeEntry.addUseSet(midCodeEntry.getR1());
+                }
+                if (needInDefSetMid(midCodeEntry,midCodeEntry.getDst())) {
+                    midCodeEntry.addDefSet(midCodeEntry.getDst());
+                }
             } else if ((midCodeEntry.getOpType() == OpType.LOAD_ARRAY_1D
-                    || midCodeEntry.getOpType() == OpType.STORE_ARRAY_1D) && needInUseSet(midCodeEntry.getR2())) {
-                useSet.add(midCodeEntry.getR2());
+                    || midCodeEntry.getOpType() == OpType.STORE_ARRAY_1D)) {
+                if (needInUseSet(midCodeEntry.getR2())) {
+                    useSet.add(midCodeEntry.getR2());
+                }
+                if (needInDefSet(midCodeEntry.getDst())) {
+                    defSet.add(midCodeEntry.getDst());
+                }
+                if (needInUseSetMid(midCodeEntry,midCodeEntry.getR2())) {
+                    midCodeEntry.addUseSet(midCodeEntry.getR2());
+                }
+                if (needInDefSetMid(midCodeEntry,midCodeEntry.getDst())) {
+                    midCodeEntry.addDefSet(midCodeEntry.getDst());
+                }
             } else if (midCodeEntry.getOpType() == OpType.LOAD_ARRAY_2D
                     || midCodeEntry.getOpType() == OpType.STORE_ARRAY_2D) {
                 if (needInUseSet(midCodeEntry.getR2())) {
@@ -150,12 +194,30 @@ public class BasicBlock {
                 if (needInUseSet(midCodeEntry.getR3())) {
                     useSet.add(midCodeEntry.getR3());
                 }
+                if (needInDefSet(midCodeEntry.getDst())) {
+                    defSet.add(midCodeEntry.getDst());
+                }
+                if (needInUseSetMid(midCodeEntry,midCodeEntry.getR2())) {
+                    midCodeEntry.addUseSet(midCodeEntry.getR2());
+                }
+                if (needInUseSetMid(midCodeEntry,midCodeEntry.getR3())) {
+                    midCodeEntry.addUseSet(midCodeEntry.getR3());
+                }
+                if (needInDefSetMid(midCodeEntry,midCodeEntry.getDst())) {
+                    midCodeEntry.addDefSet(midCodeEntry.getDst());
+                }
             } else if (midCodeEntry.getOpType() == OpType.ASSIGN) {
                 if (needInUseSet(midCodeEntry.getDst())) {
                     useSet.add(midCodeEntry.getDst());
                 }
                 if (needInDefSet(midCodeEntry.getR1())) {
                     defSet.add(midCodeEntry.getR1());
+                }
+                if (needInUseSetMid(midCodeEntry,midCodeEntry.getDst())) {
+                    midCodeEntry.addUseSet(midCodeEntry.getDst());
+                }
+                if (needInDefSetMid(midCodeEntry,midCodeEntry.getR1())) {
+                    midCodeEntry.addDefSet(midCodeEntry.getR1());
                 }
             } else if (midCodeEntry.getOpType() == OpType.ADD || midCodeEntry.getOpType() == OpType.SUB
                     || midCodeEntry.getOpType() == OpType.MULT || midCodeEntry.getOpType() == OpType.DIV
@@ -169,22 +231,58 @@ public class BasicBlock {
                 if (needInUseSet(midCodeEntry.getR2())) {
                     useSet.add(midCodeEntry.getR2());
                 }
+                if (needInDefSet(midCodeEntry.getDst())) {
+                    defSet.add(midCodeEntry.getDst());
+                }
+                if (needInUseSetMid(midCodeEntry,midCodeEntry.getR1())) {
+                    midCodeEntry.addUseSet(midCodeEntry.getR1());
+                }
+                if (needInUseSetMid(midCodeEntry,midCodeEntry.getR2())) {
+                    midCodeEntry.addUseSet(midCodeEntry.getR2());
+                }
+                if (needInDefSetMid(midCodeEntry,midCodeEntry.getDst())) {
+                    midCodeEntry.addDefSet(midCodeEntry.getDst());
+                }
             } else if (midCodeEntry.getOpType() == OpType.PRINT_INT || midCodeEntry.getOpType() == OpType.RET_VALUE) {
                 if (needInUseSet(midCodeEntry.getDst())) {
                     useSet.add(midCodeEntry.getDst());
+                }
+                if (needInUseSetMid(midCodeEntry,midCodeEntry.getDst())) {
+                    midCodeEntry.addUseSet(midCodeEntry.getDst());
+                }
+            } else if (midCodeEntry.getOpType() == OpType.GETINT) {
+                if (needInDefSet(midCodeEntry.getDst())) {
+                    defSet.add(midCodeEntry.getDst());
+                }
+                if (needInDefSetMid(midCodeEntry,midCodeEntry.getDst())) {
+                    midCodeEntry.addDefSet(midCodeEntry.getDst());
                 }
             }
         }
     }
 
     public boolean needInUseSet(String name) {
-        return name != null && MidCodeGener.getSymbolTable().search_local(func,name) != null
+        assert name != null;
+        return MidCodeGener.getSymbolTable().search_local(func,name) != null
                 && isLocalVar(name) && !defSet.contains(name);
     }
 
+    public boolean needInUseSetMid(MidCodeEntry midCodeEntry,String name) {
+        assert name != null;
+        return MidCodeGener.getSymbolTable().search_local(func,name) != null
+                && isLocalVar(name) && !midCodeEntry.getDefSet().contains(name);
+    }
+
     public boolean needInDefSet(String name) {
-        return name != null && MidCodeGener.getSymbolTable().search_local(func,name) != null
+        assert name != null;
+        return MidCodeGener.getSymbolTable().search_local(func,name) != null
                 &&  isLocalVar(name) && !useSet.contains(name);
+    }
+
+    public boolean needInDefSetMid(MidCodeEntry midCodeEntry,String name) {
+        assert name != null;
+        return MidCodeGener.getSymbolTable().search_local(func,name) != null
+                && isLocalVar(name) && !midCodeEntry.getUseSet().contains(name);
     }
 
     public boolean isNumber(String name) {
@@ -214,7 +312,7 @@ public class BasicBlock {
         return name != null && MidCodeGener.getSymbolTable().search_local(func,name) != null
                 && MidCodeGener.getSymbolTable().search_local(func,name).getDataType() == DataType.INT
                 && MidCodeGener.getSymbolTable().search_local(func,name).getDeclType() != DeclType.PARAM
-                && !isNumber(name) && !isTemp(name);
+                && !isNumber(name);
     }
 
     public ArrayList<MidCodeEntry> getOptimizedMidCode() {
@@ -501,18 +599,6 @@ public class BasicBlock {
         return func;
     }
 
-    public void resetSRegs() {
-        for (int i = 0; i < 8;i++) {
-            sRegs.add(String.format("$s%d",i));
-        }
-    }
-
-    public void resetTRegs() {
-        for (int i = 0; i < 10;i++) {
-            tRegs.add(String.format("$t%d",i));
-        }
-    }
-
     public ArrayList<String> getSRegs() {
         return sRegs;
     }
@@ -529,121 +615,28 @@ public class BasicBlock {
         this.sRegs = new ArrayList<>(sRegs);
     }
 
-    public void setAllocation(BasicBlock basicBlock) {
-        //传进来的基本块是前驱
-        setSRegs(basicBlock.getSRegs());
-        setVarToReg(basicBlock.getVarToReg());
-        //复制状态
-        Iterator<Map.Entry<String, String>> iterator = varToReg.entrySet().iterator();
-        HashSet<String> lastUseDefOutSet = basicBlock.getUseDefOutSet();
-        while (iterator.hasNext()) {
-            Map.Entry<String, String> entry = iterator.next();
-            String var = entry.getKey();
-            if (!lastUseDefOutSet.contains(var)) {
-                //需要在外面remove一下
-                releaseSReg(var);
-                iterator.remove();
-            }
-        }
-    }
-
-    public void allocSReg(String var) {
-        String sReg = sRegs.get(0);
-        sRegs.remove(0);
-        varToReg.put(var,sReg);
-    }
-
     public void releaseSReg(String var) {
         sRegs.add(varToReg.get(var));
     }
 
-    public boolean hasSReg(String var) {
-        return var != null && varToReg.containsKey(var);
-    }
-
-    public String querySReg(String var) {
-        return varToReg.get(var);
-    }
-
-    public void allocSRegs() {
-        //只对跨越基本块的localvar分配reg
-        for (MidCodeEntry midCodeEntry:midCodeList) {
-            if (sRegs.size() > 0 && crossBasicBlock(midCodeEntry.getR1())
-                    &&!hasSReg(midCodeEntry.getR1()) && r1IsLocalVar(midCodeEntry)) {
-                allocSReg(midCodeEntry.getR1());
-            }
-            if (sRegs.size() > 0 && crossBasicBlock(midCodeEntry.getR2())
-                    && !hasSReg(midCodeEntry.getR2()) && r2IsLocalVar(midCodeEntry)) {
-                allocSReg(midCodeEntry.getR2());
-            }
-            if (sRegs.size() > 0 && crossBasicBlock(midCodeEntry.getR3())
-                    && !hasSReg(midCodeEntry.getR3()) && r3IsLocalVar(midCodeEntry)) {
-                allocSReg(midCodeEntry.getR3());
-            }
-            if (sRegs.size() > 0 && crossBasicBlock(midCodeEntry.getDst()) &&
-                    !hasSReg(midCodeEntry.getDst()) && dstIsLocalVar(midCodeEntry)) {
-                allocSReg(midCodeEntry.getDst());
-            }
-        }
-    }
-
-    public boolean crossBasicBlock(String name) {
-        return useDefOutSet.contains(name);
-    }
-
     public void genSubConf(ConflictGraph conflictGraph) {
-        conflictGraph.addLiveVars(useDefOutSet);
-    }
-
-    public boolean r1IsLocalVar(MidCodeEntry midCodeEntry) {
-        OpType opType = midCodeEntry.getOpType();
-        if (isLocalVar(midCodeEntry.getR1()) &&
-                (opType == OpType.PUSH_PARAM || opType == OpType.ASSIGN
-                        || opType == OpType.ADD || opType == OpType.SUB || opType == OpType.MULT
-                        || opType == OpType.DIV || opType == OpType.MOD || opType == OpType.NEG
-                        || opType == OpType.SLT || opType == OpType.SLE || opType == OpType.SGT
-                        || opType == OpType.SGE || opType == OpType.SEQ || opType == OpType.SNE
-                        || opType == OpType.NOT || opType == OpType.BEQZ || opType == OpType.BNEZ)) {
-            //只给局部变量分配sreg
-            return true;
+        for (MidCodeEntry midCodeEntry:midCodeList) {
+            conflictGraph.addLiveVars(midCodeEntry.getUseDefOutSet());
         }
-        return false;
     }
 
-    public boolean r2IsLocalVar(MidCodeEntry midCodeEntry) {
-        OpType opType = midCodeEntry.getOpType();
-        if (isLocalVar(midCodeEntry.getR2()) &&
-                (opType == OpType.LOAD_ARRAY_1D || opType == OpType.STORE_ARRAY_1D || opType == OpType.LOAD_ARRAY_2D
-                || opType == OpType.STORE_ARRAY_2D || opType == OpType.LOAD_ARRDESS
-                || opType == OpType.ADD || opType == OpType.SUB || opType == OpType.MULT
-                || opType == OpType.DIV || opType == OpType.MOD
-                || opType == OpType.SLT || opType == OpType.SLE || opType == OpType.SGT
-                || opType == OpType.SGE || opType == OpType.SEQ || opType == OpType.SNE)) {
-            return true;
+    public void genUseDef() {
+        HashSet<String> in = useDefOutSet;
+        for (int i = midCodeList.size() - 1;i >= 0;i--) {
+            HashSet<String> out = new HashSet<>(in);
+            midCodeList.get(i).setUseDefOutSet(out);
+            HashSet<String> tmp = new HashSet<>(out);
+            tmp.removeAll(midCodeList.get(i).getDefSet());
+            tmp.addAll(midCodeList.get(i).getUseSet());
+            midCodeList.get(i).setUseDefInSet(tmp);
+            in = tmp;
         }
-        return false;
     }
-
-    public boolean r3IsLocalVar(MidCodeEntry midCodeEntry) {
-        OpType opType = midCodeEntry.getOpType();
-        if (isLocalVar(midCodeEntry.getR3()) &&
-                (opType == OpType.LOAD_ARRAY_2D || opType == OpType.STORE_ARRAY_2D )) {
-            return true;
-        }
-        return false;
-    }
-
-    public boolean dstIsLocalVar(MidCodeEntry midCodeEntry) {
-        OpType opType = midCodeEntry.getOpType();
-        if (isLocalVar(midCodeEntry.getDst()) &&
-                (opType == OpType.ASSIGN || opType == OpType.PRINT_INT || opType == OpType.RET_VALUE
-                        || opType == OpType.STORE_ARRAY_1D || opType == OpType.STORE_ARRAY_2D)) {
-            return true;
-        }
-        return false;
-    }
-    //Todo t分配
-
 
     @Override
     public String toString() {

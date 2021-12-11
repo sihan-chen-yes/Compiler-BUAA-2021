@@ -10,11 +10,11 @@ public class ConflictGraph {
     private ArrayList<LiveVar> tmp = new ArrayList<>();
     private ArrayList<LiveVar> deleted = new ArrayList<>();
 
-    private ArrayList<String> sRegs = new ArrayList<>();
+    private ArrayList<String> regs = new ArrayList<>();
 
 
     public ConflictGraph() {
-        resetSRegs();
+        resetRegs();
     }
 
     public void addLiveVars(HashSet<String> vars) {
@@ -35,9 +35,9 @@ public class ConflictGraph {
         }
     }
 
-    public void resetSRegs() {
+    public void resetRegs() {
         for (int i = 0; i < 8;i++) {
-            sRegs.add(String.format("$s%d",i));
+            regs.add(String.format("$s%d",i));
         }
     }
 
@@ -51,7 +51,7 @@ public class ConflictGraph {
             boolean find = false;
             for (int i = 0;i < liveVars.size();i++) {
                 LiveVar liveVar = liveVars.get(i);
-                if (liveVar.getEdgeNum() < sRegs.size()) {
+                if (liveVar.getEdgeNum() < regs.size()) {
                     liveVar.remove();
                     tmp.add(liveVar);
                     liveVars.remove(i);
@@ -62,7 +62,7 @@ public class ConflictGraph {
             if (!find) {
                 for (int i = 0;i < liveVars.size();i++) {
                     LiveVar liveVar = liveVars.get(i);
-                    if (liveVar.getEdgeNum() >= sRegs.size()) {
+                    if (liveVar.getEdgeNum() >= regs.size()) {
                         liveVar.delete();
                         deleted.add(liveVar);
                         liveVars.remove(i);
@@ -74,7 +74,7 @@ public class ConflictGraph {
         for (int i = tmp.size() - 1;i >= 0;i--) {
             LiveVar liveVar = tmp.get(i);
             HashSet<String> regs = liveVar.getEdgeReg();
-            for (String reg:sRegs) {
+            for (String reg: this.regs) {
                 if (!regs.contains(reg)) {
                     liveVar.setReg(reg);
                     varToReg.put(liveVar.getVar(),reg);

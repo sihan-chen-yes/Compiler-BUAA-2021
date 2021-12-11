@@ -20,7 +20,8 @@ public class SymbolTable {
     private HashMap<String,ArrayList<SymbolTableEntry>> fullFunc = new HashMap<>();
     //没有remove过的full符号表
     private static int offset_gp = -0x8000;
-    private static int offset_sp = 4;
+    private static int preStack = 4;
+    private static int offset_sp = preStack;
     private FileWriter writer;
     private int stack_size = 0;
 
@@ -322,7 +323,7 @@ public class SymbolTable {
     }
 
     public void reset() {
-        offset_sp = 4;
+        offset_sp = preStack;
     }
 
     public int getLocalSize(String func) {
@@ -331,7 +332,7 @@ public class SymbolTable {
         for (int i = 0;i < local.size();i++) {
             size += local.get(i).getSize();
         }
-        return size + 4;
+        return size + preStack;
         //最底下还有一个 ra
     }
 
