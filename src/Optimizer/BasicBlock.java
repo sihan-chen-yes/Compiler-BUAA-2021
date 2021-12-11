@@ -304,7 +304,6 @@ public class BasicBlock {
     }
 
     public boolean isLocalVar(String name) {
-        //Todo 参数不参与分配 数组不参与分配
         return name != null && MidCodeGener.getSymbolTable().search_local(func,name) != null
                 && MidCodeGener.getSymbolTable().search_local(func,name).getDataType() == DataType.INT
                 && MidCodeGener.getSymbolTable().search_local(func,name).getDeclType() != DeclType.PARAM
@@ -389,7 +388,7 @@ public class BasicBlock {
 //                    deletedOperand.add(midCodeEntry.getDst());
 //                    continue;
 //                }
-//            } else if (midCodeEntry.getOpType() == OpType.BEQZ) {
+//            } else if (midCodeEntitry.getOpType() == OpType.BEQZ) {
 //                if (needChange(midCodeEntry.getR1())) {
 //                    midCodeEntry.setR1(replace(midCodeEntry.getR1()));
 //                }

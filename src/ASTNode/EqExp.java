@@ -40,7 +40,6 @@ public class EqExp extends Node {
 
     @Override
     public String genMidCode() {
-        //Todo 之后要做公共子表达式优化 T要用不同的下标
         String temp1 = RelExps.get(0).genMidCode();
         for (int i = 1;i < RelExps.size();i++) {
             String temp2 = RelExps.get(i).genMidCode();

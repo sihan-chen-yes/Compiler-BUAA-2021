@@ -118,7 +118,6 @@ public class ConstDef extends Node {
                     dataType,MidCodeGener.getLayer());
             setEntryInfo(symbolTableEntry,false);
             symbolTable.insertLocal(symbolTableEntry,MidCodeGener.getFuncName());
-            //Todo 可以优化 const
             String Ident = getName() + getLine();
             if (dataType == DataType.INT) {
                 int value = symbolTableEntry.getValue();

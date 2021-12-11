@@ -43,7 +43,6 @@ public class RelExp extends Node {
 
     @Override
     public String genMidCode() {
-        //Todo 之后要做公共子表达式优化 T要用不同的下标
         String temp1 = AddExps.get(0).genMidCode();
         for (int i = 1;i < AddExps.size();i++) {
             String temp2 = AddExps.get(i).genMidCode();
@@ -58,7 +57,6 @@ public class RelExp extends Node {
             } else if (calType == CalType.ge) {
                 op = OpType.SGE;
             }
-            //Todo
             String temp3;
             if (isNumber(temp1) && isNumber(temp2)) {
                 int value1 = Integer.parseInt(temp1);

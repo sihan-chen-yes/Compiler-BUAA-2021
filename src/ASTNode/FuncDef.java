@@ -99,7 +99,6 @@ public class FuncDef extends Node {
                     )
             );
         }
-        //虽然会重复还是要加//Todo
         MidCodeGener.getSymbolTable().setLocalAddr(MidCodeGener.getFuncName());
         MidCodeGener.getSymbolTable().refactorName(MidCodeGener.getFuncName());
         return super.genMidCode();
