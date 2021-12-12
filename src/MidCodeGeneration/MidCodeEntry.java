@@ -341,7 +341,6 @@ public class MidCodeEntry {
             }
         } else {
             reg = "$t0";
-            //Todo 是否可优化为addi
             if (symbolTable.isNumber(func,name)) {
                 curCode += String.format("li $t0,%d",Integer.parseInt(name));
             } else {
@@ -1446,7 +1445,9 @@ public class MidCodeEntry {
             //最多存在一个操作数是常数的情况
             String reg0 = null,reg1 = null,regDst,c = null,reg = null;
             boolean needConstOp = false;
-            if (opType == OpType.ADD && (isNumber(r1) || isNumber(r2))
+            boolean needNeg = false;
+            int shift = 0;
+            if ((opType == OpType.ADD) && (isNumber(r1) || isNumber(r2))
                     || (opType == OpType.SUB || opType == OpType.SLT || opType == OpType.SGE)
                     && isNumber(r2)) {
                 needConstOp = true;
@@ -1465,6 +1466,36 @@ public class MidCodeEntry {
                     reg = load(r1);
                 }
                 curCode += "\n";
+            } else if (opType == OpType.MULT &&
+                    (isNumber(r1) && isPower(r1) || isNumber(r2) && isPower(r2))) {
+                if (isNumber(r1) && isPower(r1) ) {
+                    needConstOp = true;
+                    shift = getShift(r1);
+                    assert shift > 0;
+                    reg = loadSec(r2);
+                    curCode += "\n";
+                    if (r1.charAt(0) == '-') {
+                        needNeg = true;
+                    }
+                } else if (isNumber(r2) && isPower(r2)) {
+                    needConstOp = true;
+                    shift = getShift(r2);
+                    assert shift > 0;
+                    reg = load(r1);
+                    curCode += "\n";
+                    if (r2.charAt(0) == '-') {
+                        needNeg = true;
+                    }
+                }
+            } else if ((opType == OpType.DIV || opType == OpType.MOD) && isNumber(r2) && isPower(r2)) {
+                needConstOp = true;
+                shift = getShift(r2);
+                assert shift > 0;
+                reg = load(r1);
+                curCode += "\n";
+                if (r2.charAt(0) == '-') {
+                    needNeg = true;
+                }
             } else {
                 //没有常数
                 reg0 = load(r1);
@@ -1497,18 +1528,82 @@ public class MidCodeEntry {
                     }
                 }
             } else if (opType == OpType.MULT) {
-                assert !needConstOp;
-                curCode += String.format("mul %s,%s,%s",regDst,reg0,reg1);
+                if (!needConstOp) {
+                    curCode += String.format("mul %s,%s,%s",regDst,reg0,reg1);
+                } else {
+                    //不可能有 1 -1 0作为常数
+                    curCode += String.format("sll %s,%s,%d",regDst,reg,shift);
+                    if (needNeg) {
+                        curCode += "\n";
+                        curCode += String.format("neg %s,%s",regDst,regDst);
+                    }
+                }
             } else if (opType == OpType.DIV) {
-                assert !needConstOp;
-                curCode += String.format("div %s,%s",reg0,reg1);
-                curCode += "\n";
-                curCode += String.format("mflo %s",regDst);
+                //不可能有+-1
+                if (!needConstOp) {
+                    curCode += String.format("div %s,%s",reg0,reg1);
+                    curCode += "\n";
+                    curCode += String.format("mflo %s",regDst);
+                } else {
+                    //reg 和 regDst可能是一个reg
+                    String label1 = MidCodeGener.genLabel();
+                    String label2 = MidCodeGener.genLabel();
+                    curCode += String.format("bgez %s,%s",reg, label1);
+                    curCode += "\n";
+                    curCode += String.format("neg %s,%s",regDst,reg);
+                    curCode += "\n";
+                    curCode += String.format("sra %s,%s,%d",regDst,regDst,shift);
+                    curCode += "\n";
+                    curCode += String.format("neg %s,%s",regDst,regDst);
+                    curCode += "\n";
+                    curCode += String.format("j %s",label2);
+                    curCode += "\n";
+                    curCode += String.format("%s:sra %s,%s,%d",label1,regDst,reg,shift);
+                    curCode += "\n";
+                    curCode += String.format("%s:",label2);
+                    curCode += "\n";
+                    if (needNeg) {
+                        curCode += String.format("neg %s,%s",regDst,regDst);
+                    }
+
+                }
             } else if (opType == OpType.MOD) {
-                assert !needConstOp;
-                curCode += String.format("div %s,%s",reg0,reg1);
-                curCode += "\n";
-                curCode += String.format("mfhi %s",regDst);
+                //r2不可能出现 +1 -1 中间代码已优化
+                if (!needConstOp) {
+                    curCode += String.format("div %s,%s",reg0,reg1);
+                    curCode += "\n";
+                    curCode += String.format("mfhi %s",regDst);
+                } else {
+                    String label1 = MidCodeGener.genLabel();
+                    String label2 = MidCodeGener.genLabel();
+                    if (reg.equals(regDst)) {
+                        //reg和regDst可能是一个reg 需要先保存reg
+                        curCode += String.format("move $t1,%s",reg);
+                        curCode += "\n";
+                    }
+                    curCode += String.format("bgez %s,%s",reg, label1);
+                    curCode += "\n";
+                    curCode += String.format("neg %s,%s",regDst,reg);
+                    curCode += "\n";
+                    curCode += String.format("sra %s,%s,%d",regDst,regDst,shift);
+                    curCode += "\n";
+                    curCode += String.format("neg %s,%s",regDst,regDst);
+                    curCode += "\n";
+                    curCode += String.format("j %s",label2);
+                    curCode += "\n";
+                    curCode += String.format("%s:sra %s,%s,%d",label1,regDst,reg,shift);
+                    curCode += "\n";
+                    curCode += String.format("%s:",label2);
+                    curCode += "\n";
+                    //算出商
+                    curCode += String.format("sll %s,%s,%d",regDst,regDst,shift);
+                    curCode += "\n";
+                    if (reg.equals(regDst)) {
+                        curCode += String.format("subu %s,$t1,%s",regDst,regDst);
+                    } else {
+                        curCode += String.format("subu %s,%s,%s",regDst,reg,regDst);
+                    }
+                }
             } else if (opType == OpType.SLT) {
                 if (!needConstOp) {
                     curCode += String.format("slt %s,%s,%s",regDst,reg0,reg1);
@@ -1549,6 +1644,27 @@ public class MidCodeEntry {
                 store(dst,regDst);
             }
         }
+    }
+
+    public boolean isPower(String num) {
+        int val = Integer.valueOf(num);
+        if (val < 0) {
+            val = -val;
+        }
+        return (val & (val - 1)) == 0;
+    }
+
+    public int getShift(String num) {
+        int val = Integer.valueOf(num);
+        if (val < 0) {
+            val = -val;
+        }
+        int shift = 0;
+        while (val != 1) {
+            val /= 2;
+            shift++;
+        }
+        return shift;
     }
 
     public void genSingleOperand() {
