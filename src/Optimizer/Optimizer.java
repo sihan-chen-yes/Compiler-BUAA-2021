@@ -10,7 +10,7 @@ import java.util.Iterator;
 
 public class Optimizer {
     private ArrayList<MidCodeEntry> midCodeList;
-    private ArrayList<MidCodeEntry> opMidCode = null;
+    private ArrayList<MidCodeEntry> optimizedMidCode = null;
 
     private ArrayList<FuncBlock> funcBlocks = new ArrayList<>();
     private FuncBlock curFuncBlock = null;
@@ -49,9 +49,10 @@ public class Optimizer {
 //        print();
         spread();
         genDataFlow();
-        delDeadCode();
+//        delDeadCode();
         dye();
-        MidCodeGener.setMidCodeList(getOpMidCode());
+//        genDAG();
+        MidCodeGener.setMidCodeList(getOptimizedMidCode());
     }
 
     public void prune() {
@@ -173,25 +174,18 @@ public class Optimizer {
 //        getOptimizedMidCode();
 //    }
 
-    public ArrayList<MidCodeEntry> getOpMidCode() {
-        if (opMidCode == null) {
-            opMidCode = new ArrayList<>();
+    public ArrayList<MidCodeEntry> getOptimizedMidCode() {
+        if (optimizedMidCode == null) {
+            optimizedMidCode = new ArrayList<>();
             for (FuncBlock funcBlock:funcBlocks) {
-                opMidCode.addAll(funcBlock.getOptimizedMidCode());
+                optimizedMidCode.addAll(funcBlock.getOptimizedMidCode());
             }
         }
-        return opMidCode;
+        return optimizedMidCode;
     }
 
     public void genDataFlow() {
         genDefUse();
-    }
-
-    public void delDeadCode() {
-        //注意死代码删除后符号表中可能存在没有意义的项
-        for (FuncBlock funcBlock:funcBlocks) {
-            funcBlock.delDeadCode();
-        }
     }
 
     public void genReachDef() {
@@ -209,6 +203,13 @@ public class Optimizer {
     public void dye() {
         for (FuncBlock funcBlock:funcBlocks) {
             funcBlock.dye();
+        }
+    }
+
+    public void delDeadCode() {
+        //注意死代码删除后符号表中可能存在没有意义的项
+        for (FuncBlock funcBlock:funcBlocks) {
+            funcBlock.delDeadCode();
         }
     }
 

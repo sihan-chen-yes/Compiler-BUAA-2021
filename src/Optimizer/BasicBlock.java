@@ -13,7 +13,7 @@ public class BasicBlock {
     private ArrayList<BasicBlock> preBlocks = new ArrayList<>();
     private ArrayList<MidCodeEntry> midCodeList = new ArrayList<>();
     private ArrayList<MidCodeEntry> assignMid = new ArrayList<>();
-    private ArrayList<MidCodeEntry> opMidCode = new ArrayList<>();
+//    private ArrayList<MidCodeEntry> optimizedMidCode = new ArrayList<>();
     private ArrayList<BasicBlock> postBlocks = new ArrayList<>();
     private String func;
     private int blockNum;
@@ -314,13 +314,11 @@ public class BasicBlock {
     }
 
     public ArrayList<MidCodeEntry> getOptimizedMidCode() {
-        //生成优化后的中间代码
         ArrayList<MidCodeEntry> midCodeEntries = new ArrayList<>();
         for (String label:labels) {
             midCodeEntries.add(new MidCodeEntry(OpType.LABEL_GEN,null,null,null,label));
         }
-        midCodeEntries.addAll(opMidCode);
-        //Todo change Here
+        midCodeEntries.addAll(midCodeList);
         return midCodeEntries;
     }
 
@@ -639,6 +637,7 @@ public class BasicBlock {
     }
 
     public void delDeadCode() {
+        ArrayList<MidCodeEntry> tmp = new ArrayList<>();
         for (MidCodeEntry midCodeEntry:midCodeList) {
             OpType opType = midCodeEntry.getOpType();
             String r1 = midCodeEntry.getR1();
@@ -652,36 +651,37 @@ public class BasicBlock {
                     || opType == OpType.SNE || opType == OpType.NOT) {
                 if (midCodeEntry.getUseDefOutSet().contains(dst)) {
                     //新定义的dst 在out集中 需要加入
-                    opMidCode.add(midCodeEntry);
+                    tmp.add(midCodeEntry);
                 }
             } else if (opType == OpType.STORE_ARRAY_1D || opType == OpType.STORE_ARRAY_2D) {
                 //先检查是否是全局变量
                 if (symbolTable.search_local(func,dst) != null) {
                     if (midCodeEntry.getUseDefOutSet().contains(dst)) {
                         //新定义的dst 在out集中 需要加入
-                        opMidCode.add(midCodeEntry);
+                        tmp.add(midCodeEntry);
                     }
                 } else {
                     assert symbolTable.search_global(dst) != null;
                     //是全局变量 无条件加入
-                    opMidCode.add(midCodeEntry);
+                    tmp.add(midCodeEntry);
                 }
             } else if (opType == OpType.ASSIGN) {
                 //先检查是否是全局变量
                 if (symbolTable.search_local(func,r1) != null) {
                     if (midCodeEntry.getUseDefOutSet().contains(r1)) {
                         //新定义的r1 在out集中 需要加入
-                        opMidCode.add(midCodeEntry);
+                        tmp.add(midCodeEntry);
                     }
                 } else {
                     assert symbolTable.search_global(r1) != null;
                     //是全局变量 无条件加入
-                    opMidCode.add(midCodeEntry);
+                    tmp.add(midCodeEntry);
                 }
             } else {
-                opMidCode.add(midCodeEntry);
+                tmp.add(midCodeEntry);
             }
         }
+        midCodeList = tmp;
     }
 
     public void spread() {
