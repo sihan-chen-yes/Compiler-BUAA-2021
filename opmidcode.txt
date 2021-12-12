@@ -1,32 +1,89 @@
 ########################################GLOBAL START########################################
-GLOBAL_DECLARE a
-GLOBAL_DECLARE b
+GLOBAL_DECLARE d
 ########################################GLOBAL END##########################################
 ########################################ASCIIZ START########################################
+str_0:, 
+str_1:, 
+str_2:\n
 ########################################ASCIIZ END##########################################
 ########################################FUNC START##########################################
-FUNC_DECLARE main
-ADD 1 a @T_0
-ADD @T_0 a @T_1
-ADD @T_1 a @T_2
-ADD @T_2 a @T_3
-ASSIGN x4 @T_3
-ADD 1 x4 @T_4
-ADD @T_4 x4 @T_5
-ADD @T_5 x4 @T_6
-ADD @T_6 x4 @T_7
-ADD @T_7 x4 @T_8
-ASSIGN y5 @T_8
-SEQ x4 1 @T_9
-BEQZ @T_9 label_0
-PRINT_INT x4
-PRINT_INT y5
-GOTO label_1
+FUNC_DECLARE hhh
+MULT i3 i3 @T_0
+ASSIGN c4 @T_0
+SEQ i3 1 @T_1
+BEQZ @T_1 label_0
+RET_VALUE 1
+########################################FUNC END############################################
 LABEL_GEN label_0
-PRINT_INT x4
-PRINT_INT y5
+SEQ i3 2 @T_2
+BEQZ @T_2 label_1
+RET_VALUE 2
+########################################FUNC END############################################
 LABEL_GEN label_1
-PRINT_INT x4
-PRINT_INT y5
+MULT c4 c4 @T_3
+MOD @T_3 10 @T_4
+PREPARE hhh
+SUB i3 1 @T_5
+PUSH_PARAM @T_5 0 hhh
+CALL hhh
+FIN_CALL hhh
+STORE_RET @T_6
+PREPARE hhh
+SUB i3 2 @T_7
+PUSH_PARAM @T_7 0 hhh
+CALL hhh
+FIN_CALL hhh
+STORE_RET @T_8
+ADD @T_6 @T_8 @T_9
+RET_VALUE @T_9
+########################################FUNC END############################################
+########################################FUNC START##########################################
+FUNC_DECLARE main
+GETINT @T_10
+ASSIGN i16 @T_10
+GETINT @T_11
+PREPARE hhh
+PREPARE hhh
+PUSH_PARAM 3 0 hhh
+CALL hhh
+FIN_CALL hhh
+STORE_RET @T_12
+PUSH_PARAM @T_12 0 hhh
+CALL hhh
+FIN_CALL hhh
+STORE_RET @T_13
+SUB 41440 @T_13 @T_14
+ADD @T_14 -10091 @T_15
+ASSIGN j16 @T_15
+ASSIGN k20 5
+ASSIGN n21 10
+LABEL_GEN label_2
+MULT k20 k20 @T_16
+MULT @T_16 k20 @T_17
+MULT @T_17 k20 @T_18
+MULT @T_18 k20 @T_19
+MULT @T_19 k20 @T_20
+SLT n21 @T_20 @T_21
+BEQZ @T_21 label_4
+LABEL_GEN label_3
+MULT d d @T_22
+MOD @T_22 10000 @T_23
+ASSIGN d @T_23
+ADD n21 1 @T_24
+ASSIGN n21 @T_24
+MULT k20 k20 @T_25
+MULT @T_25 k20 @T_26
+MULT @T_26 k20 @T_27
+MULT @T_27 k20 @T_28
+MULT @T_28 k20 @T_29
+SLT n21 @T_29 @T_30
+BNEZ @T_30 label_3
+LABEL_GEN label_4
+PRINT_INT i16
+PRINT_STRING str_0
+PRINT_INT j16
+PRINT_STRING str_1
+PRINT_INT k20
+PRINT_STRING str_2
 EXIT
 ########################################FUNC END############################################

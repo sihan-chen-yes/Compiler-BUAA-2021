@@ -1,6 +1,7 @@
 package Optimizer;
 
 import Enum.*;
+import GrammarAnalysis.SymbolTable;
 import MidCodeGeneration.MidCodeEntry;
 import MidCodeGeneration.MidCodeGener;
 
@@ -12,7 +13,7 @@ public class BasicBlock {
     private ArrayList<BasicBlock> preBlocks = new ArrayList<>();
     private ArrayList<MidCodeEntry> midCodeList = new ArrayList<>();
     private ArrayList<MidCodeEntry> assignMid = new ArrayList<>();
-//    private ArrayList<MidCodeEntry> optimizedMidCode = new ArrayList<>();
+    private ArrayList<MidCodeEntry> opMidCode = new ArrayList<>();
     private ArrayList<BasicBlock> postBlocks = new ArrayList<>();
     private String func;
     private int blockNum;
@@ -311,11 +312,13 @@ public class BasicBlock {
     }
 
     public ArrayList<MidCodeEntry> getOptimizedMidCode() {
+        //生成优化后的中间代码
         ArrayList<MidCodeEntry> midCodeEntries = new ArrayList<>();
         for (String label:labels) {
             midCodeEntries.add(new MidCodeEntry(OpType.LABEL_GEN,null,null,null,label));
         }
-        midCodeEntries.addAll(midCodeList);
+        midCodeEntries.addAll(opMidCode);
+        //Todo change Here
         return midCodeEntries;
     }
 
@@ -630,6 +633,52 @@ public class BasicBlock {
             tmp.addAll(midCodeList.get(i).getUseSet());
             midCodeList.get(i).setUseDefInSet(tmp);
             in = tmp;
+        }
+    }
+
+    public void delDeadCode() {
+        for (MidCodeEntry midCodeEntry:midCodeList) {
+            OpType opType = midCodeEntry.getOpType();
+            String r1 = midCodeEntry.getR1();
+            String dst = midCodeEntry.getDst();
+            SymbolTable symbolTable = MidCodeGener.getSymbolTable();
+            if (opType == OpType.STORE_RET || opType == OpType.LOAD_ARRAY_1D || opType == OpType.LOAD_ARRAY_2D
+                    || opType == OpType.LOAD_ARRDESS || opType == OpType.ADD || opType == OpType.SUB
+                    || opType == OpType.MULT || opType == OpType.DIV || opType == OpType.MOD
+                    || opType == OpType.NEG || opType == OpType.SLT || opType == OpType.SLE
+                    || opType == OpType.SGT || opType == OpType.SGE || opType == OpType.SEQ
+                    || opType == OpType.SNE || opType == OpType.NOT) {
+                if (midCodeEntry.getUseDefOutSet().contains(dst)) {
+                    //新定义的dst 在out集中 需要加入
+                    opMidCode.add(midCodeEntry);
+                }
+            } else if (opType == OpType.STORE_ARRAY_1D || opType == OpType.STORE_ARRAY_2D) {
+                //先检查是否是全局变量
+                if (symbolTable.search_local(func,dst) != null) {
+                    if (midCodeEntry.getUseDefOutSet().contains(dst)) {
+                        //新定义的dst 在out集中 需要加入
+                        opMidCode.add(midCodeEntry);
+                    }
+                } else {
+                    assert symbolTable.search_global(dst) != null;
+                    //是全局变量 无条件加入
+                    opMidCode.add(midCodeEntry);
+                }
+            } else if (opType == OpType.ASSIGN) {
+                //先检查是否是全局变量
+                if (symbolTable.search_local(func,r1) != null) {
+                    if (midCodeEntry.getUseDefOutSet().contains(r1)) {
+                        //新定义的r1 在out集中 需要加入
+                        opMidCode.add(midCodeEntry);
+                    }
+                } else {
+                    assert symbolTable.search_global(r1) != null;
+                    //是全局变量 无条件加入
+                    opMidCode.add(midCodeEntry);
+                }
+            } else {
+                opMidCode.add(midCodeEntry);
+            }
         }
     }
 

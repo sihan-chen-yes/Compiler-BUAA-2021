@@ -15,11 +15,14 @@ public class Compiler {
 //    private static boolean op = false;
     //优化开关
     // 影响while
-    // 影响sregs
+    // 影响stregs dye
+    // 影响运算强度削弱
+    // 影响死代码删除
 
 
-//    private static boolean debug = true;
-    private static boolean debug = false;
+
+    private static boolean debug = true;
+//    private static boolean debug = false;
     //debug开关
 
     public static void main(java.lang.String[] args) {

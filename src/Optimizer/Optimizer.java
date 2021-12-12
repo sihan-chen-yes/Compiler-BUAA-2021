@@ -10,7 +10,7 @@ import java.util.Iterator;
 
 public class Optimizer {
     private ArrayList<MidCodeEntry> midCodeList;
-    private ArrayList<MidCodeEntry> optimizedMidCode = null;
+    private ArrayList<MidCodeEntry> opMidCode = null;
 
     private ArrayList<FuncBlock> funcBlocks = new ArrayList<>();
     private FuncBlock curFuncBlock = null;
@@ -48,8 +48,8 @@ public class Optimizer {
         prune();
 //        print();
         genDataFlow();
-//        genDAG();
-        MidCodeGener.setMidCodeList(getOptimizedMidCode());
+        delDeadCode();
+        MidCodeGener.setMidCodeList(getOpMidCode());
     }
 
     public void prune() {
@@ -171,20 +171,26 @@ public class Optimizer {
 //        getOptimizedMidCode();
 //    }
 
-    public ArrayList<MidCodeEntry> getOptimizedMidCode() {
-        if (optimizedMidCode == null) {
-            optimizedMidCode = new ArrayList<>();
+    public ArrayList<MidCodeEntry> getOpMidCode() {
+        if (opMidCode == null) {
+            opMidCode = new ArrayList<>();
             for (FuncBlock funcBlock:funcBlocks) {
-                optimizedMidCode.addAll(funcBlock.getOptimizedMidCode());
+                opMidCode.addAll(funcBlock.getOptimizedMidCode());
             }
         }
-        return optimizedMidCode;
+        return opMidCode;
     }
 
     public void genDataFlow() {
         genDefUse();
         allocSRegs();
-        System.out.println("genDF OK");
+    }
+
+    public void delDeadCode() {
+        //注意死代码删除后符号表中可能存在没有意义的项
+        for (FuncBlock funcBlock:funcBlocks) {
+            funcBlock.delDeadCode();
+        }
     }
 
     public void genReachDef() {

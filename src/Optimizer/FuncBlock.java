@@ -101,6 +101,12 @@ public class FuncBlock {
         return conflictGraph;
     }
 
+    public void delDeadCode() {
+        for (BasicBlock basicBlock:basicBlocks) {
+            basicBlock.delDeadCode();
+        }
+    }
+
     @Override
     public String toString() {
         String results = headBlock.toString() + "\n";
