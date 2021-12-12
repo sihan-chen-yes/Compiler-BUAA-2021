@@ -107,11 +107,11 @@ public class FuncBlock {
         }
     }
 
-//    public void spread() {
-//        for (BasicBlock basicBlock:basicBlocks) {
-//            basicBlock.spread();
-//        }
-//    }
+    public void spread() {
+        for (BasicBlock basicBlock:basicBlocks) {
+            basicBlock.spread();
+        }
+    }
 
     @Override
     public String toString() {

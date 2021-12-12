@@ -40,6 +40,8 @@ public class BasicBlock {
     private HashMap<String, String> varToReg = new HashMap<>();
     private FuncBlock fatherBlock;
 
+    private HashMap<String, String> spreadMap = new HashMap<>();
+
     public void addMideCodeEntry(MidCodeEntry midCodeEntry) {
         midCodeList.add(midCodeEntry);
         midCodeEntry.setBasicBlock(this);
@@ -682,138 +684,138 @@ public class BasicBlock {
         }
     }
 
-//    public void spread() {
-//        //顺序扫描 建立映射之后放入midCodeList 再DF分析
-//        for (MidCodeEntry midCodeEntry:midCodeList) {
-//            //每次先替换再扩充映射
-//            OpType opType = midCodeEntry.getOpType();
-//            String r1 = midCodeEntry.getR1();
-//            String r2 = midCodeEntry.getR2();
-//            String dst = midCodeEntry.getDst();
-//            if (opType == OpType.PUSH_PARAM) {
-//                if (spreadMap.containsKey(r1)) {
-//                    midCodeEntry.setR1(spreadMap.get(r1));
-//                }
-//            } else if (opType == OpType.LOAD_ARRAY_1D || opType == OpType.STORE_ARRAY_1D
-//                    || opType == OpType.LOAD_ARRDESS && r2 != null) {
-//                if (spreadMap.containsKey(r2)) {
-//                    midCodeEntry.setR2(spreadMap.get(r2));
-//                }
-//            } else if (opType == OpType.LOAD_ARRAY_2D || opType == OpType.STORE_ARRAY_2D) {
-//                if (spreadMap.containsKey(r1)) {
-//                    midCodeEntry.setR1(spreadMap.get(r1));
-//                }
-//                if (spreadMap.containsKey(r2)) {
-//                    midCodeEntry.setR2(spreadMap.get(r2));
-//                }
-//            } else if (opType == OpType.ASSIGN) {
-//                if (spreadMap.containsKey(dst)) {
-//                    midCodeEntry.setDst(spreadMap.get(dst));
-//                }
-//                dst = midCodeEntry.getDst();
-//                spreadMap.put(r1,dst);
-//            } else if (opType == OpType.PRINT_INT) {
-//                if (spreadMap.containsKey(dst)) {
-//                    midCodeEntry.setDst(spreadMap.get(dst));
-//                }
-//            } else if (opType == OpType.RET_VALUE) {
-//                if (spreadMap.containsKey(dst)) {
-//                    midCodeEntry.setDst(spreadMap.get(dst));
-//                }
-//            } else if (isDoubleOp(opType)) {
-//                spreadConst(midCodeEntry);
-//            } else if (opType == OpType.BEQZ || opType == OpType.BNEZ) {
-//                if (spreadMap.containsKey(r1)) {
-//                    midCodeEntry.setR1(spreadMap.get(r1));
-//                }
-//            }
-//        }
-//    }
+    public void spread() {
+        //顺序扫描 建立映射之后放入midCodeList 再DF分析
+        for (MidCodeEntry midCodeEntry:midCodeList) {
+            //每次先替换再扩充映射
+            OpType opType = midCodeEntry.getOpType();
+            String r1 = midCodeEntry.getR1();
+            String r2 = midCodeEntry.getR2();
+            String dst = midCodeEntry.getDst();
+            if (opType == OpType.PUSH_PARAM) {
+                if (spreadMap.containsKey(r1)) {
+                    midCodeEntry.setR1(spreadMap.get(r1));
+                }
+            } else if (opType == OpType.LOAD_ARRAY_1D || opType == OpType.STORE_ARRAY_1D
+                    || opType == OpType.LOAD_ARRDESS && r2 != null) {
+                if (spreadMap.containsKey(r2)) {
+                    midCodeEntry.setR2(spreadMap.get(r2));
+                }
+            } else if (opType == OpType.LOAD_ARRAY_2D || opType == OpType.STORE_ARRAY_2D) {
+                if (spreadMap.containsKey(r1)) {
+                    midCodeEntry.setR1(spreadMap.get(r1));
+                }
+                if (spreadMap.containsKey(r2)) {
+                    midCodeEntry.setR2(spreadMap.get(r2));
+                }
+            } else if (opType == OpType.ASSIGN) {
+                if (spreadMap.containsKey(dst)) {
+                    midCodeEntry.setDst(spreadMap.get(dst));
+                }
+                dst = midCodeEntry.getDst();
+                spreadMap.put(r1,dst);
+            } else if (opType == OpType.PRINT_INT) {
+                if (spreadMap.containsKey(dst)) {
+                    midCodeEntry.setDst(spreadMap.get(dst));
+                }
+            } else if (opType == OpType.RET_VALUE) {
+                if (spreadMap.containsKey(dst)) {
+                    midCodeEntry.setDst(spreadMap.get(dst));
+                }
+            } else if (isDoubleOp(opType)) {
+                spreadConst(midCodeEntry);
+            } else if (opType == OpType.BEQZ || opType == OpType.BNEZ) {
+                if (spreadMap.containsKey(r1)) {
+                    midCodeEntry.setR1(spreadMap.get(r1));
+                }
+            }
+        }
+    }
 
-//    public void spreadConst(MidCodeEntry midCodeEntry) {
-//        String r1,r2,dst;
-//        spreadR1R2(midCodeEntry);
-//        r1 = midCodeEntry.getR1();
-//        r2 = midCodeEntry.getR2();
-//        //得到最新的操作数
-//        dst = midCodeEntry.getDst();
-//        OpType opType = midCodeEntry.getOpType();
-//        if (isNumber(r1) && isNumber(r2)) {
-//            int val;
-//            if (opType == OpType.ADD) {
-//                val = Integer.valueOf(r1) + Integer.valueOf(r2);
-//            } else if (opType == OpType.SUB) {
-//                val = Integer.valueOf(r1) - Integer.valueOf(r2);
-//            } else if (opType == OpType.MULT) {
-//                val = Integer.valueOf(r1) * Integer.valueOf(r2);
-//            } else if (opType == OpType.DIV) {
-//                val = Integer.valueOf(r1) / Integer.valueOf(r2);
-//            } else if (opType == OpType.MOD) {
-//                val = Integer.valueOf(r1) % Integer.valueOf(r2);
-//            } else if (opType == OpType.SLT) {
-//                if (Integer.valueOf(r1) < Integer.valueOf(r2)) {
-//                    val = 1;
-//                } else {
-//                    val = 0;
-//                }
-//            } else if (opType == OpType.SLE) {
-//                if (Integer.valueOf(r1) <= Integer.valueOf(r2)) {
-//                    val = 1;
-//                } else {
-//                    val = 0;
-//                }
-//            } else if (opType == OpType.SGT) {
-//                if (Integer.valueOf(r1) > Integer.valueOf(r2)) {
-//                    val = 1;
-//                } else {
-//                    val = 0;
-//                }
-//            } else if (opType == OpType.SGE) {
-//                if (Integer.valueOf(r1) >= Integer.valueOf(r2)) {
-//                    val = 1;
-//                } else {
-//                    val = 0;
-//                }
-//            } else if (opType == OpType.SEQ) {
-//                if (Integer.valueOf(r1) == Integer.valueOf(r2)) {
-//                    val = 1;
-//                } else {
-//                    val = 0;
-//                }
-//            } else {
-//                assert opType == OpType.SNE;
-//                if (Integer.valueOf(r1) != Integer.valueOf(r2)) {
-//                    val = 1;
-//                } else {
-//                    val = 0;
-//                }
-//            }
-//            spreadMap.put(dst,String.valueOf(val));
-//        } else {
-//            spreadMap.remove(dst);
-//        }
-//    }
-//
-//    public boolean isDoubleOp(OpType opType) {
-//        if (opType == OpType.ADD || opType == OpType.SUB || opType == OpType.MULT || opType == OpType.DIV ||
-//                opType == OpType.MOD ||
-//                opType == OpType.SLT || opType == OpType.SLE || opType == OpType.SGT || opType == OpType.SGE ||
-//                opType == OpType.SEQ || opType == OpType.SNE) {
-//            return true;
-//        }
-//        return false;
-//    }
-//
-//    public void spreadR1R2(MidCodeEntry midCodeEntry) {
-//        String r1 = midCodeEntry.getR1();
-//        String r2 = midCodeEntry.getR2();
-//        if (spreadMap.containsKey(r1)) {
-//            midCodeEntry.setR1(spreadMap.get(r1));
-//        }
-//        if (spreadMap.containsKey(r2)) {
-//            midCodeEntry.setR2(spreadMap.get(r2));
-//        }
-//    }
+    public void spreadConst(MidCodeEntry midCodeEntry) {
+        String r1,r2,dst;
+        spreadR1R2(midCodeEntry);
+        r1 = midCodeEntry.getR1();
+        r2 = midCodeEntry.getR2();
+        //得到最新的操作数
+        dst = midCodeEntry.getDst();
+        OpType opType = midCodeEntry.getOpType();
+        if (isNumber(r1) && isNumber(r2)) {
+            int val;
+            if (opType == OpType.ADD) {
+                val = Integer.valueOf(r1) + Integer.valueOf(r2);
+            } else if (opType == OpType.SUB) {
+                val = Integer.valueOf(r1) - Integer.valueOf(r2);
+            } else if (opType == OpType.MULT) {
+                val = Integer.valueOf(r1) * Integer.valueOf(r2);
+            } else if (opType == OpType.DIV) {
+                val = Integer.valueOf(r1) / Integer.valueOf(r2);
+            } else if (opType == OpType.MOD) {
+                val = Integer.valueOf(r1) % Integer.valueOf(r2);
+            } else if (opType == OpType.SLT) {
+                if (Integer.valueOf(r1) < Integer.valueOf(r2)) {
+                    val = 1;
+                } else {
+                    val = 0;
+                }
+            } else if (opType == OpType.SLE) {
+                if (Integer.valueOf(r1) <= Integer.valueOf(r2)) {
+                    val = 1;
+                } else {
+                    val = 0;
+                }
+            } else if (opType == OpType.SGT) {
+                if (Integer.valueOf(r1) > Integer.valueOf(r2)) {
+                    val = 1;
+                } else {
+                    val = 0;
+                }
+            } else if (opType == OpType.SGE) {
+                if (Integer.valueOf(r1) >= Integer.valueOf(r2)) {
+                    val = 1;
+                } else {
+                    val = 0;
+                }
+            } else if (opType == OpType.SEQ) {
+                if (Integer.valueOf(r1) == Integer.valueOf(r2)) {
+                    val = 1;
+                } else {
+                    val = 0;
+                }
+            } else {
+                assert opType == OpType.SNE;
+                if (Integer.valueOf(r1) != Integer.valueOf(r2)) {
+                    val = 1;
+                } else {
+                    val = 0;
+                }
+            }
+            spreadMap.put(dst,String.valueOf(val));
+        } else {
+            spreadMap.remove(dst);
+        }
+    }
+
+    public boolean isDoubleOp(OpType opType) {
+        if (opType == OpType.ADD || opType == OpType.SUB || opType == OpType.MULT || opType == OpType.DIV ||
+                opType == OpType.MOD ||
+                opType == OpType.SLT || opType == OpType.SLE || opType == OpType.SGT || opType == OpType.SGE ||
+                opType == OpType.SEQ || opType == OpType.SNE) {
+            return true;
+        }
+        return false;
+    }
+
+    public void spreadR1R2(MidCodeEntry midCodeEntry) {
+        String r1 = midCodeEntry.getR1();
+        String r2 = midCodeEntry.getR2();
+        if (spreadMap.containsKey(r1)) {
+            midCodeEntry.setR1(spreadMap.get(r1));
+        }
+        if (spreadMap.containsKey(r2)) {
+            midCodeEntry.setR2(spreadMap.get(r2));
+        }
+    }
 
     @Override
     public String toString() {

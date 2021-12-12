@@ -47,6 +47,7 @@ public class Optimizer {
         genBlock();
         prune();
 //        print();
+        spread();
         genDataFlow();
         delDeadCode();
         dye();
@@ -211,10 +212,10 @@ public class Optimizer {
         }
     }
 
-//    public void spread() {
-//        //基本块内的常量 、 复写传播
-//        for (FuncBlock funcBlock:funcBlocks) {
-//            funcBlock.spread();
-//        }
-//    }
+    public void spread() {
+        //基本块内的常量 、 复写传播
+        for (FuncBlock funcBlock:funcBlocks) {
+            funcBlock.spread();
+        }
+    }
 }
