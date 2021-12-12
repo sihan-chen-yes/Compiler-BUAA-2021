@@ -49,6 +49,7 @@ public class Optimizer {
 //        print();
         genDataFlow();
         delDeadCode();
+        dye();
         MidCodeGener.setMidCodeList(getOpMidCode());
     }
 
@@ -183,7 +184,6 @@ public class Optimizer {
 
     public void genDataFlow() {
         genDefUse();
-        allocSRegs();
     }
 
     public void delDeadCode() {
@@ -205,9 +205,16 @@ public class Optimizer {
         }
     }
 
-    public void allocSRegs() {
+    public void dye() {
         for (FuncBlock funcBlock:funcBlocks) {
-            funcBlock.allocSRegs();
+            funcBlock.dye();
         }
     }
+
+//    public void spread() {
+//        //基本块内的常量 、 复写传播
+//        for (FuncBlock funcBlock:funcBlocks) {
+//            funcBlock.spread();
+//        }
+//    }
 }

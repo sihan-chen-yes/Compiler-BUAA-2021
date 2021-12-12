@@ -90,7 +90,7 @@ public class FuncBlock {
         }
     }
 
-    public void allocSRegs() {
+    public void dye() {
         for (BasicBlock basicBlock:basicBlocks) {
             basicBlock.genSubConf(conflictGraph);
         }
@@ -106,6 +106,12 @@ public class FuncBlock {
             basicBlock.delDeadCode();
         }
     }
+
+//    public void spread() {
+//        for (BasicBlock basicBlock:basicBlocks) {
+//            basicBlock.spread();
+//        }
+//    }
 
     @Override
     public String toString() {
