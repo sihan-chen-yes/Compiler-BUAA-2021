@@ -1,31 +1,14 @@
 ########################################GLOBAL START########################################
 ########################################GLOBAL END##########################################
 ########################################ASCIIZ START########################################
-str_0:\n
-str_1:\n
-str_2:\n
-str_3:\n
 ########################################ASCIIZ END##########################################
 ########################################FUNC START##########################################
 FUNC_DECLARE main
 ASSIGN y2 9
-MOD y2 4 @T_0
-ASSIGN x3 @T_0
-PRINT_INT x3
-PRINT_STRING str_0
-MOD y2 -4 @T_1
-ASSIGN x3 @T_1
-PRINT_INT x3
-PRINT_STRING str_1
-NEG y2 @T_2
-MOD @T_2 4 @T_3
-ASSIGN x3 @T_3
-PRINT_INT x3
-PRINT_STRING str_2
-NEG y2 @T_4
-MOD @T_4 -4 @T_5
-ASSIGN x3 @T_5
-PRINT_INT x3
-PRINT_STRING str_3
+STORE_ARRAY_2D a3 0 0 1
+STORE_ARRAY_2D a3 0 1 2
+STORE_ARRAY_2D a3 0 1 1
+LOAD_ARRAY_2D a3 0 1 @T_0
+STORE_ARRAY_2D a3 0 1 @T_0
 EXIT
 ########################################FUNC END############################################

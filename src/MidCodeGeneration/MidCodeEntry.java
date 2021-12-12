@@ -427,16 +427,22 @@ public class MidCodeEntry {
         } else {
             assert reg0 != null;
             String reg1;
-            reg1 = loadSec(i);
-            curCode += "\n";
-            curCode += String.format("sll $t1,%s,2",reg1);
-            curCode += "\n";
-            curCode += String.format("addu %s,%s,$t1",reg0,reg0);
+            if (isNumber(i)) {
+                int val = Integer.valueOf(i);
+                curCode += String.format("addiu %s,%s,%d",reg0,reg0,val * 4);
+            } else {
+                reg1 = loadSec(i);
+                curCode += "\n";
+                curCode += String.format("sll $t1,%s,2",reg1);
+                curCode += "\n";
+                curCode += String.format("addu %s,%s,$t1",reg0,reg0);
+            }
         }
     }
 
     public void calOffset2D(String i, String j, int length2D,String reg0) {
         //i j is T t1 t2 算出绝对地址放到t0 或者其他s
+        //offset = t0 + (i * l + j) * 4 = t0 + 4*i*l + 4*j
         //t0 = t0 + (t1 * t2 + t2) * 4
         //传进来的reg0值会变化
         String reg1,reg2;
@@ -458,22 +464,84 @@ public class MidCodeEntry {
             curCode += String.format("addu $t0,$t0,$t1");
         } else {
             assert reg0 != null;
+            if (isNumber(i) && isNumber(j)) {
+                //i j都是常数
+                int valI = Integer.valueOf(i);
+                int valJ = Integer.valueOf(j);
+                curCode += String.format("addiu %s,%s,%d",reg0,reg0,4 * (valI * length2D + valJ));
+            } else if (isNumber(i) && !isNumber(j)) {
+                //i 是常数 j不是
+                int val = Integer.valueOf(i) * length2D;
+                reg2 = loadThird(j);
+                curCode += "\n";
+                curCode += String.format("addiu $t1,%s,%d",reg2,val);
+                curCode += "\n";
+                curCode += String.format("sll $t1,$t1,2");
+                curCode += "\n";
+                curCode += String.format("addu %s,%s,$t1",reg0,reg0);
+            } else if (!isNumber(i) && isNumber(j)) {
+                //i不是常数 j是常数
+                int val = Integer.valueOf(j);
+                reg1 = loadSec(i);
+                curCode += "\n";
+                curCode += String.format("li $t2,%d",length2D);
+                curCode += "\n";
+                curCode += String.format("mul $t1,%s,$t2",reg1);
+                curCode += "\n";
+                curCode += String.format("addiu $t1,$t1,%d",val);
+                curCode += "\n";
+                curCode += String.format("sll $t1,$t1,2");
+                curCode += "\n";
+                curCode += String.format("addu %s,%s,$t1",reg0,reg0);
+            } else {
+                //i j 都不是常数 不优化
+                reg1 = loadSec(i);
+                curCode += "\n";
+                curCode += String.format("li $t2,%d",length2D);
+                curCode += "\n";
+                curCode += String.format("mul $t1,%s,$t2",reg1);
+                curCode += "\n";
+                reg2 = loadThird(j);
+                curCode += "\n";
+                curCode += String.format("addu $t1,$t1,%s",reg2);
+                curCode += "\n";
+                curCode += String.format("sll $t1,$t1,2");
+                curCode += "\n";
+                curCode += String.format("addu %s,%s,$t1",reg0,reg0);
+            }
+        }
+    }
+
+    public String opCalAddr(String i,int num) {
+        //结果放在$t1中 i对应的reg不能改
+        String regOffset = "$t1";
+        String reg1;
+        int shift;
+        if (isNumber(i)) {
+            int val = Integer.valueOf(i) * num * 4;
+            curCode += String.format("li %s,%d",regOffset,val);
+        } else if (!isNumber(i) && isPower(String.valueOf(num))) {
+            //num是2的幂次
             reg1 = loadSec(i);
             curCode += "\n";
-            curCode += String.format("li $t2,%d",length2D);
+            shift = getShift(String.valueOf(num));
+            curCode += String.format("sll %s,%s,%d",regOffset,reg1,shift + 2);
+            if (num < 0) {
+                curCode += "\n";
+                curCode += String.format("neg %s,%s",regOffset,regOffset);
+            }
+        } else {
+            //不是幂次
+            reg1 = loadSec(i);
+            //$t1
             curCode += "\n";
-            curCode += String.format("mult %s,$t2",reg1);
+            curCode += String.format("li $t2,%d",num);
             curCode += "\n";
-            curCode += String.format("mflo $t1");
+            curCode += String.format("mul %s,%s,$t2",regOffset,reg1);
             curCode += "\n";
-            reg2 = loadThird(j);
-            curCode += "\n";
-            curCode += String.format("addu $t1,$t1,%s",reg2);
-            curCode += "\n";
-            curCode += String.format("sll $t1,$t1,2");
-            curCode += "\n";
-            curCode += String.format("addu %s,%s,$t1",reg0,reg0);
+            curCode += String.format("sll %s,%s,2",regOffset,regOffset);
         }
+        return  regOffset;
     }
 
     public void calOffsetAddr(String i,int length2D,String reg0) {
@@ -494,19 +562,10 @@ public class MidCodeEntry {
             curCode += String.format("addu $t0,$t0,$t1");
         } else {
             assert reg0 != null;
-            String reg1;
-            reg1 = loadSec(i);
-            //$t1
+            String regOffset;
+            regOffset = opCalAddr(i,length2D);
             curCode += "\n";
-            curCode += String.format("li $t2,%d",length2D);
-            curCode += "\n";
-            curCode += String.format("mult %s,$t2",reg1);
-            curCode += "\n";
-            curCode += String.format("mflo $t1");
-            curCode += "\n";
-            curCode += String.format("sll $t1,$t1,2");
-            curCode += "\n";
-            curCode += String.format("addu %s,%s,$t1",reg0,reg0);
+            curCode += String.format("addu %s,%s,%s",reg0,reg0,regOffset);
         }
     }
 

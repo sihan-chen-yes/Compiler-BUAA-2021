@@ -2,141 +2,48 @@
 ########################################GLOBAL START########################################
 ########################################GLOBAL END##########################################
 ########################################ASCIIZ START########################################
-str_0:.asciiz "\n"
-str_1:.asciiz "\n"
-str_2:.asciiz "\n"
-str_3:.asciiz "\n"
 ########################################ASCIIZ END##########################################
 .text
-addiu $sp,$sp,-32
+addiu $sp,$sp,-16
 j main
 ########################################FUNC START##########################################
-####var:@T_5 reg:$s0
-####var:y2 reg:$s1
 #############FUNC_DECLARE main#############
 main:
 
 #############ASSIGN y2 9#############
 
-li $s1,9
+li $t0,9
+sw $t0,16($sp)
 
-#############MOD y2 4 @T_0#############
+#############STORE_ARRAY_2D a3 0 0 1#############
+li $t0,1
+addiu $t3,$sp,8
+addiu $t3,$t3,0
+sw $t0,0($t3)
 
-bgez $s1,label_0
-neg $s0,$s1
-sra $s0,$s0,2
-neg $s0,$s0
-j label_1
-label_0:sra $s0,$s1,2
-label_1:
-sll $s0,$s0,2
-subu $s0,$s1,$s0
+#############STORE_ARRAY_2D a3 0 1 2#############
+li $t0,2
+addiu $t3,$sp,8
+addiu $t3,$t3,4
+sw $t0,0($t3)
 
-#############ASSIGN x3 @T_0#############
+#############STORE_ARRAY_2D a3 0 1 1#############
+li $t0,1
+addiu $t3,$sp,8
+addiu $t3,$t3,4
+sw $t0,0($t3)
 
-move $s0,$s0
+#############LOAD_ARRAY_2D a3 0 1 @T_0#############
+addiu $t0,$sp,8
+addiu $t0,$t0,4
+lw $t0,0($t0)
+sw $t0,4($sp)
 
-#############PRINT_INT x3#############
-
-move $a0,$s0
-li $v0,1
-syscall
-
-#############PRINT_STRING str_0#############
-la $a0,str_0
-li $v0,4
-syscall
-
-#############MOD y2 -4 @T_1#############
-
-bgez $s1,label_2
-neg $s0,$s1
-sra $s0,$s0,2
-neg $s0,$s0
-j label_3
-label_2:sra $s0,$s1,2
-label_3:
-sll $s0,$s0,2
-subu $s0,$s1,$s0
-
-#############ASSIGN x3 @T_1#############
-
-move $s0,$s0
-
-#############PRINT_INT x3#############
-
-move $a0,$s0
-li $v0,1
-syscall
-
-#############PRINT_STRING str_1#############
-la $a0,str_1
-li $v0,4
-syscall
-
-#############NEG y2 @T_2#############
-
-neg $s0,$s1
-
-#############MOD @T_2 4 @T_3#############
-
-move $t1,$s0
-bgez $s0,label_4
-neg $s0,$s0
-sra $s0,$s0,2
-neg $s0,$s0
-j label_5
-label_4:sra $s0,$s0,2
-label_5:
-sll $s0,$s0,2
-subu $s0,$t1,$s0
-
-#############ASSIGN x3 @T_3#############
-
-move $s0,$s0
-
-#############PRINT_INT x3#############
-
-move $a0,$s0
-li $v0,1
-syscall
-
-#############PRINT_STRING str_2#############
-la $a0,str_2
-li $v0,4
-syscall
-
-#############NEG y2 @T_4#############
-
-neg $s0,$s1
-
-#############MOD @T_4 -4 @T_5#############
-
-move $t1,$s0
-bgez $s0,label_6
-neg $s0,$s0
-sra $s0,$s0,2
-neg $s0,$s0
-j label_7
-label_6:sra $s0,$s0,2
-label_7:
-sll $s0,$s0,2
-subu $s0,$t1,$s0
-
-#############ASSIGN x3 @T_5#############
-
-move $s0,$s0
-
-#############PRINT_INT x3#############
-
-move $a0,$s0
-li $v0,1
-syscall
-
-#############PRINT_STRING str_3#############
-la $a0,str_3
-li $v0,4
-syscall
+#############STORE_ARRAY_2D a3 0 1 @T_0#############
+lw $t0,4($sp)
+addiu $t3,$sp,8
+addiu $t3,$t3,4
+sw $t0,0($t3)
 
 #############EXIT#############
 li $v0,10
