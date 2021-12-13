@@ -49,9 +49,8 @@ public class Optimizer {
 //        print();
         spread();
         genDataFlow();
-//        delDeadCode();
+        delDeadCode();
         dye();
-//        genDAG();
         MidCodeGener.setMidCodeList(getOptimizedMidCode());
     }
 

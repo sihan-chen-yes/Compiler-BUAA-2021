@@ -15,7 +15,8 @@ public class Compiler {
 //    private static boolean op = false;
     //优化开关
     // 影响while
-    // 影响sregs
+    // 影响dye
+    //影响spread deldeadcode
 
 
 //    private static boolean debug = true;

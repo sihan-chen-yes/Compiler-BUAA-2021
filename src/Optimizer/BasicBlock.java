@@ -175,8 +175,7 @@ public class BasicBlock {
                 if (needInDefSetMid(midCodeEntry,midCodeEntry.getDst())) {
                     midCodeEntry.addDefSet(midCodeEntry.getDst());
                 }
-            } else if ((midCodeEntry.getOpType() == OpType.LOAD_ARRAY_1D
-                    || midCodeEntry.getOpType() == OpType.STORE_ARRAY_1D)) {
+            } else if ((midCodeEntry.getOpType() == OpType.LOAD_ARRAY_1D)) {
                 if (needInUseSet(midCodeEntry.getR2())) {
                     useSet.add(midCodeEntry.getR2());
                 }
@@ -189,8 +188,20 @@ public class BasicBlock {
                 if (needInDefSetMid(midCodeEntry,midCodeEntry.getDst())) {
                     midCodeEntry.addDefSet(midCodeEntry.getDst());
                 }
-            } else if (midCodeEntry.getOpType() == OpType.LOAD_ARRAY_2D
-                    || midCodeEntry.getOpType() == OpType.STORE_ARRAY_2D) {
+            } else if (midCodeEntry.getOpType() == OpType.STORE_ARRAY_1D) {
+                if (needInUseSet(midCodeEntry.getR2())) {
+                    useSet.add(midCodeEntry.getR2());
+                }
+                if (needInUseSet(midCodeEntry.getDst())) {
+                    useSet.add(midCodeEntry.getDst());
+                }
+                if (needInUseSetMid(midCodeEntry,midCodeEntry.getR2())) {
+                    midCodeEntry.addUseSet(midCodeEntry.getR2());
+                }
+                if (needInUseSetMid(midCodeEntry,midCodeEntry.getDst())) {
+                    midCodeEntry.addUseSet(midCodeEntry.getDst());
+                }
+            } else if (midCodeEntry.getOpType() == OpType.LOAD_ARRAY_2D) {
                 if (needInUseSet(midCodeEntry.getR2())) {
                     useSet.add(midCodeEntry.getR2());
                 }
@@ -208,6 +219,25 @@ public class BasicBlock {
                 }
                 if (needInDefSetMid(midCodeEntry,midCodeEntry.getDst())) {
                     midCodeEntry.addDefSet(midCodeEntry.getDst());
+                }
+            } else if (midCodeEntry.getOpType() == OpType.STORE_ARRAY_2D) {
+                if (needInUseSet(midCodeEntry.getR2())) {
+                    useSet.add(midCodeEntry.getR2());
+                }
+                if (needInUseSet(midCodeEntry.getR3())) {
+                    useSet.add(midCodeEntry.getR3());
+                }
+                if (needInUseSet(midCodeEntry.getDst())) {
+                    useSet.add(midCodeEntry.getDst());
+                }
+                if (needInUseSetMid(midCodeEntry,midCodeEntry.getR2())) {
+                    midCodeEntry.addUseSet(midCodeEntry.getR2());
+                }
+                if (needInUseSetMid(midCodeEntry,midCodeEntry.getR3())) {
+                    midCodeEntry.addUseSet(midCodeEntry.getR3());
+                }
+                if (needInUseSetMid(midCodeEntry,midCodeEntry.getDst())) {
+                    midCodeEntry.addUseSet(midCodeEntry.getDst());
                 }
             } else if (midCodeEntry.getOpType() == OpType.ASSIGN) {
                 if (needInUseSet(midCodeEntry.getDst())) {
@@ -307,10 +337,10 @@ public class BasicBlock {
     }
 
     public boolean isLocalVar(String name) {
-        return name != null && MidCodeGener.getSymbolTable().search_local(func,name) != null
-                && MidCodeGener.getSymbolTable().search_local(func,name).getDataType() == DataType.INT
-                && MidCodeGener.getSymbolTable().search_local(func,name).getDeclType() != DeclType.PARAM
+        return MidCodeGener.getSymbolTable().search_local(func,name).getDataType() == DataType.INT
+//                && MidCodeGener.getSymbolTable().search_local(func,name).getDeclType() != DeclType.PARAM
                 && !isNumber(name);
+        //Todo 考虑use def时考虑参数 但是不分配reg给他
     }
 
     public ArrayList<MidCodeEntry> getOptimizedMidCode() {
@@ -383,7 +413,7 @@ public class BasicBlock {
 //                    midCodeEntry.setDst(replace(midCodeEntry.getDst()));
 //                }
 //            } else if (midCodeEntry.getOpType() == OpType.CALL) {
-//                //写回 Todo 跨函数分析
+//                //写回
 //                recordLocal();
 //                reset();
 //            } else if (isExp(midCodeEntry)) {
@@ -619,7 +649,17 @@ public class BasicBlock {
 
     public void genSubConf(ConflictGraph conflictGraph) {
         for (MidCodeEntry midCodeEntry:midCodeList) {
-            conflictGraph.addLiveVars(midCodeEntry.getUseDefOutSet());
+            //如果是参数则不分配reg
+            HashSet<String> useDefOutSet = midCodeEntry.getUseDefOutSet();
+            HashSet<String> tmp = new HashSet<>();
+            SymbolTable symbolTable = MidCodeGener.getSymbolTable();
+            for (String varOut:useDefOutSet) {
+                if (symbolTable.search_param(func,varOut) == null) {
+                    //不是参数
+                    tmp.add(varOut);
+                }
+            }
+            conflictGraph.addLiveVars(tmp);
         }
     }
 
@@ -640,29 +680,19 @@ public class BasicBlock {
         ArrayList<MidCodeEntry> tmp = new ArrayList<>();
         for (MidCodeEntry midCodeEntry:midCodeList) {
             OpType opType = midCodeEntry.getOpType();
+            assert opType != OpType.LABEL_GEN;
             String r1 = midCodeEntry.getR1();
             String dst = midCodeEntry.getDst();
             SymbolTable symbolTable = MidCodeGener.getSymbolTable();
             if (opType == OpType.STORE_RET || opType == OpType.LOAD_ARRAY_1D || opType == OpType.LOAD_ARRAY_2D
-                    || opType == OpType.LOAD_ARRDESS || opType == OpType.ADD || opType == OpType.SUB
+                    || opType == OpType.LOAD_ARRDESS
+                    || opType == OpType.ADD || opType == OpType.SUB
                     || opType == OpType.MULT || opType == OpType.DIV || opType == OpType.MOD
                     || opType == OpType.NEG || opType == OpType.SLT || opType == OpType.SLE
                     || opType == OpType.SGT || opType == OpType.SGE || opType == OpType.SEQ
                     || opType == OpType.SNE || opType == OpType.NOT) {
                 if (midCodeEntry.getUseDefOutSet().contains(dst)) {
                     //新定义的dst 在out集中 需要加入
-                    tmp.add(midCodeEntry);
-                }
-            } else if (opType == OpType.STORE_ARRAY_1D || opType == OpType.STORE_ARRAY_2D) {
-                //先检查是否是全局变量
-                if (symbolTable.search_local(func,dst) != null) {
-                    if (midCodeEntry.getUseDefOutSet().contains(dst)) {
-                        //新定义的dst 在out集中 需要加入
-                        tmp.add(midCodeEntry);
-                    }
-                } else {
-                    assert symbolTable.search_global(dst) != null;
-                    //是全局变量 无条件加入
                     tmp.add(midCodeEntry);
                 }
             } else if (opType == OpType.ASSIGN) {

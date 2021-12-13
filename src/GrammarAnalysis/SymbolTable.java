@@ -250,6 +250,19 @@ public class SymbolTable {
         return symbolTableEntry;
     }
 
+    public SymbolTableEntry search_param(String func,String name) {
+        //图着色的时候排除param局部变量
+        ArrayList<SymbolTableEntry> local = fullFunc.get(func);
+        SymbolTableEntry symbolTableEntry = null;
+        for (int i = local.size() - 1;i >= 0;i--) {
+            if (local.get(i).getName().equals(name) && local.get(i).getDeclType() == DeclType.PARAM) {
+                symbolTableEntry = local.get(i);
+                return symbolTableEntry;
+            }
+        }
+        return symbolTableEntry;
+    }
+
     public boolean isLocal(String func,String name) {
         return search_local(func,name) != null;
     }
