@@ -1556,7 +1556,7 @@ public class MidCodeEntry {
                     needNeg = true;
                 }
             } else {
-                //没有常数
+                //不需要优化
                 reg0 = load(r1);
                 curCode += "\n";
                 reg1 = loadSec(r2);
