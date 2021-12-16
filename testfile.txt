@@ -1,6 +1,9 @@
+int a = 25;
 int main() {
-    int a = 9;
-    int b = 4;
-    printf("%d",a/b);
+    printf("%d\n",a/6);
+    printf("%d\n",-a/6);
+    printf("%d\n",a%6);
+    printf("%d\n",-a%6);
+
     return 1;
 }

@@ -1,19 +1,117 @@
 .data 0x10000000
 ########################################GLOBAL START########################################
+#############GLOBAL_DECLARE a#############
+a:.word 25
+
 ########################################GLOBAL END##########################################
 ########################################ASCIIZ START########################################
+str_0:.asciiz "\n"
+str_1:.asciiz "\n"
+str_2:.asciiz "\n"
+str_3:.asciiz "\n"
 ########################################ASCIIZ END##########################################
 .text
-addiu $sp,$sp,-12
+addiu $sp,$sp,-24
 j main
 ########################################FUNC START##########################################
+####var:@T_5 reg:$s0
 #############FUNC_DECLARE main#############
 main:
 
-#############PRINT_INT 2#############
+#############DIV a 6 @T_0#############
+lw $t0,-32768($gp)
+li $t3,0x2AAAAAAB
+mult $t0,$t3
+mfhi $s0
+bgtz $t0,label_0
+addiu $s0,$s0,1
+label_0:
 
-li $a0,2
+#############PRINT_INT @T_0#############
+
+move $a0,$s0
 li $v0,1
+syscall
+
+#############PRINT_STRING str_0#############
+la $a0,str_0
+li $v0,4
+syscall
+
+#############NEG a @T_1#############
+lw $t0,-32768($gp)
+neg $s0,$t0
+
+#############DIV @T_1 6 @T_2#############
+
+move $t2,$s0
+li $t3,0x2AAAAAAB
+mult $s0,$t3
+mfhi $s0
+bgtz $s0,label_1
+addiu $s0,$s0,1
+label_1:
+
+#############PRINT_INT @T_2#############
+
+move $a0,$s0
+li $v0,1
+syscall
+
+#############PRINT_STRING str_1#############
+la $a0,str_1
+li $v0,4
+syscall
+
+#############MOD a 6 @T_3#############
+lw $t0,-32768($gp)
+li $t3,0x2AAAAAAB
+mult $t0,$t3
+mfhi $s0
+bgtz $t0,label_2
+addiu $s0,$s0,1
+label_2:
+li $t3,6
+mul $s0,$s0,$t3
+subu $s0,$t0,$s0
+
+#############PRINT_INT @T_3#############
+
+move $a0,$s0
+li $v0,1
+syscall
+
+#############PRINT_STRING str_2#############
+la $a0,str_2
+li $v0,4
+syscall
+
+#############NEG a @T_4#############
+lw $t0,-32768($gp)
+neg $s0,$t0
+
+#############MOD @T_4 6 @T_5#############
+
+move $t2,$s0
+li $t3,0x2AAAAAAB
+mult $s0,$t3
+mfhi $s0
+bgtz $s0,label_3
+addiu $s0,$s0,1
+label_3:
+li $t3,6
+mul $s0,$s0,$t3
+subu $s0,$t2,$s0
+
+#############PRINT_INT @T_5#############
+
+move $a0,$s0
+li $v0,1
+syscall
+
+#############PRINT_STRING str_3#############
+la $a0,str_3
+li $v0,4
 syscall
 
 #############EXIT#############
