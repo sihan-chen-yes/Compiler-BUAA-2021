@@ -51,6 +51,7 @@ public class Optimizer {
         genDataFlow();
         delDeadCode();
         dye();
+        delWhile();
         MidCodeGener.setMidCodeList(getOptimizedMidCode());
     }
 
@@ -174,11 +175,9 @@ public class Optimizer {
 //    }
 
     public ArrayList<MidCodeEntry> getOptimizedMidCode() {
-        if (optimizedMidCode == null) {
-            optimizedMidCode = new ArrayList<>();
-            for (FuncBlock funcBlock:funcBlocks) {
-                optimizedMidCode.addAll(funcBlock.getOptimizedMidCode());
-            }
+        optimizedMidCode = new ArrayList<>();
+        for (FuncBlock funcBlock:funcBlocks) {
+            optimizedMidCode.addAll(funcBlock.getOptimizedMidCode());
         }
         return optimizedMidCode;
     }
@@ -216,6 +215,14 @@ public class Optimizer {
         //基本块内的常量 、 复写传播
         for (FuncBlock funcBlock:funcBlocks) {
             funcBlock.spread();
+        }
+    }
+
+    public void delWhile() {
+        for (FuncBlock funcBlock:funcBlocks) {
+            if (funcBlock.getFunc().equals("main")) {
+                funcBlock.delWhile(funcBlocks);
+            }
         }
     }
 }

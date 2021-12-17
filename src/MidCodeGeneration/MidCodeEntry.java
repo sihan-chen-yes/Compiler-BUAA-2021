@@ -31,6 +31,8 @@ public class MidCodeEntry {
     private HashSet<String> defSet = new HashSet<>();
     private HashSet<String> useDefInSet = new HashSet<>();
     private HashSet<String> useDefOutSet = new HashSet<>();
+    private HashSet<String> useGlobal = new HashSet<>();
+    private HashSet<String> defGlobal = new HashSet<>();
 
     private String pre0 = "$t0";
     private String pre1 = "$t1";
@@ -2072,6 +2074,27 @@ public class MidCodeEntry {
 
     public void setUseDefOutSet(HashSet<String> useDefOutSet) {
         this.useDefOutSet = useDefOutSet;
+    }
+
+    public HashSet<String> getUseGlobal() {
+        return useGlobal;
+    }
+
+    public HashSet<String> getDefGlobal() {
+        return defGlobal;
+    }
+
+
+    public void addUseGlobal(String var) {
+        if (!useGlobal.contains(var)) {
+            useGlobal.add(var);
+        }
+    }
+
+    public void addDefGlobal(String var) {
+        if (!defGlobal.contains(var)) {
+            defGlobal.add(var);
+        }
     }
 
     @Override
