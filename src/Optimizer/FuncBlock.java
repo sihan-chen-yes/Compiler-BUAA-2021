@@ -126,6 +126,8 @@ public class FuncBlock {
         for (BasicBlock basicBlock:basicBlocks) {
             if (!deletable(basicBlock,funcBlocks)) {
                 tmp.add(basicBlock);
+            } else {
+                tmp.remove(tmp.get(tmp.size() - 1));
             }
         }
         basicBlocks = tmp;
@@ -143,7 +145,6 @@ public class FuncBlock {
     public boolean deletable(BasicBlock basicBlock,ArrayList<FuncBlock> funcBlocks) {
         ArrayList<MidCodeEntry> midCodeList = basicBlock.getMidCodeList();
         if (!(basicBlock.getPreBlocks().size() == 2 && basicBlock.getPostBlocks().size() == 2 && selfWhile(basicBlock))) {
-            //Todo 需要判断中间代码？
             return false;
         }
         HashSet<String> assignDef= new HashSet<>();

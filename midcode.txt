@@ -22,7 +22,6 @@ RET_VALUE 2
 LABEL_GEN label_1
 MULT c4 c4 @T_3
 MOD @T_3 10 @T_4
-ASSIGN c4 @T_4
 PREPARE hhh
 SUB i3 1 @T_5
 PUSH_PARAM @T_5 0 hhh
@@ -40,12 +39,9 @@ RET_VALUE @T_9
 ########################################FUNC END############################################
 ########################################FUNC START##########################################
 FUNC_DECLARE main
-ASSIGN i16 2
-ASSIGN j16 5
 GETINT @T_10
 ASSIGN i16 @T_10
 GETINT @T_11
-ASSIGN j16 @T_11
 PREPARE hhh
 PREPARE hhh
 PUSH_PARAM 3 0 hhh
@@ -61,27 +57,6 @@ ADD @T_14 -10091 @T_15
 ASSIGN j16 @T_15
 ASSIGN k20 5
 ASSIGN n21 10
-LABEL_GEN label_2
-MULT k20 k20 @T_16
-MULT @T_16 k20 @T_17
-MULT @T_17 k20 @T_18
-MULT @T_18 k20 @T_19
-MULT @T_19 k20 @T_20
-SLT n21 @T_20 @T_21
-BEQZ @T_21 label_4
-LABEL_GEN label_3
-MULT d d @T_22
-MOD @T_22 10000 @T_23
-ASSIGN d @T_23
-ADD n21 1 @T_24
-ASSIGN n21 @T_24
-MULT k20 k20 @T_25
-MULT @T_25 k20 @T_26
-MULT @T_26 k20 @T_27
-MULT @T_27 k20 @T_28
-MULT @T_28 k20 @T_29
-SLT n21 @T_29 @T_30
-BNEZ @T_30 label_3
 LABEL_GEN label_4
 PRINT_INT i16
 PRINT_STRING str_0

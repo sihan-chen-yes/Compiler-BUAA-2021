@@ -13,7 +13,6 @@ public class BasicBlock {
     private ArrayList<BasicBlock> preBlocks = new ArrayList<>();
     private ArrayList<MidCodeEntry> midCodeList = new ArrayList<>();
     private ArrayList<MidCodeEntry> assignMid = new ArrayList<>();
-//    private ArrayList<MidCodeEntry> optimizedMidCode = new ArrayList<>();
     private ArrayList<BasicBlock> postBlocks = new ArrayList<>();
     private String func;
     private int blockNum;
@@ -126,10 +125,6 @@ public class BasicBlock {
 
     public HashSet<String> getUseDefInSet() {
         return useDefInSet;
-    }
-
-    public HashSet<String> getUseDefOutSet() {
-        return useDefOutSet;
     }
 
     public void genUseDefSet() {
@@ -635,26 +630,6 @@ public class BasicBlock {
         if (spreadMap.containsKey(r2)) {
             midCodeEntry.setR2(spreadMap.get(r2));
         }
-    }
-
-    public HashSet<String> getDefSet() {
-        return defSet;
-    }
-
-//    public HashSet<String> getUseGlobal() {
-//        HashSet<String> useGlobal = new HashSet<>();
-//        for (MidCodeEntry midCodeEntry:midCodeList) {
-//            useGlobal.addAll(midCodeEntry.getUseGlobal());
-//        }
-//        return useGlobal;
-//    }
-
-    public HashSet<String> getDefGlobal() {
-        HashSet<String> defGlobal = new HashSet<>();
-        for (MidCodeEntry midCodeEntry:midCodeList) {
-            defGlobal.addAll(midCodeEntry.getDefGlobal());
-        }
-        return defGlobal;
     }
 
     @Override
