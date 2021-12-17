@@ -191,15 +191,8 @@ public class FuncBlock {
                             }
                             if (midCode.getOpType() == OpType.CALL) {
                                 String calledFunc = midCode.getDst();
-                                FuncBlock called = null;
-                                for (FuncBlock funcBlock:funcBlocks) {
-                                    if (funcBlock.getFunc().equals(calledFunc)) {
-                                        called = funcBlock;
-                                        break;
-                                    }
-                                }
                                 //调用的函数有用到此全局变量
-                                if (checkFuncUse(called,var)) {
+                                if (checkFuncUse(funcBlocks,var,calledFunc)) {
                                     return false;
                                 }
                             }
@@ -215,15 +208,24 @@ public class FuncBlock {
         return true;
     }
 
-    public boolean checkFuncUse(FuncBlock funcBlock,String var) {
+    public boolean checkFuncUse(ArrayList<FuncBlock> funcBlocks,String var,String funcName) {
         //是否使用过该全局变量
-        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
-        assert symbolTable.search_local(funcBlock.getFunc(),var) == null
-                && symbolTable.search_global(var) != null;
-        ArrayList<MidCodeEntry> midCodeList = funcBlock.getMidCode();
+        FuncBlock called = null;
+        for (FuncBlock funcBlock:funcBlocks) {
+            if (funcBlock.getFunc().equals(funcName)) {
+                called = funcBlock;
+                break;
+            }
+        }
+        ArrayList<MidCodeEntry> midCodeList = called.getMidCode();
         for (MidCodeEntry midCodeEntry:midCodeList) {
             if (midCodeEntry.getUseGlobal().contains(var)) {
                 return true;
+            }
+            if (midCodeEntry.getOpType() == OpType.CALL) {
+                if (checkFuncUse(funcBlocks,var,midCodeEntry.getDst())) {
+                    return true;
+                }
             }
         }
         return false;
