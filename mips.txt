@@ -11,6 +11,7 @@ j main
 ####var:@T_1 reg:$s0
 #############FUNC_DECLARE try#############
 try:
+lw $s1,16($sp)
 
 #############LABEL_GEN label_0#############
 label_0:

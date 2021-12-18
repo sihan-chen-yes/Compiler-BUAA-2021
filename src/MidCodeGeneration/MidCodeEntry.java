@@ -233,6 +233,21 @@ public class MidCodeEntry {
 
     public void genFuncLabel() {
         curCode += String.format("%s:",dst);
+        initParam();
+    }
+
+    public void initParam() {
+        SymbolTable symbolTable = MidCodeGener.getSymbolTable();
+        String func = dst;
+        ArrayList<SymbolTableEntry> params = symbolTable.getParams(func);
+        for (SymbolTableEntry symbolTableEntry:params) {
+            String name = symbolTableEntry.getName();
+            if (conflictGraph.hasReg(name)) {
+                curCode += "\n";
+                curCode += String.format("lw %s,%d($sp)",
+                        conflictGraph.getReg(name),symbolTableEntry.getOffset_sp());
+            }
+        }
     }
 
     public void loadParam() {

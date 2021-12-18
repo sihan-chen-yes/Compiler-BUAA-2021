@@ -263,6 +263,17 @@ public class SymbolTable {
         return symbolTableEntry;
     }
 
+    public ArrayList<SymbolTableEntry> getParams(String func) {
+        ArrayList<SymbolTableEntry> params = new ArrayList<>();
+        ArrayList<SymbolTableEntry> local = fullFunc.get(func);
+        for (int i = local.size() - 1;i >= 0;i--) {
+            if (local.get(i).getDeclType() == DeclType.PARAM) {
+                params.add(local.get(i));
+            }
+        }
+        return params;
+    }
+
     public boolean isLocal(String func,String name) {
         return search_local(func,name) != null;
     }

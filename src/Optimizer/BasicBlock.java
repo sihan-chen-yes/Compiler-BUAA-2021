@@ -439,10 +439,12 @@ public class BasicBlock {
             HashSet<String> tmp = new HashSet<>();
             SymbolTable symbolTable = MidCodeGener.getSymbolTable();
             for (String varOut:useDefOutSet) {
-                if (symbolTable.search_param(func,varOut) == null) {
-                    //不是参数
-                    tmp.add(varOut);
-                }
+                tmp.add(varOut);
+
+//                if (symbolTable.search_param(func,varOut) == null) {
+//                    //不是参数
+//                    tmp.add(varOut);
+//                }
             }
             conflictGraph.addLiveVars(tmp);
         }
