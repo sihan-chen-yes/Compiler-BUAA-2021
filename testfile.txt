@@ -1,6 +1,6 @@
 int try(int a) {
     while(a < 10) {
-     a = a + 1;
+     a = 2 * 3;
     }
     printf("%d",a);
     return 1;

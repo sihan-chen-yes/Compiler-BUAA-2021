@@ -8,10 +8,8 @@ LABEL_GEN label_0
 SLT a1 10 @T_0
 BEQZ @T_0 label_2
 LABEL_GEN label_1
-ADD a1 1 @T_1
-ASSIGN a1 @T_1
-SLT @T_1 10 @T_2
-BNEZ @T_2 label_1
+ASSIGN a1 6
+BNEZ 1 label_1
 LABEL_GEN label_2
 PRINT_INT a1
 RET_VALUE 1

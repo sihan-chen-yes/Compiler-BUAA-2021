@@ -8,10 +8,10 @@ addiu $sp,$sp,-8
 j main
 ########################################FUNC START##########################################
 ####var:a1 reg:$s1
-####var:@T_1 reg:$s0
+####var:@T_0 reg:$s0
 #############FUNC_DECLARE try#############
 try:
-lw $s1,16($sp)
+lw $s1,12($sp)
 
 #############LABEL_GEN label_0#############
 label_0:
@@ -27,21 +27,13 @@ beqz $s0,label_2
 #############LABEL_GEN label_1#############
 label_1:
 
-#############ADD a1 1 @T_1#############
+#############ASSIGN a1 6#############
 
-addiu $s0,$s1,1
+li $s1,6
 
-#############ASSIGN a1 @T_1#############
-
-move $s1,$s0
-
-#############SLT @T_1 10 @T_2#############
-
-slti $s0,$s0,10
-
-#############BNEZ @T_2 label_1#############
-
-bnez $s0,label_1
+#############BNEZ 1 label_1#############
+li $t0,1
+bnez $t0,label_1
 
 #############LABEL_GEN label_2#############
 label_2:
@@ -65,17 +57,17 @@ main:
 #############PREPARE try#############
 sw $ra,0($sp)
 
-addiu $sp,$sp,-20
+addiu $sp,$sp,-16
 
 #############PUSH_PARAM 3 0 try#############
 li $t0,3
-sw $t0,16($sp)
+sw $t0,12($sp)
 
 #############CALL try#############
 jal try
 
 #############FIN_CALL try#############
-addiu $sp,$sp,20
+addiu $sp,$sp,16
 lw $ra,0($sp)
 
 
