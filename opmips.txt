@@ -15,22 +15,24 @@ j main
 ########################################FUNC START##########################################
 ####var:@T_9 reg:$s0
 ####var:c4 reg:$s1
+####var:i3 reg:$s2
 #############FUNC_DECLARE hhh#############
 hhh:
+lw $s2,48($sp)
 
 #############MULT i3 i3 @T_0#############
-lw $t0,48($sp)
-lw $t1,48($sp)
-mul $s0,$t0,$t1
+
+
+mul $s0,$s2,$s2
 
 #############ASSIGN c4 @T_0#############
 
 move $s1,$s0
 
 #############SEQ i3 1 @T_1#############
-lw $t0,48($sp)
+
 li $t1,1
-seq $s0,$t0,$t1
+seq $s0,$s2,$t1
 
 #############BEQZ @T_1 label_0#############
 
@@ -46,9 +48,9 @@ jr $ra
 label_0:
 
 #############SEQ i3 2 @T_2#############
-lw $t0,48($sp)
+
 li $t1,2
-seq $s0,$t0,$t1
+seq $s0,$s2,$t1
 
 #############BEQZ @T_2 label_1#############
 
@@ -86,11 +88,12 @@ subu $s0,$t2,$s0
 sw $ra,0($sp)
 sw $s0,4($sp)
 sw $s1,44($sp)
+sw $s2,48($sp)
 addiu $sp,$sp,-52
 
 #############SUB i3 1 @T_5#############
-lw $t0,100($sp)
-addiu $s0,$t0,-1
+
+addiu $s0,$s2,-1
 
 #############PUSH_PARAM @T_5 0 hhh#############
 sw $s0,48($sp)
@@ -103,6 +106,7 @@ addiu $sp,$sp,52
 lw $ra,0($sp)
 lw $s0,4($sp)
 lw $s1,44($sp)
+lw $s2,48($sp)
 
 #############STORE_RET @T_6#############
 move $s1,$v0
@@ -111,11 +115,12 @@ move $s1,$v0
 sw $ra,0($sp)
 sw $s0,4($sp)
 sw $s1,44($sp)
+sw $s2,48($sp)
 addiu $sp,$sp,-52
 
 #############SUB i3 2 @T_7#############
-lw $t0,100($sp)
-addiu $s0,$t0,-2
+
+addiu $s0,$s2,-2
 
 #############PUSH_PARAM @T_7 0 hhh#############
 sw $s0,48($sp)
@@ -128,6 +133,7 @@ addiu $sp,$sp,52
 lw $ra,0($sp)
 lw $s0,4($sp)
 lw $s1,44($sp)
+lw $s2,48($sp)
 
 #############STORE_RET @T_8#############
 move $s0,$v0
