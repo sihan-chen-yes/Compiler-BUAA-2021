@@ -13,34 +13,34 @@ str_2:.asciiz "\n"
 addiu $sp,$sp,-100
 j main
 ########################################FUNC START##########################################
+####var:@T_9 reg:$s0
+####var:c4 reg:$s1
+####var:i3 reg:$s2
 #############FUNC_DECLARE hhh#############
 hhh:
 lw $s2,48($sp)
 
 #############MULT i3 i3 @T_0#############
-lw $t0,48($sp)
-lw $t1,48($sp)
-mult $t0,$t1
-mflo $t0
-sw $t0,40($sp)
+
+
+mul $s0,$s2,$s2
 
 #############ASSIGN c4 @T_0#############
-lw $t0,40($sp)
-sw $t0,44($sp)
+
+move $s1,$s0
 
 #############SEQ i3 1 @T_1#############
-lw $t0,48($sp)
+
 li $t1,1
-seq $t0,$t0,$t1
-sw $t0,36($sp)
+seq $s0,$s2,$t1
 
 #############BEQZ @T_1 label_0#############
-lw $t0,36($sp)
-beqz $t0,label_0
+
+beqz $s0,label_0
 
 #############RET_VALUE 1#############
-li $t0,1
-move $v0,$t0
+
+li $v0,1
 jr $ra
 
 ########################################FUNC END############################################
@@ -48,18 +48,17 @@ jr $ra
 label_0:
 
 #############SEQ i3 2 @T_2#############
-lw $t0,48($sp)
+
 li $t1,2
-seq $t0,$t0,$t1
-sw $t0,32($sp)
+seq $s0,$s2,$t1
 
 #############BEQZ @T_2 label_1#############
-lw $t0,32($sp)
-beqz $t0,label_1
+
+beqz $s0,label_1
 
 #############RET_VALUE 2#############
-li $t0,2
-move $v0,$t0
+
+li $v0,2
 jr $ra
 
 ########################################FUNC END############################################
@@ -67,36 +66,37 @@ jr $ra
 label_1:
 
 #############MULT c4 c4 @T_3#############
-lw $t0,44($sp)
-lw $t1,44($sp)
-mult $t0,$t1
-mflo $t0
-sw $t0,28($sp)
+
+
+mul $s0,$s1,$s1
 
 #############MOD @T_3 10 @T_4#############
-lw $t0,28($sp)
-li $t1,10
-div $t0,$t1
-mfhi $t0
-sw $t0,24($sp)
 
-#############ASSIGN c4 @T_4#############
-lw $t0,24($sp)
-sw $t0,44($sp)
+move $t2,$s0
+li $t3,0x66666667
+mult $t2,$t3
+mfhi $s0
+sra $s0,$s0,2
+bgtz $t2,label_5
+addiu $s0,$s0,1
+label_5:
+li $t3,10
+mul $s0,$s0,$t3
+subu $s0,$t2,$s0
 
 #############PREPARE hhh#############
 sw $ra,0($sp)
+sw $s0,4($sp)
+sw $s1,44($sp)
+sw $s2,48($sp)
 addiu $sp,$sp,-52
 
 #############SUB i3 1 @T_5#############
-lw $t0,100($sp)
-li $t1,1
-subu $t0,$t0,$t1
-sw $t0,72($sp)
+
+addiu $s0,$s2,-1
 
 #############PUSH_PARAM @T_5 0 hhh#############
-lw $t0,72($sp)
-sw $t0,48($sp)
+sw $s0,48($sp)
 
 #############CALL hhh#############
 jal hhh
@@ -104,23 +104,26 @@ jal hhh
 #############FIN_CALL hhh#############
 addiu $sp,$sp,52
 lw $ra,0($sp)
+lw $s0,4($sp)
+lw $s1,44($sp)
+lw $s2,48($sp)
 
 #############STORE_RET @T_6#############
-sw $v0,16($sp)
+move $s1,$v0
 
 #############PREPARE hhh#############
 sw $ra,0($sp)
+sw $s0,4($sp)
+sw $s1,44($sp)
+sw $s2,48($sp)
 addiu $sp,$sp,-52
 
 #############SUB i3 2 @T_7#############
-lw $t0,100($sp)
-li $t1,2
-subu $t0,$t0,$t1
-sw $t0,64($sp)
+
+addiu $s0,$s2,-2
 
 #############PUSH_PARAM @T_7 0 hhh#############
-lw $t0,64($sp)
-sw $t0,48($sp)
+sw $s0,48($sp)
 
 #############CALL hhh#############
 jal hhh
@@ -128,60 +131,66 @@ jal hhh
 #############FIN_CALL hhh#############
 addiu $sp,$sp,52
 lw $ra,0($sp)
+lw $s0,4($sp)
+lw $s1,44($sp)
+lw $s2,48($sp)
 
 #############STORE_RET @T_8#############
-sw $v0,8($sp)
+move $s0,$v0
 
 #############ADD @T_6 @T_8 @T_9#############
-lw $t0,16($sp)
-lw $t1,8($sp)
-addu $t0,$t0,$t1
-sw $t0,4($sp)
+
+
+addu $s0,$s1,$s0
 
 #############RET_VALUE @T_9#############
-lw $t0,4($sp)
-move $v0,$t0
+
+move $v0,$s0
 jr $ra
 
 ########################################FUNC END############################################
 ########################################FUNC START##########################################
+####var:@T_13 reg:$s0
+####var:@T_24 reg:$s1
+####var:k20 reg:$s3
+####var:n21 reg:$s2
+####var:j16 reg:$s4
+####var:i16 reg:$s5
 #############FUNC_DECLARE main#############
 main:
-
-#############ASSIGN i16 2#############
-li $t0,2
-sw $t0,100($sp)
-
-#############ASSIGN j16 5#############
-li $t0,5
-sw $t0,96($sp)
 
 #############GETINT @T_10#############
 li $v0,5
 syscall
-move $t0,$v0
-sw $t0,92($sp)
+move $s0,$v0
 
 #############ASSIGN i16 @T_10#############
-lw $t0,92($sp)
-sw $t0,100($sp)
+
+move $s5,$s0
 
 #############GETINT @T_11#############
 li $v0,5
 syscall
-move $t0,$v0
-sw $t0,88($sp)
-
-#############ASSIGN j16 @T_11#############
-lw $t0,88($sp)
-sw $t0,96($sp)
+move $s0,$v0
 
 #############PREPARE hhh#############
 sw $ra,0($sp)
+sw $s0,80($sp)
+sw $s1,28($sp)
+sw $s3,68($sp)
+sw $s2,64($sp)
+sw $s4,96($sp)
+sw $s5,100($sp)
 addiu $sp,$sp,-52
 
 #############PREPARE hhh#############
 sw $ra,0($sp)
+sw $s0,132($sp)
+sw $s1,80($sp)
+sw $s3,120($sp)
+sw $s2,116($sp)
+sw $s4,148($sp)
+sw $s5,152($sp)
 addiu $sp,$sp,-52
 
 #############PUSH_PARAM 3 0 hhh#############
@@ -194,13 +203,18 @@ jal hhh
 #############FIN_CALL hhh#############
 addiu $sp,$sp,52
 lw $ra,0($sp)
+lw $s0,132($sp)
+lw $s1,80($sp)
+lw $s3,120($sp)
+lw $s2,116($sp)
+lw $s4,148($sp)
+lw $s5,152($sp)
 
 #############STORE_RET @T_12#############
-sw $v0,136($sp)
+move $s0,$v0
 
 #############PUSH_PARAM @T_12 0 hhh#############
-lw $t0,136($sp)
-sw $t0,48($sp)
+sw $s0,48($sp)
 
 #############CALL hhh#############
 jal hhh
@@ -208,164 +222,43 @@ jal hhh
 #############FIN_CALL hhh#############
 addiu $sp,$sp,52
 lw $ra,0($sp)
+lw $s0,80($sp)
+lw $s1,28($sp)
+lw $s3,68($sp)
+lw $s2,64($sp)
+lw $s4,96($sp)
+lw $s5,100($sp)
 
 #############STORE_RET @T_13#############
-sw $v0,80($sp)
+move $s0,$v0
 
 #############SUB 41440 @T_13 @T_14#############
 li $t0,41440
-lw $t1,80($sp)
-subu $t0,$t0,$t1
-sw $t0,76($sp)
+
+subu $s0,$t0,$s0
 
 #############ADD @T_14 -10091 @T_15#############
-lw $t0,76($sp)
-li $t1,-10091
-addu $t0,$t0,$t1
-sw $t0,72($sp)
+
+addiu $s0,$s0,-10091
 
 #############ASSIGN j16 @T_15#############
-lw $t0,72($sp)
-sw $t0,96($sp)
+
+move $s4,$s0
 
 #############ASSIGN k20 5#############
-li $t0,5
-sw $t0,68($sp)
+
+li $s3,5
 
 #############ASSIGN n21 10#############
-li $t0,10
-sw $t0,64($sp)
 
-#############LABEL_GEN label_2#############
-label_2:
-
-#############MULT k20 k20 @T_16#############
-lw $t0,68($sp)
-lw $t1,68($sp)
-mult $t0,$t1
-mflo $t0
-sw $t0,60($sp)
-
-#############MULT @T_16 k20 @T_17#############
-lw $t0,60($sp)
-lw $t1,68($sp)
-mult $t0,$t1
-mflo $t0
-sw $t0,56($sp)
-
-#############MULT @T_17 k20 @T_18#############
-lw $t0,56($sp)
-lw $t1,68($sp)
-mult $t0,$t1
-mflo $t0
-sw $t0,52($sp)
-
-#############MULT @T_18 k20 @T_19#############
-lw $t0,52($sp)
-lw $t1,68($sp)
-mult $t0,$t1
-mflo $t0
-sw $t0,48($sp)
-
-#############MULT @T_19 k20 @T_20#############
-lw $t0,48($sp)
-lw $t1,68($sp)
-mult $t0,$t1
-mflo $t0
-sw $t0,44($sp)
-
-#############SLT n21 @T_20 @T_21#############
-lw $t0,64($sp)
-lw $t1,44($sp)
-slt $t0,$t0,$t1
-sw $t0,40($sp)
-
-#############BEQZ @T_21 label_4#############
-lw $t0,40($sp)
-beqz $t0,label_4
-
-#############LABEL_GEN label_3#############
-label_3:
-
-#############MULT d d @T_22#############
-lw $t0,-32768($gp)
-lw $t1,-32768($gp)
-mult $t0,$t1
-mflo $t0
-sw $t0,36($sp)
-
-#############MOD @T_22 10000 @T_23#############
-lw $t0,36($sp)
-li $t1,10000
-div $t0,$t1
-mfhi $t0
-sw $t0,32($sp)
-
-#############ASSIGN d @T_23#############
-lw $t0,32($sp)
-sw $t0,-32768($gp)
-
-#############ADD n21 1 @T_24#############
-lw $t0,64($sp)
-li $t1,1
-addu $t0,$t0,$t1
-sw $t0,28($sp)
-
-#############ASSIGN n21 @T_24#############
-lw $t0,28($sp)
-sw $t0,64($sp)
-
-#############MULT k20 k20 @T_25#############
-lw $t0,68($sp)
-lw $t1,68($sp)
-mult $t0,$t1
-mflo $t0
-sw $t0,24($sp)
-
-#############MULT @T_25 k20 @T_26#############
-lw $t0,24($sp)
-lw $t1,68($sp)
-mult $t0,$t1
-mflo $t0
-sw $t0,20($sp)
-
-#############MULT @T_26 k20 @T_27#############
-lw $t0,20($sp)
-lw $t1,68($sp)
-mult $t0,$t1
-mflo $t0
-sw $t0,16($sp)
-
-#############MULT @T_27 k20 @T_28#############
-lw $t0,16($sp)
-lw $t1,68($sp)
-mult $t0,$t1
-mflo $t0
-sw $t0,12($sp)
-
-#############MULT @T_28 k20 @T_29#############
-lw $t0,12($sp)
-lw $t1,68($sp)
-mult $t0,$t1
-mflo $t0
-sw $t0,8($sp)
-
-#############SLT @T_24 @T_29 @T_30#############
-lw $t0,28($sp)
-lw $t1,8($sp)
-slt $t0,$t0,$t1
-sw $t0,4($sp)
-
-#############BNEZ @T_30 label_3#############
-lw $t0,4($sp)
-bnez $t0,label_3
+li $s2,10
 
 #############LABEL_GEN label_4#############
 label_4:
 
 #############PRINT_INT i16#############
-lw $t0,100($sp)
-move $a0,$t0
+
+move $a0,$s5
 li $v0,1
 syscall
 
@@ -375,8 +268,8 @@ li $v0,4
 syscall
 
 #############PRINT_INT j16#############
-lw $t0,96($sp)
-move $a0,$t0
+
+move $a0,$s4
 li $v0,1
 syscall
 
@@ -386,8 +279,8 @@ li $v0,4
 syscall
 
 #############PRINT_INT k20#############
-lw $t0,68($sp)
-move $a0,$t0
+
+move $a0,$s3
 li $v0,1
 syscall
 
